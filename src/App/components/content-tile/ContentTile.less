@@ -1,0 +1,70 @@
+@import '~@variables';
+
+@content-height: @medium-font-size;
+
+.content-tile {
+  width: 100%;
+  height: fit-content;
+  background-color: @white-background-color;
+  border-radius: @normal-border-radius;
+  box-shadow: @subtle-box-shadow;
+  &.sub-tile {
+    border-radius: @table-content-border-radius;
+    box-shadow: @less-subtle-box-shadow;
+  }
+  .label-row {
+    transition: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px @page-additional-padding;
+    &.with-action-button {
+      padding: 2.5px calc(@page-additional-padding - @small-button-padding)
+        2.5px @page-additional-padding;
+    }
+    border-bottom: solid 2px @tile-separator-color;
+    .label-side {
+      display: flex;
+      align-items: center;
+      .image-wrapper {
+        width: @content-height;
+        height: @content-height;
+        margin: 0 10px 0 0;
+        > * {
+          fill: rgba(0, 0, 0, 0.6);
+          color: rgba(0, 0, 0, 0.6);
+        }
+      }
+      .label {
+        margin: 0;
+        font-size: @content-height;
+        line-height: @content-height;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+    .action-button {
+      .label,
+      .icon > * {
+        color: @primary-button-color;
+        fill: @primary-button-color;
+      }
+      .neumo-button:disabled {
+        opacity: 0;
+      }
+    }
+  }
+  > .content {
+    height: fit-content;
+    position: relative;
+  }
+  &.padding-none > .content {
+    padding: 0;
+  }
+  &.padding-narrower > .content {
+    padding: calc(@page-additional-padding / 2);
+  }
+  &.padding-normal > .content {
+    padding: @page-additional-padding;
+  }
+}

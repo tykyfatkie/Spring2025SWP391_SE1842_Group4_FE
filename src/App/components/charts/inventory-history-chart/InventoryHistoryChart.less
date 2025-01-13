@@ -1,0 +1,65 @@
+@import '~@variables';
+
+@addedColor: #76aa41;
+@subtractedColor: #f47560;
+@stockColor: #ecf5df;
+
+.inventory-history-chart-tooltip {
+  background-color: white;
+  padding: 1rem 1.5rem;
+  box-shadow: @strong-box-shadow;
+  border-radius: @normal-border-radius;
+  .line {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    > * {
+      margin-right: 10px;
+    }
+    .indicator {
+      height: 1.2rem;
+      width: 1.2rem;
+      border-radius: 2rem;
+    }
+    .name,
+    .content {
+      line-height: 0;
+      margin: 0;
+    }
+    .name {
+      width: 8rem;
+    }
+    .content {
+      min-width: 3rem;
+      text-align: right;
+      font-weight: bold;
+    }
+    &:nth-child(1) {
+      .indicator {
+        background-color: @stockColor;
+      }
+      .name,
+      .content {
+        color: darken(@stockColor, 30%);
+      }
+    }
+    &:nth-child(2) {
+      .indicator {
+        background-color: @addedColor;
+      }
+      .name,
+      .content {
+        color: darken(@addedColor, 10%);
+      }
+    }
+    &:nth-child(3) {
+      .indicator {
+        background-color: @subtractedColor;
+      }
+      .name,
+      .content {
+        color: darken(@subtractedColor, 10%);
+      }
+    }
+  }
+}

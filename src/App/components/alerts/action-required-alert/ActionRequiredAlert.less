@@ -1,0 +1,18 @@
+@import '~@variables';
+
+.action-required-alert {
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: @regular-padding;
+  &.dashed-border {
+    border: dashed 2px @inactive-gray-color;
+  }
+  .paragraph {
+    color: @gray-text-color;
+    text-align: center;
+    font-size: @medium-font-size;
+    margin: 0;
+  }
+}

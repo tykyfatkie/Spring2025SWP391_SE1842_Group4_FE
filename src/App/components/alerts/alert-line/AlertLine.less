@@ -1,0 +1,42 @@
+@import '~@variables';
+
+@dimension: @small-font-size;
+@margin: calc((1.5rem) / 2);
+
+.alert-line {
+  display: flex;
+  align-items: center;
+  &.margin-top {
+    padding-top: @margin;
+  }
+  &.margin-bottom {
+    padding-bottom: @margin;
+  }
+  &.margin-top-and-bottom {
+    padding: @margin 0;
+  }
+  &.error {
+    > .alert-line-icon {
+      > * {
+        fill: @error-red-text-color;
+      }
+    }
+    > .alert-line-content {
+      color: @error-red-text-color;
+    }
+  }
+  .alert-line-icon {
+    height: calc(1.5 * @dimension);
+    width: calc(1.5 * @dimension);
+    margin-right: 0.3em;
+    > * {
+      height: 100%;
+      width: 100%;
+    }
+  }
+  .alert-line-content {
+    line-height: 1.2em;
+    font-size: @dimension;
+    margin: 0;
+  }
+}

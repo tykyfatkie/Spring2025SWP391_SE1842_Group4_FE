@@ -1,0 +1,32 @@
+@import '~@variables';
+
+.info-tag {
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  border-radius: 5px;
+  font-weight: 500;
+  &.gray {
+    background-color: @light-label-button-hover-color;
+    color: @dark-gray-text-color;
+  }
+  &.green {
+    background-color: @green-info-tag-background-color;
+    color: @green-info-tag-text-color;
+  }
+  &.yellow {
+    background-color: @yellow-info-tag-background-color;
+    color: @yellow-info-tag-text-color;
+  }
+  &.red {
+    background-color: @red-info-tag-background-color;
+    color: @red-info-tag-text-color;
+  }
+  &.blue {
+    background-color: @blue-info-tag-background-color;
+    color: @blue-info-tag-text-color;
+  }
+ 
+}

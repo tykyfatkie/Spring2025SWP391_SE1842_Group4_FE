@@ -1,0 +1,93 @@
+@import '~@variables';
+
+.image-box {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  &.button-animation {
+    .transition(transform 0.2s;);
+    &:hover {
+      box-shadow: 2px 2px 20px #00000025;
+      transform: scale(1.2);
+    }
+    &:active {
+      transform: scale(1);
+    }
+  }
+  &.rounded-corner {
+    border-radius: @normal-border-radius;
+  }
+  &.without-content {
+    background-color: @placeholder-background-color;
+  }
+  &.with-shadow {
+    box-shadow: @strong-box-shadow;
+  }
+  &.square-ratio {
+    > .image-wrapper {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+  }
+  .image-wrapper {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    > *,
+    > *::before {
+      width: 100%;
+      height: 100%;
+      line-height: 100%;
+      font-size: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+  }
+  .height-constraint {
+    margin-top: 100%;
+  }
+  .placeholder {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .placeholder-icon {
+      width: 50%;
+      > * {
+        fill: @primary-button-color;
+        opacity: 0.5;
+      }
+    }
+  }
+  .loading-placeholder {
+    height: 100% !important;
+    position: absolute !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  .overlay {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    opacity: 0;
+    border-radius: 0 0 @normal-border-radius @normal-border-radius;
+    overflow: hidden;
+  }
+  &:hover {
+    .overlay {
+      opacity: 1;
+    }
+  }
+}

@@ -1,0 +1,102 @@
+@import '~@variables';
+
+.notification-card-wrapper {
+  position: relative;
+  border-radius: @notification-card-border-radius;
+}
+.notification-card {
+  width: @notification-card-dimension;
+  // background-color: #fff;
+  border-radius: @notification-card-border-radius;
+  padding: @notification-card-padding;
+  .transition(transform 0.2s, opacity 0.2s, background-color 0.2s;);
+  //todo: disable transform with :not(.clickable)
+  &:hover:not(.loading) {
+    cursor: pointer;
+    // transform: scale(1.05);
+    background-color: @light-label-button-hover-color;
+  }
+  &:active:not(.loading) {
+    // transform: scale(1);
+    opacity: 0.6;
+    background-color: transparent;
+  }
+  .notification-card-top-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 10px;
+    .title {
+      margin: 0;
+      font-size: @medium-font-size;
+    }
+    .received-at {
+      font-size: @small-font-size;
+      color: @dark-gray-text-color;
+      // color: @red-info-tag-text-color;
+    }
+  }
+  .notification-card-content-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .content {
+      margin: 0;
+      padding: 0 10px 0 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      .box-orient(vertical);
+      .line-clamp(3);
+    }
+    .read-indicator-wrapper {
+      width: @read-indicator-dimension;
+      height: @read-indicator-dimension;
+      position: relative;
+      .read-indicator {
+        width: @read-indicator-dimension;
+        height: @read-indicator-dimension;
+        border-radius: @read-indicator-dimension;
+        background-color: @primary-button-color;
+        &::before {
+          content: '';
+          position: absolute;
+          width: calc(@read-indicator-dimension / 2);
+          height: calc(@read-indicator-dimension / 2);
+          border-radius: @read-indicator-dimension;
+          background-color: #fff;
+          opacity: 0;
+          top: 50%;
+          left: 50%;
+          transform: translate3d(-50%, -50%, 0);
+          .transition(opacity 0.2s);
+        }
+        &:hover::before {
+          opacity: 1;
+        }
+      }
+    }
+  }
+  &.read {
+    .notification-card-top-line .title,
+    .notification-card-top-line .received-at,
+    .notification-card-content-line .content {
+      color: @dark-gray-text-color;
+    }
+    .notification-card-content-line .read-indicator-wrapper .read-indicator {
+      opacity: 0;
+    }
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    // box-shadow: @notification-card-box-shadow;
+    // box-shadow: @less-subtle-box-shadow;
+    border-radius: @notification-card-border-radius;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+}

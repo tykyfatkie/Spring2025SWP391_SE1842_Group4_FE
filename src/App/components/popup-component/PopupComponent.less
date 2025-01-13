@@ -1,0 +1,47 @@
+@import '~@variables';
+
+.popup-component {
+  &.dangerous {
+    .header {
+      background-color: @red-info-tag-text-color !important;
+      .danger-icon {
+        display: flex;
+        width: @larger-font-size;
+        height: 100%;
+        margin: 0 0.5rem;
+        .image-wrapper > * {
+          fill: #fff;
+        }
+      }
+      .modal-title {
+        color: #fff;
+      }
+    }
+    .content,
+    .footer {
+      background-color: fade(@red-info-tag-background-color, 20%) !important;
+    }
+    .content {
+      p,
+      li {
+        color: darken(@red-info-tag-text-color, 25%);
+      }
+    }
+    .footer {
+      .neumo-button.highlighted.red {
+        background-color: @red-info-tag-text-color !important;
+      }
+    }
+  }
+  .content {
+    li:not(:last-child) {
+      margin-bottom: 1em;
+    }
+  }
+
+  .footer {
+    .neumo-button {
+      min-width: 6em;
+    }
+  }
+}
