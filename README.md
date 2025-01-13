@@ -1,50 +1,35 @@
-# React + TypeScript + Vite
+# 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Mô tả
+Đây là một dự án môn SWP391 của tụi mình, thành viên trong dự án bao gồm:
+   -   Đỗ Hoàng Tỷ Phú ( Leader )
+   -   Nguyễn Tăng Tài Phát
+   -   Nguyễn Thanh Hùng Phát
+   -   Hoàng Lê Bách Khoa
+   -   Đỗ Khánh Huy
+   -   Nguyễn Lê Đức Trường
+     
+ Baby Haven là một nền tảng thương mại điện tử chuyên cung cấp các sản phẩm sữa cho mẹ bầu và em bé. Nền tảng của tụi mình giúp người dùng dễ dàng tìm kiếm, so sánh và mua các loại sữa phù hợp với nhu cầu.
 
-Currently, two official plugins are available:
+## Document:
+[https://docs.google.com/document/d/1ibByng0s_AW_yHufn1ctLzduIoZnLjtS/edit?usp=sharing&ouid=110360738031562445105&rtpof=true&sd=true](https://docs.google.com/document/d/10iX_LZBBd2lraAZ6hr4BTZPe7U8whxRh/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+## Tính năng chính
+- **
+- **
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Công nghệ sử dụng
+- **Front-end**: React.js, Vitejs
+- **Back-end**: C#, API Swagger
+- **Cơ sở dữ liệu**: MySQL, Firebase
+- **Authentication**: JSON Web Tokens (JWT)
+- **Triển khai**: Firebase
 
-- Configure the top-level `parserOptions` property like this:
+## Thông tin liên hệ
+Nếu bạn có bất kỳ câu hỏi hoặc góp ý nào, vui lòng liên hệ với leader dự án qua email: phudhtse173569@fpt.edu.vn
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## THANKS FOR READING!!
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
