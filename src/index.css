@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -54,6 +58,7 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Chế độ sáng */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -66,8 +71,3 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
