@@ -6,13 +6,13 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="bg-gray-900 text-white w-full shadow-md fixed top-0 z-50">
+    <header className="bg-gray-900 text-white w-full shadow-md fixed top-0 left-0 z-50">
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         {/* Logo */}
         <h1 className="text-2xl font-bold">Child Growth Tracking System</h1>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex space-x-8 text-lg font-medium">
+        <nav className="hidden md:flex space-x-6 text-lg font-medium">
           <Link to="/" className="hover:text-pink-400 transition">Home</Link>
           <Link to="/product" className="hover:text-pink-400 transition">Product</Link>
           <Link to="/faq" className="hover:text-pink-400 transition">FAQ</Link>
@@ -21,7 +21,7 @@ const Header = () => {
         </nav>
 
         {/* Login & Cart */}
-        <div className="hidden md:flex items-center space-x-6">
+        <div className="hidden md:flex items-center space-x-4">
           <Link to="/login" className="bg-pink-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-600 transition">
             Log in
           </Link>
