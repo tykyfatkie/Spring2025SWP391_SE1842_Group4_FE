@@ -9,7 +9,7 @@ const Header = () => {
     <header className="bg-gray-900 text-white w-full shadow-md fixed top-0 z-50">
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         {/* Logo */}
-        <h1 className="text-2xl font-bold">MomMilk</h1>
+        <h1 className="text-2xl font-bold">Child Growth Tracking System</h1>
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex space-x-8 text-lg font-medium">
