@@ -14,10 +14,9 @@ const Homepage: React.FC = () => {
   return (
     <Layout>
       <Content>
-        <Title level={1}>Welcome to the Children Vaccination System</Title>
+        <Title level={1}>Welcome to the Children Growth Tracking System</Title>
         <Paragraph>
-          Ensuring the health and safety of our children through timely
-          vaccinations.
+          asdfghjkl
         </Paragraph>
         <Button type='primary' href='/login'>
           Register Now
