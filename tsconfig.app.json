@@ -15,15 +15,6 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Fix lỗi import */
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    },
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
