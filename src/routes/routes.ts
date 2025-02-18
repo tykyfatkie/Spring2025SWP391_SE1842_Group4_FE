@@ -1,7 +1,11 @@
 import MainLayout from '../components/layout/MainLayout'
-import Homepage from '../Pages/Home/Home'
-import Login from '../Pages/Login/Login'
+import { LoginPage } from '../Pages/Login/LoginPage'
+import { RegisterPage } from '../Pages/Login/LoginPage'
+import Homepage from '../Pages/Home/HomePage'
+import GuestHomePage from '../Pages/Home/GuestHomePage'
 import { LayoutRoute } from '../types/routes'
+import { AboutPage } from '../Pages/About&Contact/About&ContactPage'
+import { ContactPage } from '../Pages/About&Contact/About&ContactPage'
 
 const routes: LayoutRoute[] = [
   {
@@ -9,12 +13,24 @@ const routes: LayoutRoute[] = [
     data: [
       {
         path: '/',
-        component: Homepage,
+        component: GuestHomePage,
         exact: true,
       },
       {
         path: '/login',
-        component: Login,
+        component: LoginPage,
+      },
+      {
+        path: '/register',
+        component: RegisterPage,
+      },
+      {
+        path: '/about',
+        component: AboutPage,
+      },
+      {
+        path: '/contact-us',
+        component: ContactPage,
       },
     ],
   },
