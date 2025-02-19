@@ -56,7 +56,7 @@ const GuestHeader: React.FC = () => {
               <a href="/">Home</a>
             </Menu.Item>
             <Menu.Item key="about" icon={<InfoCircleOutlined />}>
-              <a href="/about">About</a>
+              <a href="/about-us">About</a>
             </Menu.Item>
             <Menu.Item key="contact-us" icon={<ContactsOutlined />}>
               <a href="/contact-us">Contact Us</a>

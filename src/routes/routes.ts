@@ -8,6 +8,12 @@ import { AboutPage } from '../Pages/About&Contact/About&ContactPage'
 import { ContactPage } from '../Pages/About&Contact/About&ContactPage'
 import PackagePage from '../Pages/PremiumSubscription/PremiumSubscriptionPage'
 
+
+// const token = localStorage.getItem('childgrowthtrackingsystem');
+// const { account } = useAppSelector((state) => state.auth);
+// const isAdmin = account && account.user && account.user.role.includes('Admin');
+// const isStoreOwner = account && account.user && account.user.role.includes('User');
+// const isCustomer = account && account.user && account.user.role.includes('Guest');
 const routes: LayoutRoute[] = [
   {
     layout: MainLayout,
@@ -31,7 +37,7 @@ const routes: LayoutRoute[] = [
         component: RegisterPage,
       },
       {
-        path: '/about',
+        path: '/about-us',
         component: AboutPage,
       },
       {
@@ -47,3 +53,7 @@ const routes: LayoutRoute[] = [
 ]
 
 export default routes
+function useAppSelector(arg0: (state: any) => any): { account: any } {
+  throw new Error('Function not implemented.')
+}
+

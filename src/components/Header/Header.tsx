@@ -76,7 +76,7 @@ const AppHeader: React.FC = () => {
             <a href="/profile">Profile</a>
             </Menu.Item>
             <Menu.Item key="about" icon={<InfoCircleOutlined />}>
-              About
+            <a href="/about-us">About</a>
             </Menu.Item>
           </Menu>
         </Col>
