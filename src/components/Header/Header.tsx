@@ -28,7 +28,7 @@ const AppHeader: React.FC = () => {
       <Row justify="space-between" align="middle" style={{ height: '100%' }}>
         <Col>
           <Space align="center" size={16}>
-            <Avatar 
+            {/* <Avatar 
               size={40}
               style={{ 
                 backgroundColor: '#1890ff',
@@ -38,7 +38,7 @@ const AppHeader: React.FC = () => {
               }}
             >
               CGT
-            </Avatar>
+            </Avatar> */}
             <Title 
               level={4} 
               style={{ 
@@ -60,20 +60,20 @@ const AppHeader: React.FC = () => {
             style={{ 
               border: 'none',
               justifyContent: 'center',
-              marginLeft: '40px'
+              marginLeft: '0px'
             }}
           >
             <Menu.Item key="home" icon={<HomeOutlined />}>
-              Home
+              <a href="/home">Home</a>
             </Menu.Item>
             <Menu.Item key="dashboard" icon={<DashboardOutlined />}>
-              Dashboard
+            <a href="/dashboard">Dashboard</a>
             </Menu.Item>
             <Menu.Item key="contact" icon={<ContactsOutlined />}>
-              Contact
+            <a href="/contact-us">Contact Us</a>
             </Menu.Item>
             <Menu.Item key="profile" icon={<UserOutlined />}>
-              Profile
+            <a href="/profile">Profile</a>
             </Menu.Item>
             <Menu.Item key="about" icon={<InfoCircleOutlined />}>
               About

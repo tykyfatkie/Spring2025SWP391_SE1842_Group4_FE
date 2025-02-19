@@ -18,6 +18,11 @@ const routes: LayoutRoute[] = [
         exact: true,
       },
       {
+        path: '/home',
+        component: Homepage,
+        exact: true,
+      },
+      {
         path: '/login',
         component: LoginPage,
       },
