@@ -1,5 +1,5 @@
 import MainLayout from '../components/layout/MainLayout'
-import { LoginPage } from '../Pages/Login&Register/Login&RegisterPage' //không vấn đề gì cả
+import { LoginPage } from '../Pages/Login&Register/Login&RegisterPage' 
 import { RegisterPage } from '../Pages/Login&Register/Login&RegisterPage'
 import Homepage from '../Pages/Home/HomePage'
 import GuestHomePage from '../Pages/Home/GuestHomePage'
