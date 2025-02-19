@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Menu, Row, Col, Space, Typography, Button } from 'antd';
 import { 
     ContactsOutlined,
+    CrownOutlined,
     HomeOutlined, 
     InfoCircleOutlined,
     LoginOutlined,
@@ -78,6 +79,12 @@ const GuestHeader: React.FC = () => {
               href="/register"
             >
               Register
+            </Button>
+            <Button color='yellow'
+              icon={<CrownOutlined />}
+              href="/package"
+            >
+              Package
             </Button>
           </Space>
         </Col>

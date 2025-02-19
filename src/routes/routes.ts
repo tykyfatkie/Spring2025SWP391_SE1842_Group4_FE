@@ -1,11 +1,12 @@
 import MainLayout from '../components/layout/MainLayout'
-import { LoginPage } from '../Pages/Login/LoginPage'
-import { RegisterPage } from '../Pages/Login/LoginPage'
+import { LoginPage } from '../Pages/Login&Register/Login&RegisterPage' //không vấn đề gì cả
+import { RegisterPage } from '../Pages/Login&Register/Login&RegisterPage'
 import Homepage from '../Pages/Home/HomePage'
 import GuestHomePage from '../Pages/Home/GuestHomePage'
 import { LayoutRoute } from '../types/routes'
 import { AboutPage } from '../Pages/About&Contact/About&ContactPage'
 import { ContactPage } from '../Pages/About&Contact/About&ContactPage'
+import PackagePage from '../Pages/PremiumSubscription/PremiumSubscriptionPage'
 
 const routes: LayoutRoute[] = [
   {
@@ -32,32 +33,12 @@ const routes: LayoutRoute[] = [
         path: '/contact-us',
         component: ContactPage,
       },
+      {
+        path: '/package',
+        component: PackagePage,
+      },
     ],
   },
-  // {
-  //   layout: SimpleLayout,
-  //   data: [
-  //     {
-  //       path: '/login',
-  //       component: LoginPage,
-  //     },
-  //     {
-  //       path: '/register',
-  //       component: RegisterPage,
-  //     },
-  //   ],
-  // },
-  // {
-  //   layout: AdminLayout,
-  //   data: [
-  //     {
-  //       path: '/admin',
-  //       component: Admin,
-  //       role: ['admin'],
-  //     },
-
-  //   ],
-  // },
 ]
 
 export default routes
