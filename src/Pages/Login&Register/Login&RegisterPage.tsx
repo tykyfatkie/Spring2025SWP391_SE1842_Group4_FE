@@ -19,6 +19,7 @@ import {
   GoogleOutlined,
   FacebookOutlined 
 } from '@ant-design/icons';
+import AppFooter from '../../components/Footer/Footer';
 
 const { Title, Text } = Typography;
 

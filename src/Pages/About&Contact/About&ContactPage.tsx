@@ -9,6 +9,7 @@ import {
   EnvironmentOutlined
 } from '@ant-design/icons';
 import GuestHeader from '../../components/Header/GuestHeader';
+import AppFooter from '../../components/Footer/Footer';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -159,6 +160,8 @@ export const ContactPage: React.FC = () => {
           </Row>
         </Space>
       </Layout.Content>
+    {/* Footer */}
+    <AppFooter />
     </Layout>
   );
 };
