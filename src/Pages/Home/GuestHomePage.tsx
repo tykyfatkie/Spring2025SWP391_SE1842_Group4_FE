@@ -4,6 +4,7 @@ import { HeartOutlined, LineChartOutlined, UserOutlined, MedicineBoxOutlined } f
 import GuestHeader from '../../components/Header/GuestHeader';
 import AppFooter from '../../components/Footer/Footer';
 import HomePagePicture from '../../assets/homepaagepic.jpg';
+import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -13,7 +14,8 @@ const Homepage: React.FC = () => {
     {
       icon: <LineChartOutlined style={{ fontSize: '48px', color: '#1890ff' }} />,
       title: "Track Weight & Height",
-      description: "Record and monitor children's physical development over time."
+      description: "Record and monitor children's physical development over time.",
+      link: "/guestbmi"
     },
     {
       icon: <UserOutlined style={{ fontSize: '48px', color: '#52c41a' }} />,
@@ -75,21 +77,23 @@ const Homepage: React.FC = () => {
             </Col>
             {features.map((feature, index) => (
               <Col xs={24} sm={12} lg={6} key={index} style={{ padding: 12 }}>
-                <Card 
-                  hoverable 
-                  style={{ height: '100%', textAlign: 'center' }}
-                  bodyStyle={{ padding: 24 }}
-                >
-                  <div style={{ marginBottom: 24 }}>
-                    {feature.icon}
-                  </div>
-                  <Title level={3} style={{ fontSize: 20, marginBottom: 16 }}>
-                    {feature.title}
-                  </Title>
-                  <Paragraph style={{ color: 'rgba(0, 0, 0, 0.65)' }}>
-                    {feature.description}
-                  </Paragraph>
-                </Card>
+                <Link to={feature.link || '#'}> {/* Thêm liên kết cho Track Weight & Height */}
+                  <Card 
+                    hoverable 
+                    style={{ height: '100%', textAlign: 'center' }}
+                    bodyStyle={{ padding: 24 }}
+                  >
+                    <div style={{ marginBottom: 24 }}>
+                      {feature.icon}
+                    </div>
+                    <Title level={3} style={{ fontSize: 20, marginBottom: 16 }}>
+                      {feature.title}
+                    </Title>
+                    <Paragraph style={{ color: 'rgba(0, 0, 0, 0.65)' }}>
+                      {feature.description}
+                    </Paragraph>
+                  </Card>
+                </Link>
               </Col>
             ))}
           </Row>

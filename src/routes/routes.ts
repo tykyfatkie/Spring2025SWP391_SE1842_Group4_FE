@@ -7,6 +7,7 @@ import { LayoutRoute } from '../types/routes'
 import { AboutPage } from '../Pages/About&Contact/About&ContactPage'
 import { ContactPage } from '../Pages/About&Contact/About&ContactPage'
 import PackagePage from '../Pages/PremiumSubscription/PremiumSubscriptionPage'
+import GuestBMICalculator from '../Pages/BMI cal/GuestBMICalculator'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -47,6 +48,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/package',
         component: PackagePage,
+      },
+      {
+        path: '/guestbmi',
+        component: GuestBMICalculator,
       },
     ],
   },

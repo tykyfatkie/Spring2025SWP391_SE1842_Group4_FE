@@ -6,7 +6,7 @@ import {
     HomeOutlined, 
     InfoCircleOutlined,
     LoginOutlined,
-    UserAddOutlined
+    UserAddOutlined,
 } from '@ant-design/icons';
 
 const { Header } = Layout;

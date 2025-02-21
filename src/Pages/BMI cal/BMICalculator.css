@@ -1,0 +1,26 @@
+.gauge-container {
+    position: relative;
+    width: 100%;
+    height: 200px; /* Điều chỉnh chiều cao nếu cần */
+  }
+  
+  .circle {
+    width: 80%; /* Giảm kích thước hình nền */
+    max-width: 400px; /* Giới hạn kích thước tối đa */
+    position: absolute;
+    top: 50%; /* Căn giữa theo chiều dọc */
+    left: 50%; /* Căn giữa theo chiều ngang */
+    transform: translate(-50%, -50%); /* Căn giữa hoàn toàn */
+    z-index: 1;
+  }
+  
+  .needle {
+    width: 30px; /* Giảm kích thước kim chỉ */
+    position: absolute;
+    top: 50%; /* Căn giữa theo chiều dọc */
+    left: 50%; /* Căn giữa theo chiều ngang */
+    transform-origin: center bottom; /* Điểm xoay là đáy kim */
+    z-index: 2;
+    transition: transform 0.3s ease-in-out;
+    margin-top: 100px; /* Điều chỉnh vị trí của kim để không bị dính vào hình nền */
+  }
