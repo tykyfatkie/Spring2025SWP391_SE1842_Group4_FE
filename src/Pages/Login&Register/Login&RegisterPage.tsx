@@ -19,7 +19,6 @@ import {
   GoogleOutlined,
   FacebookOutlined 
 } from '@ant-design/icons';
-import AppFooter from '../../components/Footer/Footer';
 
 const { Title, Text } = Typography;
 
@@ -32,7 +31,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <Row justify="center" align="middle" style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+    <Row justify="center" align="middle" style={{ minHeight: '100vh', background: '#f0f2f5', margin: "-25px"}}>
       <Col xs={23} sm={20} md={16} lg={12} xl={8}>
         <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
           <Space direction="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>
@@ -100,7 +99,7 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <Row justify="center" align="middle" style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+    <Row justify="center" align="middle" style={{ minHeight: '100vh', background: '#f0f2f5', margin: "-25px"}}>
       <Col xs={23} sm={20} md={16} lg={12} xl={8}>
         <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
           <Space direction="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>

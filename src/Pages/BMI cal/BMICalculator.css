@@ -22,5 +22,5 @@
     transform-origin: center bottom; /* Điểm xoay là đáy kim */
     z-index: 2;
     transition: transform 0.3s ease-in-out;
-    margin-top: 100px; /* Điều chỉnh vị trí của kim để không bị dính vào hình nền */
+    margin-top: 100px; /* Điều chỉnh vị trí của kim để không bị dính */
   }

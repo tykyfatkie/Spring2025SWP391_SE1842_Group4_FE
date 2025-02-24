@@ -22,7 +22,7 @@ const GuestHeader: React.FC = () => {
         position: 'sticky',
         top: 0,
         zIndex: 1,
-        width: '100%'
+        width: '1415px',
       }}
     >
       <Row justify="space-between" align="middle" style={{ height: '100%' }}>

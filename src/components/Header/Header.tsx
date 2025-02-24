@@ -21,6 +21,7 @@ const AppHeader: React.FC = () => {
         padding: '0 24px',
         position: 'sticky',
         top: 0,
+        margin: '-100px auto',
         zIndex: 1,
         width: '100%'
       }}

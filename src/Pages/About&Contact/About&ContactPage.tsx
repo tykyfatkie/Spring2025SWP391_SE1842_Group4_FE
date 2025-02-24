@@ -16,7 +16,7 @@ const { TextArea } = Input;
 
 export const AboutPage: React.FC = () => {
   return (
-    <Layout>
+    <Layout style={{ minHeight: '100vh', margin: '-25px'}}>
       <GuestHeader />
       <Layout.Content style={{ padding: '40px 50px', background: '#fff' }}>
         <Space direction="vertical" size={64} style={{ width: '100%' }}>
@@ -79,7 +79,7 @@ export const ContactPage: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <Layout style={{ minHeight: '100vh', margin: '-25px'}}>
       <GuestHeader />
       <Layout.Content style={{ padding: '40px 50px', background: '#fff' }}>
         <Space direction="vertical" size={64} style={{ width: '100%' }}>

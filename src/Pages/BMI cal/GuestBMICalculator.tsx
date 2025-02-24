@@ -1,48 +1,81 @@
 // src/Pages/BMI/BMICalculator.tsx
 import React, { useState } from 'react';
-import { Layout, Typography, Input, Button, Card, Radio, message } from 'antd';
+import { Layout, Typography, Input, Button, Card, Radio, message, Select } from 'antd';
 import './BMICalculator.css'; // Import file CSS
 import GuestHeader from '../../components/Header/GuestHeader';
 import AppFooter from '../../components/Footer/Footer';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
+const { Option } = Select;
 
 const BMICalculator: React.FC = () => {
-  const [weight, setWeight] = useState<number | undefined>(undefined);
-  const [height, setHeight] = useState<number | undefined>(undefined);
+  const [weight, setWeight] = useState<string>('');
+  const [height, setHeight] = useState<string>('');
   const [bmiResult, setBmiResult] = useState<number | null>(null);
   const [angle, setAngle] = useState<number>(0);
-  const [gender, setGender] = useState<string>('male'); // Thêm state cho giới tính
+  const [gender, setGender] = useState<string>('male');
+  const [ageType, setAgeType] = useState<string>('yearsMonths');
+  const [birthDate, setBirthDate] = useState<{ day: number; month: number; year: number }>({ day: 1, month: 1, year: 2000 });
 
   const calculateBMI = () => {
-    if (weight && height) {
-      if (weight <= 0 || height <= 0) {
-        message.error('Cân nặng và chiều cao phải lớn hơn 0.');
+    const weightNum = parseFloat(weight);
+    const heightNum = parseFloat(height);
+
+    if (weightNum && heightNum) {
+      if (weightNum < 4.5 || weightNum > 450) {
+        message.error('Cân nặng phải nằm trong khoảng từ 4.5kg đến 450kg.');
         return;
       }
-      const heightInMeters = height / 100; // Chuyển đổi chiều cao từ cm sang m
-      const bmi = weight / (heightInMeters * heightInMeters);
+      if (heightNum < 30 || heightNum > 270) {
+        message.error('Chiều cao phải nằm trong khoảng từ 30cm đến 270cm.');
+        return;
+      }
+      const heightInMeters = heightNum / 100;
+      const bmi = weightNum / (heightInMeters * heightInMeters);
       setBmiResult(bmi);
 
-      // Tính góc cho kim chỉ dựa trên các khoảng BMI
       let calculatedAngle = 0;
       if (bmi < 18.5) {
-        calculatedAngle = -75; // Góc 1
+        calculatedAngle = -75;
       } else if (bmi >= 18.5 && bmi < 23) {
-        calculatedAngle = -36; // Góc 2
+        calculatedAngle = -36;
       } else if (bmi >= 23 && bmi < 25) {
-        calculatedAngle = 0; // Góc 3
+        calculatedAngle = 0;
       } else if (bmi >= 25 && bmi < 30) {
-        calculatedAngle = 37; // Góc 4
+        calculatedAngle = 37;
       } else {
-        calculatedAngle = 73; // Góc 5
+        calculatedAngle = 73;
       }
 
-      setAngle(calculatedAngle); // Cập nhật góc cho kim chỉ
+      setAngle(calculatedAngle);
     } else {
       message.error('Vui lòng nhập đầy đủ cân nặng và chiều cao.');
     }
+  };
+
+  const goBack = () => {
+    setWeight('');
+    setHeight('');
+    setBmiResult(null);
+    setAngle(0);
+    setGender('male');
+    setAgeType('yearsMonths');
+    setBirthDate({ day: 1, month: 1, year: 2000 });
+  };
+
+  const getWeightCategory = (bmi: number) => {
+    if (bmi < 18.5) {
+      return "Trẻ thiếu cân";
+    } else if (bmi >= 18.5 && bmi < 22.9) {
+      return "Trẻ có cân nặng bình thường";
+    } else if (bmi >= 23 && bmi < 24.9) {
+      return "Trẻ thừa cân";
+    } else if (bmi >= 25 && bmi < 29.9) {
+      return "Trẻ béo phì độ 1";
+    } else if (bmi >= 30 ) {
+      return "Trẻ béo phì nghiêm trọng";
+    } 
   };
 
   const getAdvice = (bmi: number) => {
@@ -85,82 +118,179 @@ const BMICalculator: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', margin: "-25px" }}>
       <GuestHeader />
 
       <Content style={{ padding: '64px 0', textAlign: 'center' }}>
-        <Title level={1} style={{ fontSize: '36px', marginBottom: '20px', color: 'blue'}}>CÔNG CỤ TÍNH BMI</Title>
-        
-        <Card 
-          style={{ 
-            width: '500px', // Tăng chiều rộng
-            height: '400px', // Tăng chiều cao
-            margin: '0 auto', 
-            padding: '20px', 
-            border: '2px solid #87CEEB' // Thay đổi màu viền
+      <Title level={1} style={{ fontSize: '36px', marginBottom: '20px', color: '#0b4778', textAlign: 'left', margin: "20px" }}>Child and Teen BMI Calculator</Title>
+      <div style={{ display: 'flex', alignItems: 'flex-start', backgroundColor: '#dff2f6', padding: '20px', borderRadius: '8px', margin: '20px', width: '1370px'}}>
+        <Paragraph style={{ textAlign: 'left', marginLeft: '40px', flex: 1, fontSize: '20px' }}>
+          <strong>WHAT TO KNOW?</strong> 
+          <p>Body mass index (BMI) is a measure of weight relative to height. For children and teens,  </p>
+          <p>BMI is interpreted using sex-specific BMI-for-age percentiles. This calculator reports BMI, </p>
+          <p>BMI percentile, and BMI category for children and teens 2 through 19.</p>
+        </Paragraph>
+        <img src="https://www.cdc.gov/bmi/media/images/2024/05/child-measuring.jpg" alt="BMI Calculator" style={{ width: '350px', height: 'auto', marginRight: '60px' }} />
+      </div>
+
+        <Title level={1} style={{ fontSize: '36px', marginBottom: '20px', color: '#0b4778', textAlign: 'left', margin: "20px" }}>BMI Calculator for Child and Teen</Title>
+
+      <Card
+          style={{
+            width: '600px', // Thay đổi chiều rộng ở đây
+            height: 'auto',
+            margin: '0 auto',
+            padding: '20px',
+            border: '2px solid #87CEEB'
           }}
         >
-          <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px' }}>Giới tính</label>
-          <Radio.Group onChange={(e) => setGender(e.target.value)} value={gender} style={{ marginBottom: '16px' }}>
-            <Radio value="male">Nam</Radio>
-            <Radio value="female">Nữ</Radio>
-          </Radio.Group>
+          {bmiResult === null ? (
+            <>
+              <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px', textAlign: 'left' }}>Giới tính</label>
+              <Radio.Group onChange={(e) => setGender(e.target.value)} value={gender} style={{ marginBottom: '16px', textAlign: 'left' }}>
+                <Radio value="male">Nam</Radio>
+                <Radio value="female">Nữ</Radio>
+              </Radio.Group>
 
-          <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px' }}>Cân nặng (kg)</label>
-          <Input 
-            type="number" 
-            onChange={(e) => setWeight(e.target.value ? Number(e.target.value) : undefined)} 
-            style={{ marginBottom: '16px' }} 
-          />
-          
-          <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px' }}>Chiều cao (cm)</label>
-          <Input 
-            type="number" 
-            onChange={(e) => setHeight(e.target.value ? Number(e.target.value) : undefined)} 
-            style={{ marginBottom: '16px' }} 
-          />
-          
-          <Button 
-            type="primary" 
-            onClick={calculateBMI} 
-            style={{ 
-              backgroundColor: '#0056b3', // Màu xanh đậm
-              borderColor: '#0056b3', // Màu viền
-              color: 'white', // Màu chữ
-              fontSize: '16px', // Kích thước chữ
-              width: '100%', // Chiếm toàn bộ chiều rộng
-              height: '50px', // Chiều cao nút
-              marginTop: '20px'
-            }}
-          >
-            Xem kết quả
-          </Button>
+              <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px', textAlign: 'left' }}>Cân nặng (kg)</label>
+              <Input
+                type="number"
+                min={4.5}
+                max={450}
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                style={{ marginBottom: '16px' }}
+              />
+
+              <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px', textAlign: 'left' }}>Chiều cao (cm)</label>
+              <Input
+                type="number"
+                min={30}
+                max={270}
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                style={{ marginBottom: '16px' }}
+              />
+
+              <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px', textAlign: 'left' }}>Chọn kiểu nhập tuổi</label>
+              <Radio.Group onChange={(e) => setAgeType(e.target.value)} value={ageType} style={{ marginBottom: '16px', textAlign: 'left' }}>
+                <Radio value="yearsMonths">Năm và tháng</Radio>
+                <Radio value="months">Chỉ tháng</Radio>
+                <Radio value="birthDate">Ngày sinh</Radio>
+              </Radio.Group>
+
+              {ageType === 'yearsMonths' && (
+                <>
+                  <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px', textAlign: 'left' }}>Tuổi (năm)</label>
+                  <Input
+                    type="number"
+                    min={2}
+                    max={19}
+                    onChange={(e) => setBirthDate({ ...birthDate, year: e.target.value ? Number(e.target.value) : 0 })}
+                    style={{ marginBottom: '16px' }}
+                  />
+                  <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px', textAlign: 'left' }}>Tuổi (tháng)</label>
+                  <Input
+                    type="number"
+                    onChange={(e) => setBirthDate({ ...birthDate, month: e.target.value ? Number(e.target.value) : 0 })}
+                    style={{ marginBottom: '16px' }}
+                  />
+                </>
+              )}
+
+              {ageType === 'months' && (
+                <>
+                  <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px', textAlign: 'left' }}>Tuổi (tháng)</label>
+                  <Input
+                    type="number"
+                    onChange={(e) => setBirthDate({ ...birthDate, month: e.target.value ? Number(e.target.value) : 0 })}
+                    style={{ marginBottom: '16px' }}
+                  />
+                </>
+              )}
+
+              {ageType === 'birthDate' && (
+                <>
+                  <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px', textAlign: 'left' }}>Ngày sinh</label>
+                  <Select value={birthDate.day} onChange={(value) => setBirthDate({ ...birthDate, day: value })} style={{ width: '30%', marginRight: '5%' }}>
+                    {[...Array(31)].map((_, index) => <Option key={index + 1} value={index + 1}>{index + 1}</Option>)}
+                  </Select>
+                  <Select value={birthDate.month} onChange={(value) => setBirthDate({ ...birthDate, month: value })} style={{ width: '30%', marginRight: '5%' }}>
+                    {[...Array(12)].map((_, index) => <Option key={index + 1} value={index + 1}>{index + 1}</Option>)}
+                  </Select>
+                  <Select value={birthDate.year} onChange={(value) => setBirthDate({ ...birthDate, year: value })} style={{ width: '30%' }}>
+                    {[...Array(20)].map((_, index) => {
+                      const year = new Date().getFullYear() - index;
+                      return <Option key={year} value={year}>{year}</Option>;
+                    })}
+                  </Select>
+                </>
+              )}
+
+              <Button
+                type="primary"
+                onClick={calculateBMI}
+                style={{
+                  backgroundColor: '#0056b3',
+                  borderColor: '#0056b3',
+                  color: 'white',
+                  fontSize: '16px',
+                  width: '100%',
+                  height: '50px',
+                  marginTop: '20px'
+                }}
+              >
+                Xem kết quả
+              </Button>
+            </>
+          ) : (
+            <div>
+              <Title style={{ textAlign: 'left' }}><span style={{ fontSize: '30px' }}>Kết quả tính toán:</span></Title> 
+              <Title level={3} style={{ color: 'blue', textAlign: 'left' }}><span style={{ fontSize: '25px' }}>Kết quả BMI: {bmiResult.toFixed(1)} </span></Title>
+              <Paragraph style={{ textAlign: 'left' }}>
+                <strong>{getWeightCategory(bmiResult)}</strong>
+              </Paragraph>
+              <Paragraph style={{ textAlign: 'left' }}>Phần trăm BMI: {((bmiResult / 25) * 100).toFixed(2)} %</Paragraph>
+
+              <Title level={4} style={{ marginTop: '30px', textAlign: 'left' }}>Thông tin đã nhập</Title>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <Paragraph style={{ textAlign: 'left' }}>Tuổi: {ageType === 'yearsMonths' ? `${birthDate.year} năm` : ageType === 'months' ? `${birthDate.month} tháng` : `${birthDate.day}/${birthDate.month}/${birthDate.year}`}</Paragraph>
+                <Paragraph style={{ textAlign: 'left' }}>Giới tính: {gender}</Paragraph>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <Paragraph style={{ textAlign: 'left' }}>Chiều cao: {height} cm</Paragraph>
+                <Paragraph style={{ textAlign: 'left' }}>Cân nặng: {weight} kg</Paragraph>
+              </div>
+
+              <Title level={4} style={{ marginTop: '30px', textAlign: 'left' }}>Detailed Results</Title>
+              <div className="gauge-container">
+                <img
+                  src="https://tamanhhospital.vn/wp-content/uploads/2024/10/img-bang-ket-qua.png"
+                  alt="Biểu đồ BMI"
+                  className="circle"
+                  style={{ width: '80%', maxWidth: '400px' }}
+                />
+                <img
+                  src="https://tamanhhospital.vn/wp-content/uploads/2024/10/kim-new2.png"
+                  alt="Kim chỉ"
+                  className="needle"
+                  style={{ transform: `translate(-50%, -100%) rotate(${angle}deg)` }}
+                />
+              </div>
+              {getAdvice(bmiResult)}
+              <Button
+                type="link"
+                onClick={goBack}
+                style={{ marginTop: '20px' }}
+              >
+                Quay lại để nhập lại
+              </Button>
+            </div>
+          )}
         </Card>
 
-        {/* Di chuyển hình ảnh và kết quả ra ngoài Card */}
-        {bmiResult !== null && (
-          <div style={{ marginTop: '30px' }}>
-            <Title level={3} style={{ color: 'blue' }}>Kết quả chỉ số BMI của bạn: {bmiResult.toFixed(2)}</Title>
-            <div className="gauge-container">
-              <img 
-                src="https://tamanhhospital.vn/wp-content/uploads/2024/10/img-bang-ket-qua.png" 
-                alt="Biểu đồ BMI" 
-                className="circle" 
-                style={{ width: '80%', maxWidth: '400px' }} // Điều chỉnh kích thước trực tiếp
-              />
-              <img 
-                src="https://tamanhhospital.vn/wp-content/uploads/2024/10/kim-new2.png" 
-                alt="Kim chỉ" 
-                className="needle" 
-                style={{ transform: `translate(-50%, -100%) rotate(${angle}deg)` }} 
-              />
-            </div>
-            {getAdvice(bmiResult)}
-          </div>
-        )}
-
         {/* Thêm div màu xám bên ngoài */}
-        <div style={{ backgroundColor: '#d9d9d9', color: 'black', padding: '20px', marginTop: '30px',  width: '100%', textAlign: 'left' }}>
+        <div style={{ backgroundColor: '#d9d9d9', color: 'black', padding: '20px', marginTop: '30px', width: '100%', textAlign: 'left' }}>
           <Title level={4}>Miễn trừ trách nhiệm</Title>
           <Paragraph>
             Lưu ý, kết quả từ công cụ tính BMI online chỉ mang tính tham khảo, không thể thay thế các phương pháp chẩn đoán chuyên sâu tại cơ sở y tế. Nếu có nhu cầu chẩn đoán chính xác tình trạng cơ thể và sức khỏe, bạn có thể đến các cơ sở y tế có chuyên môn như Hệ thống Bệnh viện Đa khoa trong nước.
