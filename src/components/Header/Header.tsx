@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Row, Col, Space, Typography, Button, Avatar } from 'antd';
 import { 
   HomeOutlined, 
@@ -8,11 +8,37 @@ import {
   ContactsOutlined,
   SettingOutlined
 } from '@ant-design/icons';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
 const { Title } = Typography;
 
 const AppHeader: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [selectedKey, setSelectedKey] = useState('home');
+
+  // Update the selected key based on the current path
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes('/home')) {
+      setSelectedKey('home');
+    } else if (path.includes('/dashboard')) {
+      setSelectedKey('dashboard');
+    } else if (path.includes('/contact-us')) {
+      setSelectedKey('contact');
+    } else if (path.includes('/profile')) {
+      setSelectedKey('profile');
+    } else if (path.includes('/about-us')) {
+      setSelectedKey('about');
+    }
+  }, [location]);
+
+  // Handle logo click to navigate to home
+  const handleLogoClick = () => {
+    navigate('/home');
+  };
+
   return (
     <Header 
       style={{ 
@@ -27,18 +53,7 @@ const AppHeader: React.FC = () => {
     >
       <Row justify="space-between" align="middle" style={{ height: '100%' }}>
         <Col>
-          <Space align="center" size={16}>
-            {/* <Avatar 
-              size={40}
-              style={{ 
-                backgroundColor: '#1890ff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              CGT
-            </Avatar> */}
+          <Space align="center" size={16} onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
             <Title 
               level={4} 
               style={{ 
@@ -56,7 +71,7 @@ const AppHeader: React.FC = () => {
         <Col flex="auto">
           <Menu 
             mode="horizontal" 
-            defaultSelectedKeys={['home']}
+            selectedKeys={[selectedKey]}
             style={{ 
               border: 'none',
               justifyContent: 'center',
@@ -67,16 +82,16 @@ const AppHeader: React.FC = () => {
               <a href="/home">Home</a>
             </Menu.Item>
             <Menu.Item key="dashboard" icon={<DashboardOutlined />}>
-            <a href="/dashboard">Dashboard</a>
+              <a href="/dashboard">Dashboard</a>
             </Menu.Item>
             <Menu.Item key="contact" icon={<ContactsOutlined />}>
-            <a href="/contact-us">Contact Us</a>
+              <a href="/contact-us">Contact Us</a>
             </Menu.Item>
             <Menu.Item key="profile" icon={<UserOutlined />}>
-            <a href="/profile">Profile</a>
+              <a href="/profile">Profile</a>
             </Menu.Item>
             <Menu.Item key="about" icon={<InfoCircleOutlined />}>
-            <a href="/about-us">About</a>
+              <a href="/about-us">About</a>
             </Menu.Item>
           </Menu>
         </Col>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Row, Col, Space, Typography, Button } from 'antd';
 import { 
     ContactsOutlined,
@@ -8,11 +8,33 @@ import {
     LoginOutlined,
     UserAddOutlined,
 } from '@ant-design/icons';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
 const { Title } = Typography;
 
 const GuestHeader: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [selectedKey, setSelectedKey] = useState('home');
+
+  // Update the selected key based on the current path
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === '/' || path === '/home') {
+      setSelectedKey('home');
+    } else if (path.includes('/about-us')) {
+      setSelectedKey('about');
+    } else if (path.includes('/contact-us')) {
+      setSelectedKey('contact-us');
+    }
+  }, [location]);
+
+  // Handle logo click to navigate to home page
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
   return (
     <Header 
       style={{ 
@@ -34,8 +56,10 @@ const GuestHeader: React.FC = () => {
               margin: 0,
               background: 'linear-gradient(45deg, #1890ff, #722ed1)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
+              WebkitTextFillColor: 'transparent',
+              cursor: 'pointer'
             }}
+            onClick={handleLogoClick}
           >
             Child Growth Tracking
           </Title>
@@ -45,7 +69,7 @@ const GuestHeader: React.FC = () => {
         <Col flex="auto">
           <Menu 
             mode="horizontal" 
-            defaultSelectedKeys={['home']}
+            selectedKeys={[selectedKey]}
             style={{ 
               border: 'none',
               justifyContent: 'right',
@@ -80,8 +104,9 @@ const GuestHeader: React.FC = () => {
             >
               Register
             </Button>
-            <Button color='yellow'
-              icon={<CrownOutlined />}
+            <Button
+              style={{ color: '#faad14', borderColor: '#faad14' }}
+              icon={<CrownOutlined style={{ color: '#faad14' }} />}
               href="/package"
             >
               Package

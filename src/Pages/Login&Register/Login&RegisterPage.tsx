@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Form, 
   Input, 
@@ -113,28 +113,40 @@ export const LoginPage: React.FC = () => {
 
 export const RegisterPage: React.FC = () => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const onFinish = async (values: any) => {
     try {
-      const response = await fetch('/api/v1/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
+      setLoading(true);
       
-      if (response.ok) {
+      // Prepare the data according to the API requirements
+      const apiData = {
+        email: values.email,
+        password: values.password,
+        name: `${values.firstName} ${values.lastName}`,
+        phone: values.phone
+      };
+      
+      // Call the registration API
+      const response = await axios.post('/api/v1/auth/register', apiData);
+      
+      if (response.status === 200) {
         message.success('Registration successful!');
-        navigate('/login'); // Chuyển hướng sau khi đăng ký thành công
-      } else {
-        message.error(data.message || 'Registration failed!');
+        // Redirect to login page after successful registration
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
       }
-    } catch (error) {
-      message.error('Something went wrong. Please try again later.');
+    } catch (error: any) {
+      // Handle error response from API
+      if (error.response) {
+        message.error(error.response.data.message || 'Registration failed. Please try again.');
+      } else {
+        message.error('Network error. Please check your connection and try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -152,7 +164,27 @@ export const RegisterPage: React.FC = () => {
               onFinish={onFinish}
               layout="vertical"
               size="large"
+              scrollToFirstError
             >
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    name="firstName"
+                    rules={[{ required: true, message: 'Please input your first name!' }]}
+                  >
+                    <Input prefix={<UserOutlined />} placeholder="First Name" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="lastName"
+                    rules={[{ required: true, message: 'Please input your last name!' }]}
+                  >
+                    <Input prefix={<UserOutlined />} placeholder="Last Name" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
               <Form.Item
                 name="email"
                 rules={[
@@ -164,21 +196,65 @@ export const RegisterPage: React.FC = () => {
               </Form.Item>
 
               <Form.Item
+                name="phone"
+                rules={[
+                  { required: true, message: 'Please input your phone number!' },
+                  { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit phone number!' }
+                ]}
+              >
+                <Input prefix={<PhoneOutlined />} placeholder="Phone Number" />
+              </Form.Item>
+
+              <Form.Item
                 name="password"
-                rules={[{ required: true, message: 'Please input your password!' }]}
+                rules={[
+                  { required: true, message: 'Please input your password!' },
+                  { min: 8, message: 'Password must be at least 8 characters!' }
+                ]}
               >
                 <Input.Password prefix={<LockOutlined />} placeholder="Password" />
               </Form.Item>
 
+              <Form.Item
+                name="confirmPassword"
+                dependencies={['password']}
+                rules={[
+                  { required: true, message: 'Please confirm your password!' },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('password') === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error('Passwords do not match!'));
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder="Confirm Password" />
+              </Form.Item>
+
               <Form.Item>
-                <Button type="primary" htmlType="submit" block>
-                  Sign Up
+                <Button type="primary" htmlType="submit" block loading={loading}>
+                  Create Account
                 </Button>
               </Form.Item>
             </Form>
+
+            <Divider plain>Or register with</Divider>
+
+            <Space size="middle">
+              <Button icon={<GoogleOutlined />}>Google</Button>
+              <Button icon={<FacebookOutlined />}>Facebook</Button>
+            </Space>
+
+            <Text>
+              Already have an account? <a href="/login">Sign in</a>
+            </Text>
           </Space>
         </Card>
       </Col>
     </Row>
   );
 };
+
+export default RegisterPage;
