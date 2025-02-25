@@ -20,7 +20,8 @@ const Homepage: React.FC = () => {
     {
       icon: <UserOutlined style={{ fontSize: '48px', color: '#52c41a' }} />,
       title: "Growth Index",
-      description: "Assess BMI and compare it with WHO standards."
+      description: "Assess BMI and compare it with WHO standards.",
+      link: "/doctor"
     },
     {
       icon: <MedicineBoxOutlined style={{ fontSize: '48px', color: '#722ed1' }} />,

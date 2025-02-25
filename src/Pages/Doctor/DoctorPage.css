@@ -1,0 +1,29 @@
+/* DoctorPage.css */
+
+.card {
+    perspective: 1000px; /* Tạo chiều sâu cho hiệu ứng 3D */
+}
+
+.wrapper {
+    position: relative;
+    overflow: visible; /* Để ảnh có thể trồi ra ngoài */
+}
+
+.wrapper .ant-card {
+    transition: transform 0.5s, box-shadow 0.5s; /* Thay đổi thời gian chuyển tiếp */
+}
+
+.card:hover .wrapper .ant-card {
+    transform: translateY(30px) rotateX(10deg); /* Thẻ chìm xuống và nghiêng lên khi hover */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); /* Thêm bóng cho thẻ */
+}
+
+.wrapper img {
+    transition: transform 0.5s; /* Thay đổi thời gian chuyển tiếp cho ảnh */
+    position: relative; /* Đặt vị trí tương đối cho ảnh */
+    z-index: 1; /* Đảm bảo ảnh nằm trên thẻ */
+}
+
+.card:hover .wrapper img {
+    transform: scale(1.1); /* Phóng to ảnh khi hover */
+}

@@ -8,6 +8,7 @@ import { AboutPage } from '../Pages/About&Contact/About&ContactPage'
 import { ContactPage } from '../Pages/About&Contact/About&ContactPage'
 import PackagePage from '../Pages/PremiumSubscription/PremiumSubscriptionPage'
 import GuestBMICalculator from '../Pages/BMI cal/GuestBMICalculator'
+import DoctorPage from '../Pages/Doctor/DoctorPage'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -53,6 +54,10 @@ const routes: LayoutRoute[] = [
         path: '/guestbmi',
         component: GuestBMICalculator,
       },
+      {
+        path: '/doctor',
+        component: DoctorPage,
+      }
     ],
   },
 ]
