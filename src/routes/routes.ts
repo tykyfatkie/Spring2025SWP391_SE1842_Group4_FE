@@ -9,6 +9,7 @@ import { ContactPage } from '../Pages/About&Contact/About&ContactPage'
 import PackagePage from '../Pages/PremiumSubscription/PremiumSubscriptionPage'
 import GuestBMICalculator from '../Pages/BMI cal/GuestBMICalculator'
 import ForgotPasswordPage from '../Pages/ForgotPassword/ForgotPasswordPage'
+import UpdateChildPage from '../Pages/UpdateChild/UpdateChildPage'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -57,6 +58,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/guestbmi',
         component: GuestBMICalculator,
+      },
+      {
+        path: '/dashboard',
+        component: UpdateChildPage,
       },
     ],
   },

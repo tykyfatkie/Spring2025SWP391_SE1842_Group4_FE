@@ -241,7 +241,7 @@ const ForgotPasswordPage: React.FC = () => {
   };
 
   return (
-    <Layout className="min-h-screen bg-gray-50">
+    <Layout className="min-h-screen bg-gray-50" >
       <GuestHeader />
       <Content className="py-12">
         <div className="max-w-md mx-auto px-4">
