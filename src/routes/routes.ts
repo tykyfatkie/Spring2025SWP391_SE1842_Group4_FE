@@ -8,6 +8,7 @@ import { AboutPage } from '../Pages/About&Contact/About&ContactPage'
 import { ContactPage } from '../Pages/About&Contact/About&ContactPage'
 import PackagePage from '../Pages/PremiumSubscription/PremiumSubscriptionPage'
 import GuestBMICalculator from '../Pages/BMI cal/GuestBMICalculator'
+import ForgotPasswordPage from '../Pages/ForgotPassword/ForgotPasswordPage'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -36,6 +37,10 @@ const routes: LayoutRoute[] = [
       {
         path: '/register',
         component: RegisterPage,
+      },
+      {
+        path: '/forgot-password',
+        component: ForgotPasswordPage,
       },
       {
         path: '/about-us',
