@@ -1,12 +1,9 @@
-import { apiSlice } from '../../apis/apiSlice'
-import { login, logout } from './authSlice'
+import { apiSlice } from '../../apis/apiSlice';
+import { login, logout } from './authSlice';
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<
-      { accessToken: string },
-      { email: string; password: string }
-    >({
+    login: builder.mutation<{ accessToken: string }, { email: string; password: string; authType: number; redirect: string }>({
       query: (credentials) => ({
         url: '/auth/login',
         method: 'POST',
@@ -15,10 +12,11 @@ export const authApi = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled
-          dispatch(login(data))
+          const { data } = await queryFulfilled;
+          dispatch(login(data));
         } catch (error) {
-          console.error('Login failed', error)
+          console.error('Login failed', error);
+          // Có thể dispatch thêm hành động để thông báo lỗi ra UI
         }
       },
     }),
@@ -30,14 +28,14 @@ export const authApi = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          await queryFulfilled
-          dispatch(logout())
+          await queryFulfilled;
+          dispatch(logout());
         } catch (error) {
-          console.error('Logout failed', error)
+          console.error('Logout failed', error);
         }
       },
     }),
   }),
-})
+});
 
-export const { useLoginMutation } = authApi
+export const { useLoginMutation, useLogoutMutation } = authApi;

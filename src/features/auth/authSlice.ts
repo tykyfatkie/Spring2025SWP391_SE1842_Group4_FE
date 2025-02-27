@@ -1,61 +1,96 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { jwtDecode } from 'jwt-decode'
-import Cookies from 'js-cookie'
-import { UserData, AuthState } from '../../types/auth'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { jwtDecode } from 'jwt-decode'; // Fix import for jwtDecode
+import Cookies from 'js-cookie';
+import { UserData, AuthState } from '../../types/auth';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Lấy userData từ Cookies
+// Type for decoded token (customize it based on your token structure)
+interface DecodedToken {
+  sub: string;
+  id: string;
+  role: string;
+  name?: string; // Optional
+  avatar?: string; // Optional
+}
+
+// Get userData from cookies
 const userData: UserData | null = Cookies.get('userData')
   ? JSON.parse(Cookies.get('userData') as string)
-  : null
+  : null;
 
 const initialState: AuthState = {
   userData,
-  userToken: null, // Không lưu token vào localStorage nữa
+  userToken: null, // Do not store token in localStorage anymore
   isAuthenticated: !!userData,
   isLoading: false,
-}
+};
 
 const authSlice = createSlice({
   name: 'authSlice',
   initialState,
   reducers: {
     setLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload
+      state.isLoading = action.payload;
     },
     login: (state, action: PayloadAction<{ accessToken: string }>) => {
-      const { accessToken } = action.payload
-      const decodedToken: any = jwtDecode(accessToken)
+      const { accessToken } = action.payload;
 
+      // Decode the JWT token
+      const decodedToken: DecodedToken = jwtDecode(accessToken);
+
+      // Populate the state with decoded token data
       state.userData = {
         email: decodedToken.sub,
         id: decodedToken.id,
         role: decodedToken.role,
-        name: decodedToken.name,
-        avatar: decodedToken.avatar,
-      }
+        name: decodedToken.name || '', // Optional fallback
+        avatar: decodedToken.avatar || '', // Optional fallback
+      };
 
-      state.userToken = { token: accessToken, refreshToken: '' } // Chỉ lưu Access Token tạm thời
-      state.isAuthenticated = true
+      // Store access token in the state (refresh token can be added here if needed)
+      state.userToken = { token: accessToken, refreshToken: '' }; // Store only the access token for now
+      state.isAuthenticated = true;
 
-      // ✅ Lưu userData vào Cookies thay vì localStorage
-      Cookies.set('userData', JSON.stringify(state.userData), { expires: 7 }) // Cookies có hạn 7 ngày
+      // Store user data in cookies with a 7-day expiration
+      Cookies.set('userData', JSON.stringify(state.userData), { expires: 7 });
     },
     logout: (state) => {
-      state.userData = null
-      state.userToken = null
-      state.isAuthenticated = false
+      state.userData = null;
+      state.userToken = null;
+      state.isAuthenticated = false;
 
-      // ✅ Xóa userData trong Cookies
-      Cookies.remove('userData')
+      // Remove user data from cookies
+      Cookies.remove('userData');
     },
     refreshToken: (state, action: PayloadAction<string>) => {
+      // Assuming the new refresh token is provided
       state.userToken = {
-        token: action.payload,
-        refreshToken: state.userToken?.refreshToken || '',
-      }
+        token: state.userToken?.token || '', // Retain the current token
+        refreshToken: action.payload, // Store the new refresh token
+      };
     },
   },
-})
+  
+  
+});
 
-export const { login, logout, refreshToken, setLoading } = authSlice.actions
-export default authSlice.reducer
+
+export const api = createApi({
+  reducerPath: 'api',
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5173/api/v1/' }), // Đảm bảo URL backend đúng
+  endpoints: (builder) => ({
+    login: builder.mutation({
+      query: (loginData) => ({
+        url: 'auth/login',  // Đảm bảo đường dẫn API đúng
+        method: 'POST',
+        body: loginData,    // Dữ liệu đăng nhập
+      }),
+    }),
+  }),
+});
+
+export const { useLoginMutation } = api;
+
+
+export const { login, logout, refreshToken, setLoading } = authSlice.actions;
+export default authSlice.reducer;

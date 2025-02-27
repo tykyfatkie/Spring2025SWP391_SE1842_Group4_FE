@@ -11,12 +11,13 @@
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
   },
   "dependencies": {
+    "proxy": "https://localhost:7217",
     "@ant-design/icons": "^5.6.1",
     "@reduxjs/toolkit": "^2.5.1",
     "@types/redux-persist": "^4.3.1",
     "antd": "^5.24.1",
     "async-mutex": "^0.5.0",
-    "axios": "^1.7.9",
+    "axios": "^1.8.1",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
