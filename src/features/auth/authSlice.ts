@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { jwtDecode } from 'jwt-decode'; // Fix import for jwtDecode
+import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { UserData, AuthState } from '../../types/auth';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query';
+
 
 // Type for decoded token (customize it based on your token structure)
 interface DecodedToken {
@@ -70,27 +71,13 @@ const authSlice = createSlice({
       };
     },
   },
-  
-  
 });
 
-
-export const api = createApi({
+export const apiSlice = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5173/api/v1/' }), // Đảm bảo URL backend đúng
-  endpoints: (builder) => ({
-    login: builder.mutation({
-      query: (loginData) => ({
-        url: 'auth/login',  // Đảm bảo đường dẫn API đúng
-        method: 'POST',
-        body: loginData,    // Dữ liệu đăng nhập
-      }),
-    }),
-  }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'https://localhost:7217/api/v1/' }), // Cập nhật URL backend đúng
+  endpoints: (builder) => ({}),
 });
-
-export const { useLoginMutation } = api;
-
 
 export const { login, logout, refreshToken, setLoading } = authSlice.actions;
 export default authSlice.reducer;

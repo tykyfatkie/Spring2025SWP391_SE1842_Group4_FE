@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Card, Typography, Row, Col, Divider, message, Space } from 'antd';
 import { MailOutlined, LockOutlined, GoogleOutlined, FacebookOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useLoginMutation } from '../../features/auth/authApi'; // Đảm bảo import đúng
 import { useDispatch } from 'react-redux';
-import { login } from '../../features/auth/authSlice'; // Đảm bảo import action login từ authSlice
+import { useLoginMutation } from '../../features/auth/authApi'; // Import đúng API hook
+import { login } from '../../features/auth/authSlice'; // Import action login từ authSlice
+
 
 const { Title, Text } = Typography;
 
@@ -12,7 +13,7 @@ export const LoginPage: React.FC = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();  // Sử dụng dispatch để gọi action login
-  const [loginMutation] = useLoginMutation();  // Sử dụng useLoginMutation từ apiSlice
+  const [loginMutation, { isLoading, error }] = useLoginMutation();  // Lấy hook từ apiSlice
 
   const onFinish = async (values: any) => {
     try {
@@ -21,20 +22,28 @@ export const LoginPage: React.FC = () => {
         authType: 0, 
         redirect: "string" 
       };
-
+  
       // Gọi API login
-      const response = await loginMutation(loginValues).unwrap(); // unwrap để lấy dữ liệu
-
-      if (response) {
-        // Dispatch action login với accessToken
-        dispatch(login({ accessToken: response.accessToken }));
-
-        // Sau khi login thành công, chuyển hướng tới trang dashboard
-        navigate('/dashboard');
+      const result = await loginMutation(loginValues);
+      
+      // Kiểm tra kết quả trả về đúng cấu trúc
+      if ('data' in result) {
+        console.log('Login success', result.data);
+        // Đảm bảo result.data có chứa accessToken
+        if (result.data && result.data.accessToken) {
+          dispatch(login({ accessToken: result.data.accessToken }));
+          navigate('/dashboard');
+        } else {
+          console.error('Missing accessToken in response:', result.data);
+          message.error('Invalid response from server');
+        }
+      } else {
+        console.error('Login error:', result.error);
+        message.error('Login failed. Please check your credentials.');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      message.error('Login failed. Please check your credentials.');
+      console.error('Unexpected error:', err);
+      message.error('Something went wrong. Please try again!');
     }
   };
 
@@ -62,7 +71,7 @@ export const LoginPage: React.FC = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" block>
+                <Button type="primary" htmlType="submit" block loading={isLoading}>
                   Sign In
                 </Button>
               </Form.Item>
