@@ -4,7 +4,8 @@ import { MailOutlined, LockOutlined, GoogleOutlined, FacebookOutlined } from '@a
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useLoginMutation } from '../../features/auth/authApi'; // Import đúng API hook
-import { login } from '../../features/auth/authSlice'; // Import action login từ authSlice
+import { login, setLoading } from '../../features/auth/authSlice'; // Import action login từ authSlice
+import axios from 'axios';
 
 
 const { Title, Text } = Typography;
@@ -15,37 +16,67 @@ export const LoginPage: React.FC = () => {
   const dispatch = useDispatch();  // Sử dụng dispatch để gọi action login
   const [loginMutation, { isLoading, error }] = useLoginMutation();  // Lấy hook từ apiSlice
 
+  // const onFinish = async (values: any) => {
+  //   try {
+  //     const loginValues = { 
+  //       ...values, 
+  //       authType: 0, 
+  //       redirect: "string" 
+  //     };
+  
+  //     // Gọi API login
+  //     const result = await loginMutation(loginValues);
+      
+  //     // Kiểm tra kết quả trả về đúng cấu trúc
+  //     if ('data' in result) {
+  //       console.log('Login success', result.data);
+  //       // Đảm bảo result.data có chứa accessToken
+  //       if (result.data && result.data.accessToken) {
+  //         dispatch(login({ accessToken: result.data.accessToken }));
+  //         navigate('/home');
+  //       } else {
+  //         console.error('Missing accessToken in response:', result.data);
+  //         message.error('Invalid response from server');
+  //       }
+  //     } else {
+  //       console.error('Login error:', result.error);
+  //       message.error('Login failed. Please check your credentials.');
+  //     }
+  //   } catch (err) {
+  //     console.error('Unexpected error:', err);
+  //     message.error('Something went wrong. Please try again!');
+  //   }
+  // };
+
   const onFinish = async (values: any) => {
     try {
-      const loginValues = { 
-        ...values, 
-        authType: 0, 
-        redirect: "string" 
-      };
-  
-      // Gọi API login
-      const result = await loginMutation(loginValues);
+      setLoading(true);
       
-      // Kiểm tra kết quả trả về đúng cấu trúc
-      if ('data' in result) {
-        console.log('Login success', result.data);
-        // Đảm bảo result.data có chứa accessToken
-        if (result.data && result.data.accessToken) {
-          dispatch(login({ accessToken: result.data.accessToken }));
-          navigate('/dashboard');
-        } else {
-          console.error('Missing accessToken in response:', result.data);
-          message.error('Invalid response from server');
-        }
-      } else {
-        console.error('Login error:', result.error);
-        message.error('Login failed. Please check your credentials.');
+      // Cập nhật apiData để bao gồm tất cả các trường yêu cầu từ Swagger (bao gồm avatar)
+      const apiData = {
+        email: values.email,
+        password: values.password,
+      };
+      
+      const response = await axios.post('https://localhost:7217/api/v1/auth/login', apiData);
+      
+      if (response.status === 200) {
+        message.success('Login successful!');
+        setTimeout(() => {
+          navigate('/home');
+        }, 1500);
       }
-    } catch (err) {
-      console.error('Unexpected error:', err);
-      message.error('Something went wrong. Please try again!');
+    } catch (error: any) {
+      if (error.response) {
+        message.error(error.response.data.message || 'Login failed. Please try again.');
+      } else {
+        message.error('Network error. Please check your connection and try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   return (
     <Row justify="center" align="middle" style={{ minHeight: '100vh', background: '#f0f2f5' }}>

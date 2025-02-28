@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { UserData, AuthState } from '../../types/auth';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query';
+// import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query';
 
 
 // Type for decoded token (customize it based on your token structure)
