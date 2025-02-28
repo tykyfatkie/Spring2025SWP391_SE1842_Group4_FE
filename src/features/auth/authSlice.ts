@@ -73,11 +73,6 @@ const authSlice = createSlice({
   },
 });
 
-export const apiSlice = createApi({
-  reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://localhost:7217/api/v1/' }), // Cập nhật URL backend đúng
-  endpoints: (builder) => ({}),
-});
 
 export const { login, logout, refreshToken, setLoading } = authSlice.actions;
 export default authSlice.reducer;
