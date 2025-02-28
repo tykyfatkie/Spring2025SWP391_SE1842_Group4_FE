@@ -1,46 +1,18 @@
+// path/to/DoctorPage.tsx
 import React from 'react';
 import { Layout, Typography, Row, Col, Card, Menu } from 'antd';
 import AppFooter from "../../components/Footer/Footer";
 import GuestHeader from "../../components/Header/GuestHeader";
-import doctorImage from "../../assets/doctor.png"; // Đường dẫn mới
-import './DoctorPage.css'; 
+import doctorImage from "../../assets/doctor.png";
 
 const { Content } = Layout;
 const { Title } = Typography;
 
 const players = [
-  {
-    name: "A",
-    price: "86,000 đ",
-    description: "A",
-    rating: 4.9,
-    reviews: 100,
-    image: doctorImage,
-  },
-  {
-    name: "B",
-    price: "60,000 đ",
-    description: "B",
-    rating: 4.9,
-    reviews: 250,
-    image: doctorImage,
-  },
-  {
-    name: "C",
-    price: "79,000 đ",
-    description: "C",
-    rating: 5,
-    reviews: 52,
-    image: doctorImage,
-  },
-  {
-    name: "D",
-    price: "89,000 đ",
-    description: "D",
-    rating: 5,
-    reviews: 137,
-    image: doctorImage,
-  },
+  { name: "A", price: "86,000 đ", description: "A", rating: 4.9, reviews: 100, image: doctorImage },
+  { name: "B", price: "60,000 đ", description: "B", rating: 4.9, reviews: 250, image: doctorImage },
+  { name: "C", price: "79,000 đ", description: "C", rating: 5, reviews: 52, image: doctorImage },
+  { name: "D", price: "89,000 đ", description: "D", rating: 5, reviews: 137, image: doctorImage },
 ];
 
 const DoctorPage: React.FC = () => {
@@ -54,15 +26,29 @@ const DoctorPage: React.FC = () => {
             <Row gutter={16}>
               {players.map((player, index) => (
                 <Col span={6} key={index}>
-                  <div className="card">
-                    <div className="wrapper"> {/* Thêm div wrapper */}
+                  <div className="card" style={{ perspective: '1000px' }}>
+                    <div className="wrapper" style={{ position: 'relative', overflow: 'visible' }}>
                       <Card
                         hoverable
-                        cover={<img alt={player.name} src={player.image} />}
-                        style={{ marginBottom: '20px' }}
+                        cover={<img alt={player.name} src={player.image} style={{ transition: 'transform 0.5s', position: 'relative', zIndex: 1 }} />}
+                        style={{ marginBottom: '20px', transition: 'transform 0.5s, box-shadow 0.5s' }}
+                        onMouseEnter={(e) => {
+                          const card = e.currentTarget;
+                          card.style.transform = 'translateY(30px) rotateX(10deg)';
+                          card.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.3)';
+                          const img = card.querySelector('img');
+                          if (img) img.style.transform = 'scale(1.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          const card = e.currentTarget;
+                          card.style.transform = 'none';
+                          card.style.boxShadow = 'none';
+                          const img = card.querySelector('img');
+                          if (img) img.style.transform = 'none';
+                        }}
                       >
                         <Card.Meta
-                          title={<div className="title">{player.name}</div>} 
+                          title={<div className="title">{player.name}</div>}
                           description={
                             <>
                               <p>{player.price}</p>
@@ -81,18 +67,10 @@ const DoctorPage: React.FC = () => {
           <Col span={6} style={{ paddingLeft: '20px' }}>
             <Card title="Danh mục" style={{ marginTop: '80px' }}>
               <Menu>
-                <Menu.Item key="1">
-                  <a href="/chuyen-khoa">Bác sĩ chuyên khoa</a>
-                </Menu.Item>
-                <Menu.Item key="2">
-                  <a href="/tu-van">Tư vấn sức khỏe</a>
-                </Menu.Item>
-                <Menu.Item key="3">
-                  <a href="/khach-hang">Khách hàng</a>
-                </Menu.Item>
-                <Menu.Item key="4">
-                  <a href="/tin-tuc">Tin tức y tế</a>
-                </Menu.Item>
+                <Menu.Item key="1"><a href="/chuyen-khoa">Bác sĩ chuyên khoa</a></Menu.Item>
+                <Menu.Item key="2"><a href="/tu-van">Tư vấn sức khỏe</a></Menu.Item>
+                <Menu.Item key="3"><a href="/khach-hang">Khách hàng</a></Menu.Item>
+                <Menu.Item key="4"><a href="/tin-tuc">Tin tức y tế</a></Menu.Item>
               </Menu>
             </Card>
           </Col>
