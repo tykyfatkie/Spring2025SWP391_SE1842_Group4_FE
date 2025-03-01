@@ -11,12 +11,6 @@ import GuestBMICalculator from '../Pages/BMI cal/GuestBMICalculator'
 import DoctorPage from '../Pages/Doctor/DoctorPage'
 import DoctorProfilePage from '../Pages/Doctor/DoctorProfilePage'
 
-
-// const token = localStorage.getItem('childgrowthtrackingsystem');
-// const { account } = useAppSelector((state) => state.auth);
-// const isAdmin = account && account.user && account.user.role.includes('Admin');
-// const isStoreOwner = account && account.user && account.user.role.includes('User');
-// const isCustomer = account && account.user && account.user.role.includes('Guest');
 const routes: LayoutRoute[] = [
   {
     layout: MainLayout,
@@ -67,8 +61,4 @@ const routes: LayoutRoute[] = [
   },
 ]
 
-export default routes
-function useAppSelector(arg0: (state: any) => any): { account: any } {
-  throw new Error('Function not implemented.')
-}
-
+export default routes 

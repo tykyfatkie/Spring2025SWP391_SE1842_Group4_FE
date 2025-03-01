@@ -4,15 +4,16 @@ import { Layout, Typography, Row, Col, Card, Menu } from 'antd';
 import AppFooter from "../../components/Footer/Footer";
 import GuestHeader from "../../components/Header/GuestHeader";
 import doctorImage from "../../assets/doctor.png";
+import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title } = Typography;
 
 const players = [
-  { name: "A", price: "86,000 đ", description: "A", rating: 4.9, reviews: 100, image: doctorImage },
-  { name: "B", price: "60,000 đ", description: "B", rating: 4.9, reviews: 250, image: doctorImage },
-  { name: "C", price: "79,000 đ", description: "C", rating: 5, reviews: 52, image: doctorImage },
-  { name: "D", price: "89,000 đ", description: "D", rating: 5, reviews: 137, image: doctorImage },
+  { id: 1, name: "A", price: "86,000 đ", description: "A", rating: 4.9, reviews: 100, image: doctorImage },
+  { id: 2, name: "B", price: "60,000 đ", description: "B", rating: 4.9, reviews: 250, image: doctorImage },
+  { id: 3, name: "C", price: "79,000 đ", description: "C", rating: 5, reviews: 52, image: doctorImage },
+  { id: 4, name: "D", price: "89,000 đ", description: "D", rating: 5, reviews: 137, image: doctorImage },
 ];
 
 const DoctorPage: React.FC = () => {
@@ -26,6 +27,7 @@ const DoctorPage: React.FC = () => {
             <Row gutter={16}>
               {players.map((player, index) => (
                 <Col span={6} key={index}>
+                  <Link to={`/doctor/${player.id}`}>
                   <div className="card" style={{ perspective: '1000px' }}>
                     <div className="wrapper" style={{ position: 'relative', overflow: 'visible' }}>
                       <Card
@@ -60,6 +62,7 @@ const DoctorPage: React.FC = () => {
                       </Card>
                     </div>
                   </div>
+                  </Link>
                 </Col>
               ))}
             </Row>
