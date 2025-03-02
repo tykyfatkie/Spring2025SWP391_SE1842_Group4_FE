@@ -11,6 +11,10 @@ import GuestBMICalculator from '../Pages/BMI cal/GuestBMICalculator'
 import DoctorPage from '../Pages/Doctor/DoctorPage'
 import DoctorProfilePage from '../Pages/Doctor/DoctorProfilePage'
 import ParentProfilePage from '../Pages/Parent/ParentProfilePage'
+import Dashboard from '../Pages/Dashboard/DashboardPage'
+import Users from '../Pages/Dashboard/Users'
+import Settings from '../Pages/Dashboard/Settings'
+import DefaultLayout from '../layouts/DefaultLayout'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -67,7 +71,16 @@ const routes: LayoutRoute[] = [
       {
         path: '/profile',
         component: ParentProfilePage,
-      }
+      },    
+    ],
+  },
+
+  {
+    layout: DefaultLayout,
+    data: [
+      { path: "/dashboard", component: Dashboard},
+      { path: "/users", component: Users},
+      { path: "/settings", component: Settings},
     ],
   },
 ]
