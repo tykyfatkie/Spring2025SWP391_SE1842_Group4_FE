@@ -1,5 +1,5 @@
 import MainLayout from '../components/layout/MainLayout'
-import { LoginPage } from '../Pages/Login/LoginPage' 
+import LoginPage from '../Pages/Login/LoginPage'
 import RegisterPage from '../Pages/Register/RegisterPage'
 import Homepage from '../Pages/Home/HomePage'
 import GuestHomePage from '../Pages/Home/GuestHomePage'

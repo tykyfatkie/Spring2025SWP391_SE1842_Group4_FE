@@ -22,7 +22,7 @@ const mutex = new Mutex()
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   // wait until the mutex is available without locking it
   await mutex.waitForUnlock()
-  console.log(import.meta.env.VITE_API_ENDPOINT)
+  // console.log(import.meta.env.VITE_API_ENDPOINT)
   let result = await baseQuery(args, api, extraOptions)
 
   if (result.error && result.error.status === 401) {
