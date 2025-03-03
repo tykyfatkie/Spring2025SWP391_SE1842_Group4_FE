@@ -21,7 +21,7 @@ const ContactPage: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <Layout style={{ minHeight: '100vh', margin: '-25px', width: '1420px' }}>
       <GuestHeader />
       <Layout.Content style={{ padding: '40px 50px', background: '#fff' }}>
         <Space direction="vertical" size={64} style={{ width: '100%' }}>
