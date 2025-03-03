@@ -10,7 +10,7 @@ import PackagePage from '../Pages/PremiumSubscription/PremiumSubscriptionPage'
 import GuestBMICalculator from '../Pages/BMI cal/GuestBMICalculator'
 import ForgotPasswordPage from '../Pages/ForgotPassword/ForgotPasswordPage'
 import UpdateChildPage from '../Pages/UpdateChild/UpdateChildPage'
-import ChildProfilePage from '../Pages/ChildProfile/ChildProfilePage'
+import CreateChild from '../Pages/CreateChild/CreateChild'
 import AnalyticsPage from '../Pages/Analytics/AnalyticsPage'
 import DoctorPage from '../Pages/Doctor/DoctorPage'
 import DoctorProfilePage from '../Pages/Doctor/DoctorProfilePage'
@@ -19,7 +19,8 @@ import DefaultLayout from '../layouts/DefaultLayout'
 import Dashboard from '../Pages/Dashboard/DashboardPage'
 import Settings from '../Pages/Dashboard/Settings'
 import Users from '../Pages/Dashboard/Users'
-
+import EditChildPage from '../Pages/EditChild/EditChildPage'
+import ManageUserProfile from '../Pages/ManageUserProfile/ManageUserProfilePage'
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
 // const { account } = useAppSelector((state) => state.auth);
@@ -74,7 +75,7 @@ const routes: LayoutRoute[] = [
       },
       {
         path: '/child-create',
-        component: ChildProfilePage,
+        component: CreateChild,
       },
       {
         path: '/child-analytics',
@@ -91,6 +92,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/profile',
         component: ParentProfilePage,
+      }, 
+      {
+        path: '/child-edit',
+        component: EditChildPage,
+      }, 
+      {
+        path: '/manage-profile',
+        component: ManageUserProfile,       
       }, 
     ],
     

@@ -18,7 +18,6 @@ const AppHeader: React.FC = () => {
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState('home');
 
-  // Update the selected key based on the current path
   useEffect(() => {
     const path = location.pathname;
     if (path.includes('/home')) {
@@ -34,9 +33,14 @@ const AppHeader: React.FC = () => {
     }
   }, [location]);
 
-  // Handle logo click to navigate to home
   const handleLogoClick = () => {
     navigate('/home');
+  };
+
+  const handleLogout = () => {
+    // Handle logout logic here
+    console.log("User logged out");
+    navigate('/login');
   };
 
   return (
@@ -98,11 +102,12 @@ const AppHeader: React.FC = () => {
 
         <Col>
           <Space>
-            <Button 
-              type="text" 
-              icon={<SettingOutlined />}
-              style={{ fontSize: '16px' }}
-            />
+            <Button type="primary" onClick={() => navigate('/manage-profile')}>
+              Manage Profile
+            </Button>
+            <Button type="default" danger onClick={handleLogout}>
+              Logout
+            </Button>
             <Avatar icon={<UserOutlined />} />
           </Space>
         </Col>

@@ -14,8 +14,8 @@ import {
 } from 'antd';
 import moment from 'moment';
 import axiosInstance from '../../utils/axiosInstance.ts'; 
-import Header from '../../components/Header/Header';
-import Footer from '../../components/Footer/Footer';
+import Header from '../../components/Header/Header.tsx';
+import Footer from '../../components/Footer/Footer.tsx';
 import Sidebar from '../../components/Sidebar/Sidebar.tsx';
 
 const { Content } = Layout;
@@ -35,7 +35,7 @@ interface ChildProfile {
   groupAge: number;
 }
 
-const ChildProfilePage: React.FC = () => {
+const CreateChild: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -208,4 +208,4 @@ const ChildProfilePage: React.FC = () => {
   );
 };
 
-export default ChildProfilePage;
+export default CreateChild;
