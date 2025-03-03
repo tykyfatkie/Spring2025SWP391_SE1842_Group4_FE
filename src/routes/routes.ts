@@ -4,12 +4,14 @@ import RegisterPage from '../Pages/Register/RegisterPage'
 import Homepage from '../Pages/Home/HomePage'
 import GuestHomePage from '../Pages/Home/GuestHomePage'
 import { LayoutRoute } from '../types/routes'
-import { AboutPage } from '../Pages/About&Contact/About&ContactPage'
-import { ContactPage } from '../Pages/About&Contact/About&ContactPage'
+import AboutPage from '../Pages/About/AboutPage'
+import ContactPage from '../Pages/Contact/ContactPage'
 import PackagePage from '../Pages/PremiumSubscription/PremiumSubscriptionPage'
 import GuestBMICalculator from '../Pages/BMI cal/GuestBMICalculator'
 import ForgotPasswordPage from '../Pages/ForgotPassword/ForgotPasswordPage'
 import UpdateChildPage from '../Pages/UpdateChild/UpdateChildPage'
+import ChildProfilePage from '../Pages/ChildProfile/ChildProfilePage'
+import AnalyticsPage from '../Pages/Analytics/AnalyticsPage'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -63,7 +65,16 @@ const routes: LayoutRoute[] = [
         path: '/dashboard',
         component: UpdateChildPage,
       },
+      {
+        path: '/child-create',
+        component: ChildProfilePage,
+      },
+      {
+        path: '/child-analytics',
+        component: AnalyticsPage,
+      },
     ],
+    
   },
 ]
 

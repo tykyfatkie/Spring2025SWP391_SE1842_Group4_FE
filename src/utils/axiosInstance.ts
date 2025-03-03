@@ -1,0 +1,26 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'https://localhost:7217/api/v1'; // Change this to your actual backend URL
+
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Automatically attach token (if available) to requests
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token'); // Retrieve token from local storage
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`; // Attach auth token
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;

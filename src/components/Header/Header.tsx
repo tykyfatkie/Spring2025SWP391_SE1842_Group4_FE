@@ -88,7 +88,7 @@ const AppHeader: React.FC = () => {
               <a href="/contact-us">Contact Us</a>
             </Menu.Item>
             <Menu.Item key="profile" icon={<UserOutlined />}>
-              <a href="/profile">Profile</a>
+              <a href="/child-create">Profile</a>
             </Menu.Item>
             <Menu.Item key="about" icon={<InfoCircleOutlined />}>
               <a href="/about-us">About</a>

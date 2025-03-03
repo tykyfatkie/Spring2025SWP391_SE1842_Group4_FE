@@ -3,8 +3,8 @@ import { Form, Input, Button, Card, Typography, Row, Col, Divider, message, Spac
 import { MailOutlined, LockOutlined, GoogleOutlined, FacebookOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useLoginMutation } from '../../features/auth/authApi'; // Import đúng API hook
-import { login, setLoading } from '../../features/auth/authSlice'; // Import action login từ authSlice
+import { useLoginMutation } from '../../features/auth/authApi'; 
+import { login, setLoading } from '../../features/auth/authSlice';
 import axios from 'axios';
 
 
@@ -12,37 +12,36 @@ const { Title, Text } = Typography;
 
 const LoginPage = () => {
   const [form] = Form.useForm();
-  const [loginMutation, { isLoading, error }] = useLoginMutation();  // Lấy hook từ apiSlice
+  const [loginMutation, { isLoading, error }] = useLoginMutation();  
   const navigate = useNavigate()
 
   const onFinish = async (values: any) => {
     loginMutation(values)
-    // try {
-    //   setLoading(true);
+    try {
+      setLoading(true);
       
-    //   // Cập nhật apiData để bao gồm tất cả các trường yêu cầu từ Swagger (bao gồm avatar)
-    //   const apiData = {
-    //     email: values.email,
-    //     password: values.password,
-    //   };
+      const apiData = {
+        email: values.email,
+        password: values.password,
+      };
       
-    //   const response = await axios.post('https://localhost:7217/api/v1/auth/login', apiData);
+      const response = await axios.post('https://localhost:7217/api/v1/auth/login', apiData);
       
-    //   if (response.status === 200) {
-    //     message.success('Login successful!');
-    //     setTimeout(() => {
-    //       navigate('/home');
-    //     }, 1500);
-    //   }
-    // } catch (error: any) {
-    //   if (error.response) {
-    //     message.error(error.response.data.message || 'Login failed. Please try again.');
-    //   } else {
-    //     message.error('Network error. Please check your connection and try again.');
-    //   }
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (response.status === 200) {
+        message.success('Login successful!');
+        setTimeout(() => {
+          navigate('/home');
+        }, 1500);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        message.error(error.response.data.message || 'Login failed. Please try again.');
+      } else {
+        message.error('Network error. Please check your connection and try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
      
 }
 return (
