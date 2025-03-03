@@ -12,6 +12,8 @@ import ForgotPasswordPage from '../Pages/ForgotPassword/ForgotPasswordPage'
 import UpdateChildPage from '../Pages/UpdateChild/UpdateChildPage'
 import ChildProfilePage from '../Pages/ChildProfile/ChildProfilePage'
 import AnalyticsPage from '../Pages/Analytics/AnalyticsPage'
+import DoctorPage from '../Pages/Doctor/DoctorPage'
+import DoctorProfilePage from '../Pages/Doctor/DoctorProfilePage'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -72,6 +74,14 @@ const routes: LayoutRoute[] = [
       {
         path: '/child-analytics',
         component: AnalyticsPage,
+      },
+      {
+        path: '/doctor',
+        component: DoctorPage,
+      },
+      {
+        path: '/doctor/:id',
+        component: DoctorProfilePage,
       },
     ],
     
