@@ -33,13 +33,12 @@ export const RegisterPage: React.FC = () => {
     try {
       setLoading(true);
       
-      // Cập nhật apiData để bao gồm tất cả các trường yêu cầu từ Swagger (bao gồm avatar)
       const apiData = {
         email: values.email,
         password: values.password,
         name: `${values.firstName} ${values.lastName}`,
         phone: values.phone,
-        avatar: '', // Bạn có thể để trống hoặc lấy avatar từ nơi khác
+        avatar: '', 
       };
       
       const response = await axios.post('https://localhost:7217/api/v1/auth/register', apiData);
