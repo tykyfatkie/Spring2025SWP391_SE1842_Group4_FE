@@ -62,7 +62,7 @@ const DoctorProfilePage: React.FC = () => {
   }, [id]);
 
   return (
-    <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px', width: '1420px' }}>
       <GuestHeader />
       <Content style={{ 
         padding: '0 20px', 

@@ -51,7 +51,7 @@ const AnalyticsPage: React.FC = () => {
   }, [selectedChild]);
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px', width: '1420px' }}>
       <Header />
       <Layout>
         <Sidebar /> {/* Sidebar Component */}
