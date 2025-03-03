@@ -14,6 +14,7 @@ import ChildProfilePage from '../Pages/ChildProfile/ChildProfilePage'
 import AnalyticsPage from '../Pages/Analytics/AnalyticsPage'
 import DoctorPage from '../Pages/Doctor/DoctorPage'
 import DoctorProfilePage from '../Pages/Doctor/DoctorProfilePage'
+import ParentProfilePage from '../Pages/Parent/ParentProfilePage'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -83,6 +84,10 @@ const routes: LayoutRoute[] = [
         path: '/doctor/:id',
         component: DoctorProfilePage,
       },
+      {
+        path: '/profile',
+        component: ParentProfilePage,
+      }, 
     ],
     
   },
