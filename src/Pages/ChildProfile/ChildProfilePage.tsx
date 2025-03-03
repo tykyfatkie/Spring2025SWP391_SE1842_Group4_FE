@@ -89,7 +89,7 @@ const ChildProfilePage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px', width: '1420px' }}>
       <Header />
       <Layout>
         <Sidebar />  {/* Sidebar Component */}

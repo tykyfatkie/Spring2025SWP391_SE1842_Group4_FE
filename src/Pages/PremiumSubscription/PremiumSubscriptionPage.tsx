@@ -81,18 +81,18 @@ const PremiumSubscriptionPage: React.FC = () => {
   };
 
   return (
-    <Layout className="min-h-screen">
+    <Layout style={{ minHeight: '100vh', margin: '-25px', width: '1420px' }}>
       <GuestHeader />
       <Content>
         <div className="p-6 max-w-6xl mx-auto">
           <Title level={2} className="text-center mb-8">
-            <CrownOutlined className="mr-2" style={{ color: '#FFD700' }} />
+            <CrownOutlined className="mr-2" style={{ color: '#FFD700', marginLeft: '40px' }} />
             Đăng Ký Gói Premium
           </Title>
 
-          <Row gutter={[24, 24]} className="mb-8">
+          <Row gutter={[24, 24]} className="mb-8" style={{marginLeft:'40px'}}>
             {plans.map((plan) => (
-              <Col xs={24} md={8} key={plan.id}>
+              <Col xs={24} md={7} key={plan.id} style={{margin:'10px'}}>
                 <Card
                   className={`h-full ${
                     selectedPlan === plan.id ? 'border-blue-500 border-2' : ''
