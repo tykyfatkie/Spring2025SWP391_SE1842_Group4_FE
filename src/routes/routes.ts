@@ -15,6 +15,10 @@ import AnalyticsPage from '../Pages/Analytics/AnalyticsPage'
 import DoctorPage from '../Pages/Doctor/DoctorPage'
 import DoctorProfilePage from '../Pages/Doctor/DoctorProfilePage'
 import ParentProfilePage from '../Pages/Parent/ParentProfilePage'
+import DefaultLayout from '../layouts/DefaultLayout'
+import Dashboard from '../Pages/Dashboard/DashboardPage'
+import Settings from '../Pages/Dashboard/Settings'
+import Users from '../Pages/Dashboard/Users'
 
 
 // const token = localStorage.getItem('childgrowthtrackingsystem');
@@ -90,6 +94,15 @@ const routes: LayoutRoute[] = [
       }, 
     ],
     
+  },
+
+  {
+    layout: DefaultLayout,
+    data: [
+      { path: "/dashboards", component: Dashboard},
+      { path: "/users", component: Users},
+      { path: "/settings", component: Settings},
+    ],
   },
 ]
 
