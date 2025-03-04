@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import routes from './routes/routes.ts'
 import NotFound from './components/NotFound/NotFound.tsx'
+import "remixicon/fonts/remixicon.css";
 function App() {
   return (
     <Routes>

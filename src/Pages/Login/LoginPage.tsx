@@ -1,98 +1,117 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Card, Typography, Row, Col, Divider, message, Space } from 'antd';
-import { MailOutlined, LockOutlined, GoogleOutlined, FacebookOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { useLoginMutation } from '../../features/auth/authApi'; 
-import { login, setLoading } from '../../features/auth/authSlice';
-import axios from 'axios';
+import React, { useState } from "react";
+import "./LoginPage.css"; // Giữ nguyên CSS
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { message } from "antd";
 
+const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
-const { Title, Text } = Typography;
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
-const LoginPage = () => {
-  const [form] = Form.useForm();
-  const [loginMutation, { isLoading, error }] = useLoginMutation();  
-  const navigate = useNavigate()
-
-  const onFinish = async (values: any) => {
-    loginMutation(values)
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      setLoading(true);
-      
-      const apiData = {
-        email: values.email,
-        password: values.password,
-      };
-      
-      const response = await axios.post('https://localhost:7217/api/v1/auth/login', apiData);
+      const response = await axios.post("https://localhost:7217/api/v1/auth/login", {
+        email,
+        password,
+      });
       
       if (response.status === 200) {
-        message.success('Login successful!');
+        message.success("Login successful!");
         setTimeout(() => {
-          navigate('/home');
+          navigate("/home");
         }, 1500);
       }
     } catch (error: any) {
       if (error.response) {
-        message.error(error.response.data.message || 'Login failed. Please try again.');
+        message.error(error.response.data.message || "Login failed. Please try again.");
       } else {
-        message.error('Network error. Please check your connection and try again.');
+        message.error("Network error. Please check your connection and try again.");
       }
-    } finally {
-      setLoading(false);
     }
-     
-}
-return (
-  <Row justify="center" align="middle" style={{ minHeight: '100vh', background: '#f0f2f5' }}>
-    <Col xs={23} sm={20} md={16} lg={12} xl={8}>
-      <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-        <Space direction="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>
-          <Title level={2}>Welcome Back</Title>
-          <Text type="secondary">Sign in to Child Growth Tracking System</Text>
+  };
 
-          <Form form={form} name="login" onFinish={onFinish} layout="vertical" size="large">
-            <Form.Item
-              name="email"
-              rules={[{ required: true, message: 'Please input your email!' }, { type: 'email', message: 'Please enter a valid email!' }]}
-            >
-              <Input prefix={<MailOutlined />} placeholder="Email" />
-            </Form.Item>
+  return (
+    <div className="login" style={{ backgroundColor: "#ffffff" }}>
+      {/* LOGIN ACCESS */}
+      <div className="login__access">
+        <h1 className="login__title">Log in to your account.</h1>
 
-            <Form.Item
-              name="password"
-              rules={[{ required: true, message: 'Please input your password!' }]}
-            >
-              <Input.Password prefix={<LockOutlined />} placeholder="Password" />
-            </Form.Item>
+        <div className="login__area">
+          <form className="login__form" onSubmit={handleLogin} autoComplete="off">
+            <div className="login__content grid">
+              <div className="login__box">
+                <input
+                  type="email"
+                  id="email"
+                  required
+                  placeholder=" "
+                  className="login__input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="new-email"
+                />
+                <label htmlFor="email" className="login__label">Email</label>
+                <i className="ri-mail-fill login__icon"></i>
+              </div>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit" block loading={isLoading}>
-                Sign In
-              </Button>
-            </Form.Item>
+              <div className="login__box">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  required
+                  placeholder=" "
+                  className="login__input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <label htmlFor="password" className="login__label">Password</label>
+                <i 
+                  className={showPassword ? "ri-eye-fill login__icon login__password" : "ri-eye-off-fill login__icon login__password"} 
+                  onClick={togglePasswordVisibility}
+                  style={{ cursor: "pointer" }}
+                ></i>
+              </div>
+            </div>
 
-            <Form.Item>
-              <a href="/forgot-password">Forgot password?</a>
-            </Form.Item>
-          </Form>
+            <a href="/forgot-password" className="login__forgot">Forgot your password?</a>
+            <button type="submit" className="login__button">Login</button>
+          </form>
 
-          <Divider plain>Or continue with</Divider>
+          <div className="login__social">
+            <p className="login__social-title">Or login with</p>
+            <div className="login__social-links">
+              <a href="" className="login__social-link">
+                <img src="src/assets/img/icon-google.svg" alt="Google" className="login__social-img" />
+              </a>
+              <a href="" className="login__social-link">
+                <img src="src/assets/img/icon-facebook.svg" alt="Facebook" className="login__social-img" />
+              </a>
+              <a href="" className="login__social-link">
+                <img src="src/assets/img/icon-apple.svg" alt="Apple" className="login__social-img" />
+              </a>
+            </div>
+          </div>
 
-          <Space size="middle">
-            <Button icon={<GoogleOutlined />}>Google</Button>
-            <Button icon={<FacebookOutlined />}>Facebook</Button>
-          </Space>
+          <p className="login__switch">
+            Don't have an account? <button id="loginButtonRegister" onClick={() => navigate("/register")}>Create Account</button>
+          </p>
+        </div>
+      </div>
 
-          <Text>
-            Don't have an account? <a href="/register">Sign up now</a>
-          </Text>
-        </Space>
-      </Card>
-    </Col>
-  </Row>
-);
-}
+      {/* BACKGROUND IMAGE & EFFECT */}
+      <div className="login__background">
+        <img src="src/assets/img/bg-img.jpg" alt="Background" className="login__bg" style={{ display: "block" }} />
+      </div>
+    </div>
+  );
+};
 
-export default LoginPage
+export default LoginPage;
