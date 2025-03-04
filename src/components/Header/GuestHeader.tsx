@@ -41,19 +41,20 @@ const GuestHeader: React.FC = () => {
         padding: '0 24px',
         position: 'sticky',
         top: 0,
-        zIndex: 1000, // Tăng z-index để không bị che
-        width: '100vw', // Đảm bảo header luôn full-width
+        zIndex: 1000,
+        width: '98vw',
+        maxWidth: '100%', // Đảm bảo không bị tràn
         minWidth: '320px',
       }}
     >
-      <Row justify="space-between" align="middle" style={{ height: '100%', flexWrap: 'nowrap' }}>
+      <Row justify="space-between" align="middle" style={{ height: '100%', flexWrap: 'nowrap', width: '100%' }}>
         {/* Logo */}
-        <Col flex="200px"> 
+        <Col flex="1"> 
           <Title 
             level={4} 
             style={{ 
               margin: 0,
-              whiteSpace: 'nowrap', // Tránh bị xuống dòng trên màn hình nhỏ
+              whiteSpace: 'nowrap', 
               background: 'linear-gradient(45deg, #1890ff, #722ed1)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -66,13 +67,15 @@ const GuestHeader: React.FC = () => {
         </Col>
 
         {/* Menu */}
-        <Col flex="auto">
+        <Col flex="2">
           <Menu 
             mode="horizontal" 
             selectedKeys={[selectedKey]}
             style={{ 
               border: 'none',
-              justifyContent: 'center', // Giúp menu cân đối
+              justifyContent: 'center',
+              flex: 1,  // Dùng flex thay vì width cố định
+              minWidth: '200px', // Đảm bảo không bị thu nhỏ quá mức
             }}
           >
             <Menu.Item key="home" icon={<HomeOutlined />}>
@@ -88,7 +91,7 @@ const GuestHeader: React.FC = () => {
         </Col>
 
         {/* Auth Buttons */}
-        <Col flex="250px" style={{ textAlign: 'right' }}>
+        <Col flex="1" style={{ textAlign: 'right' }}>
           <Space size="middle">
             <Button type="primary" icon={<LoginOutlined />} href="/login">
               Login

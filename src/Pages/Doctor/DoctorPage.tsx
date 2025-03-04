@@ -18,7 +18,7 @@ const players = [
 
 const DoctorPage: React.FC = () => {
   return (
-    <Layout style={{ minHeight: '100vh', margin: '-25px', width: '1420px' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
       <GuestHeader />
       <Content style={{ padding: '0 20px', maxWidth: '1200px', margin: '0 auto' }}>
         <Row gutter={16}>

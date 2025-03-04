@@ -81,7 +81,7 @@ const PremiumSubscriptionPage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', margin: '-25px', width: '1420px' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
       <GuestHeader />
       <Content>
         <div className="p-6 max-w-6xl mx-auto">

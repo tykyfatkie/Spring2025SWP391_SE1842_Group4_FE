@@ -33,7 +33,7 @@ const Homepage: React.FC = () => {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh', margin: '-25px', width: '1420px' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
       <Header />
 
       {/* Hero Section */}
