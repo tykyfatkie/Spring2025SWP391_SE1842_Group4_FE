@@ -18,7 +18,6 @@ const GuestHeader: React.FC = () => {
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState('home');
 
-  // Update the selected key based on the current path
   useEffect(() => {
     const path = location.pathname;
     if (path === '/' || path === '/home') {
@@ -30,7 +29,6 @@ const GuestHeader: React.FC = () => {
     }
   }, [location]);
 
-  // Handle logo click to navigate to home page
   const handleLogoClick = () => {
     navigate('/');
   };
@@ -43,17 +41,19 @@ const GuestHeader: React.FC = () => {
         padding: '0 24px',
         position: 'sticky',
         top: 0,
-        zIndex: 1,
-        width: '100%'
+        zIndex: 1000, // Tăng z-index để không bị che
+        width: '100vw', // Đảm bảo header luôn full-width
+        minWidth: '320px',
       }}
     >
-      <Row justify="space-between" align="middle" style={{ height: '100%' }}>
-        {/* Logo and Title */}
-        <Col>
+      <Row justify="space-between" align="middle" style={{ height: '100%', flexWrap: 'nowrap' }}>
+        {/* Logo */}
+        <Col flex="200px"> 
           <Title 
             level={4} 
             style={{ 
               margin: 0,
+              whiteSpace: 'nowrap', // Tránh bị xuống dòng trên màn hình nhỏ
               background: 'linear-gradient(45deg, #1890ff, #722ed1)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -65,15 +65,14 @@ const GuestHeader: React.FC = () => {
           </Title>
         </Col>
 
-        {/* Navigation Menu */}
+        {/* Menu */}
         <Col flex="auto">
           <Menu 
             mode="horizontal" 
             selectedKeys={[selectedKey]}
             style={{ 
               border: 'none',
-              justifyContent: 'right',
-              marginLeft: '80px'
+              justifyContent: 'center', // Giúp menu cân đối
             }}
           >
             <Menu.Item key="home" icon={<HomeOutlined />}>
@@ -88,20 +87,13 @@ const GuestHeader: React.FC = () => {
           </Menu>
         </Col>
 
-        {/* Authentication Buttons */}
-        <Col>
+        {/* Auth Buttons */}
+        <Col flex="250px" style={{ textAlign: 'right' }}>
           <Space size="middle">
-            <Button 
-              type="primary" 
-              icon={<LoginOutlined />}
-              href="/login"
-            >
+            <Button type="primary" icon={<LoginOutlined />} href="/login">
               Login
             </Button>
-            <Button 
-              icon={<UserAddOutlined />}
-              href="/register"
-            >
+            <Button icon={<UserAddOutlined />} href="/register">
               Register
             </Button>
             <Button
