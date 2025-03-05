@@ -1,158 +1,185 @@
-import React, { useState } from 'react';
-import { 
-  Form, 
-  Input, 
-  Button, 
-  Card, 
-  Typography, 
-  Row, 
-  Col, 
-  Divider, 
-  message, 
-  Space 
-} from 'antd';
-import { 
-  UserOutlined, 
-  LockOutlined, 
-  MailOutlined,
-  PhoneOutlined,
-  GoogleOutlined,
-  FacebookOutlined 
-} from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState } from "react";
+import "./RegisterPage.css"; // Giữ nguyên CSS
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { message } from "antd";
 
-const { Title, Text } = Typography;
-
-export const RegisterPage: React.FC = () => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+const RegisterPage: React.FC = () => {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const onFinish = async (values: any) => {
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      message.error("Passwords do not match!");
+      return;
+    }
+
+    const apiData = {
+      email,
+      password,
+      name: `${firstName} ${lastName}`,
+      phone,
+      avatar: '',
+    };
+
     try {
-      setLoading(true);
-      
-      const apiData = {
-        email: values.email,
-        password: values.password,
-        name: `${values.firstName} ${values.lastName}`,
-        phone: values.phone,
-        avatar: '', 
-      };
-      
-      const response = await axios.post('https://localhost:7217/api/v1/auth/register', apiData);
-      
+      const response = await axios.post("https://localhost:7217/api/v1/auth/register", apiData);
+
       if (response.status === 200) {
-        message.success('Registration successful!');
+        message.success("Registration successful!");
         setTimeout(() => {
-          navigate('/login');
+          navigate("/login");
         }, 1500);
       }
     } catch (error: any) {
       if (error.response) {
-        message.error(error.response.data.message || 'Registration failed. Please try again.');
+        message.error(error.response.data.message || "Registration failed. Please try again.");
       } else {
-        message.error('Network error. Please check your connection and try again.');
+        message.error("Network error. Please check your connection and try again.");
       }
-    } finally {
-      setLoading(false);
     }
   };
-  
 
   return (
-    <Row justify="center" align="middle" style={{ minHeight: '100vh', background: '#f0f2f5' }}>
-      <Col xs={23} sm={20} md={16} lg={12} xl={8}>
-        <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-          <Space direction="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>
-            <Title level={2}>Create Account</Title>
-            <Text type="secondary">Join Child Growth Tracking System</Text>
+    <div className="login" style={{ backgroundColor: "#ffffff" }}>
+      <div className="login__access">
+        <h1 className="login__title">Create your account.</h1>
 
-            <Form
-              form={form}
-              name="register"
-              onFinish={onFinish}
-              layout="vertical"
-              size="large"
-              scrollToFirstError
-            >
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    name="firstName"
-                    rules={[{ required: true, message: 'Please input your first name!' }]}
-                  >
-                    <Input prefix={<UserOutlined />} placeholder="First Name" />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    name="lastName"
-                    rules={[{ required: true, message: 'Please input your last name!' }]}
-                  >
-                    <Input prefix={<UserOutlined />} placeholder="Last Name" />
-                  </Form.Item>
-                </Col>
-              </Row>
+        <div className="login__area">
+          <form className="login__form" onSubmit={handleRegister} autoComplete="off">
+            <div className="login__content grid">
+              <div className="login__box-container">
+                <div className="login__box half-width">
+                  <input
+                    type="text"
+                    id="firstName"
+                    required
+                    placeholder=" "
+                    className="login__input"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    autoComplete="given-name"
+                  />
+                  <label htmlFor="firstName" className="login__label">First Name</label>
+                  <i className="ri-user-fill login__icon"></i>
+                </div>
+                <div className="login__box half-width">
+                  <input
+                    type="text"
+                    id="lastName"
+                    required
+                    placeholder=" "
+                    className="login__input"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    autoComplete="family-name"
+                  />
+                  <label htmlFor="lastName" className="login__label">Last Name</label>
+                  <i className="ri-user-fill login__icon"></i>
+                </div>
+              </div>
+              <div className="login__box">
+                <input
+                  type="email"
+                  id="email"
+                  required
+                  placeholder=" "
+                  className="login__input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                />
+                <label htmlFor="email" className="login__label">Email</label>
+                <i className="ri-mail-fill login__icon"></i>
+              </div>
+              <div className="login__box">
+                <input
+                  type="tel"
+                  id="phone"
+                  required
+                  placeholder=" "
+                  className="login__input"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                />
+                <label htmlFor="phone" className="login__label">Phone Number</label>
+                <i className="ri-phone-fill login__icon"></i>
+              </div>
+              <div className="login__box">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  required
+                  placeholder=" "
+                  className="login__input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <label htmlFor="password" className="login__label">Password</label>
+                <i 
+                  className={showPassword ? "ri-eye-fill login__icon login__password" : "ri-eye-off-fill login__icon login__password"} 
+                  onClick={togglePasswordVisibility}
+                  style={{ cursor: "pointer" }}
+                ></i>
+              </div>
+              <div className="login__box">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  required
+                  placeholder=" "
+                  className="login__input"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <label htmlFor="confirmPassword" className="login__label">Confirm Password</label>
+                <i 
+                  className={showPassword ? "ri-eye-fill login__icon login__password" : "ri-eye-off-fill login__icon login__password"} 
+                  onClick={togglePasswordVisibility}
+                  style={{ cursor: "pointer" }}
+                ></i>
+              </div>
+            </div>
 
-              <Form.Item
-                name="email"
-                rules={[{ required: true, message: 'Please input your email!' }, { type: 'email', message: 'Please enter a valid email!' }]}
-              >
-                <Input prefix={<MailOutlined />} placeholder="Email" />
-              </Form.Item>
+            <button type="submit" className="login__button">Sign Up</button>
+          </form>
 
-              <Form.Item
-                name="phone"
-                rules={[{ required: true, message: 'Please input your phone number!' }, { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit phone number!' }]}
-              >
-                <Input prefix={<PhoneOutlined />} placeholder="Phone Number" />
-              </Form.Item>
+          <div className="login__social">
+            <p className="login__social-title">Or register with</p>
+            <div className="login__social-links">
+              <button className="login__social-button google">
+                <img src="src/assets/img/icon-google.svg" alt="Google" /> Google
+              </button>
+              <button className="login__social-button facebook">
+                <img src="src/assets/img/icon-facebook.svg" alt="Facebook" /> Facebook
+              </button>
+            </div>
+          </div>
 
-              <Form.Item
-                name="password"
-                rules={[{ required: true, message: 'Please input your password!' }, { min: 8, message: 'Password must be at least 8 characters!' }]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="Password" />
-              </Form.Item>
+          <p className="login__switch">
+            Already have an account? <button id="registerButtonLogin" onClick={() => navigate("/login")}>Log In</button>
+          </p>
+        </div>
+      </div>
 
-              <Form.Item
-                name="confirmPassword"
-                dependencies={['password']}
-                rules={[{ required: true, message: 'Please confirm your password!' }, ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue('password') === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error('Passwords do not match!'));
-                  },
-                })]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="Confirm Password" />
-              </Form.Item>
-
-              <Form.Item>
-                <Button type="primary" htmlType="submit" block loading={loading}>
-                  Create Account
-                </Button>
-              </Form.Item>
-            </Form>
-
-            <Divider plain>Or register with</Divider>
-
-            <Space size="middle">
-              <Button icon={<GoogleOutlined />}>Google</Button>
-              <Button icon={<FacebookOutlined />}>Facebook</Button>
-            </Space>
-
-            <Text>
-              Already have an account? <a href="/login">Sign in</a>
-            </Text>
-          </Space>
-        </Card>
-      </Col>
-    </Row>
+      <div className="login__background">
+        <img src="src/assets/img/bg-img.jpg" alt="Background" className="login__bg" style={{ display: "block" }} />
+      </div>
+    </div>
   );
 };
 
