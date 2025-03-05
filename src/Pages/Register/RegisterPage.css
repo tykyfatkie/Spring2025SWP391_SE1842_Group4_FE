@@ -1,0 +1,203 @@
+/*=============== GOOGLE FONTS ===============*/
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap");
+
+/*=============== VARIABLES CSS ===============*/
+:root {
+  --first-color: hsl(208, 92%, 54%);
+  --first-color-alt: hsl(208, 88%, 50%);
+  --title-color: hsl(220, 68%, 4%);
+  --white-color: hsl(0, 0%, 100%);
+  --text-color: hsl(220, 15%, 66%);
+  --body-color: hsl(0, 0%, 100%);
+  --container-color: hsl(220, 50%, 97%);
+  --body-font: "Montserrat", system-ui;
+  --big-font-size: 1.5rem;
+  --normal-font-size: .938rem;
+  --small-font-size: .813rem;
+  --font-semi-bold: 600;
+}
+
+/*=============== BASE ===============*/
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: var(--body-color);
+  color: var(--text-color);
+  font-family: var(--body-font);
+  font-size: var(--normal-font-size);
+}
+
+input, button {
+  border: none;
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+/*=============== REGISTER PAGE ===============*/
+.register {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  align-items: center;
+  padding: 2rem;
+  position: relative;
+  height: 100%;
+}
+
+.register__access {
+  max-width: 400px;
+  margin: auto;
+}
+
+.register__title {
+  font-size: var(--big-font-size);
+  color: var(--title-color);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.register__box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--container-color);
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
+
+.register__input {
+  background: none;
+  width: 100%;
+  padding: 1.2rem 1.5rem;
+  font-weight: var(--font-semi-bold);
+  border-radius: 1rem;
+  transition: border-color .3s;
+}
+
+.register__input:focus {
+  border-color: var(--first-color);
+}
+
+.register__label {
+  position: absolute;
+  left: 1.5rem;
+  font-weight: var(--font-semi-bold);
+  transition: transform .3s, font-size .3s;
+}
+
+.register__input:focus ~ .register__label,
+.register__input:not(:placeholder-shown).register__input:not(:focus) ~ .register__label {
+  transform: translateY(-10px);
+  font-size: var(--small-font-size);
+}
+
+.register__button {
+  width: 100%;
+  display: inline-flex;
+  justify-content: center;
+  background-color: var(--first-color);
+  color: var(--white-color);
+  font-weight: var(--font-semi-bold);
+  padding: 1rem;
+  border-radius: 4rem;
+  cursor: pointer;
+  transition: background-color .3s;
+}
+
+.register__button:hover {
+  background-color: var(--first-color-alt);
+}
+
+.register__switch {
+  text-align: center;
+  font-size: var(--small-font-size);
+  margin-top: 1rem;
+}
+
+.register__switch a {
+  color: var(--first-color);
+  font-weight: var(--font-semi-bold);
+  transition: color .3s;
+}
+
+.register__switch a:hover {
+  color: var(--first-color-alt);
+}
+
+.register__background {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  mask-image: url("src/assets/img/mask-blob.svg");
+  mask-size: cover;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url("src/assets/img/mask-blob.svg");
+  -webkit-mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.login__box-container {
+    display: flex;
+    gap: 10px; /* Khoảng cách giữa First Name và Last Name */
+  }
+  
+  .half-width {
+    flex: 1; /* Chia đều 2 ô trên cùng một hàng */
+  }
+
+  .register__box {
+    width: 80%; /* Điều chỉnh chiều rộng của ô nhập */
+    margin: auto; /* Căn giữa ô nhập */
+  }
+  
+  .register__input {
+    background: none;
+    width: 100%; /* Giữ nguyên 100% nhưng trong ô cha nhỏ hơn */
+    padding: 0.8rem 1.2rem; /* Giảm padding */
+    font-weight: var(--font-semi-bold);
+    border-radius: 1rem;
+    transition: border-color .3s;
+    height: 40px; /* Thay đổi chiều cao */
+  }
+
+  .login__box {
+    width: 100%; /* Giảm chiều rộng của ô nhập xuống 90% */
+    margin: auto; /* Căn giữa ô nhập */
+  }
+  
+  .login__input {
+    background: none;
+    width: 100%; /* Giữ nguyên 100% nhưng trong ô cha nhỏ hơn */
+    padding: 0.8rem 1.2rem; /* Giảm padding */
+    font-weight: var(--font-semi-bold);
+    border-radius: 1rem;
+    transition: border-color .3s;
+    height: 50px; /* Thay đổi chiều cao */
+  }
+
+  .login__social-button {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem; /* Giảm padding */
+    background: none; /* Loại bỏ nền */
+    border: none; /* Loại bỏ viền */
+    cursor: pointer; /* Con trỏ khi di chuột */
+    font-size: 0.875rem; /* Giảm kích thước chữ */
+  }
+  
+  .login__social-button img {
+    width: 20px; /* Giảm kích thước logo */
+    height: 20px; /* Giảm kích thước logo */
+    margin-right: 0.5rem; /* Khoảng cách giữa logo và văn bản */
+  }
