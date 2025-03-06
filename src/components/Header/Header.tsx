@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Row, Col, Space, Typography, Button, Avatar } from 'antd';
+import { Layout, Menu, Row, Col, Space, Typography, Dropdown, Avatar } from 'antd';
 import { 
   HomeOutlined, 
   UserOutlined, 
   InfoCircleOutlined, 
-  DashboardOutlined,
-  ContactsOutlined,
-  SettingOutlined
+  ContactsOutlined 
 } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -21,13 +19,11 @@ const AppHeader: React.FC = () => {
   useEffect(() => {
     const path = location.pathname;
     if (path.includes('/home')) {
-      setSelectedKey('home');
-    } else if (path.includes('/dashboard')) {
-      setSelectedKey('dashboard');
+      setSelectedKey('home');  
     } else if (path.includes('/contact-us')) {
       setSelectedKey('contact');
-    } else if (path.includes('/profile')) {
-      setSelectedKey('profile');
+    } else if (path.includes('/child-create')) {
+      setSelectedKey('childs');
     } else if (path.includes('/about-us')) {
       setSelectedKey('about');
     }
@@ -38,10 +34,23 @@ const AppHeader: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Handle logout logic here
     console.log("User logged out");
     navigate('/login');
   };
+
+  const menu = (
+    <Menu>
+      <Menu.Item key="manage-profile" onClick={() => navigate('/manage-profile')}>
+        Manage Profile
+      </Menu.Item>
+      <Menu.Item key="package" onClick={() => navigate('/package')}>
+        Package
+      </Menu.Item>
+      <Menu.Item key="logout" danger onClick={handleLogout}>
+        Logout
+      </Menu.Item>    
+    </Menu>
+  );
 
   return (
     <Header 
@@ -79,20 +88,18 @@ const AppHeader: React.FC = () => {
             style={{ 
               border: 'none',
               justifyContent: 'center',
-              marginLeft: '0px'
+              marginRight: '40px',
+              minWidth: '100px'
             }}
           >
             <Menu.Item key="home" icon={<HomeOutlined />}>
               <a href="/home">Home</a>
             </Menu.Item>
-            <Menu.Item key="dashboard" icon={<DashboardOutlined />}>
-              <a href="/dashboard">Dashboard</a>
-            </Menu.Item>
             <Menu.Item key="contact" icon={<ContactsOutlined />}>
               <a href="/contact-us">Contact Us</a>
             </Menu.Item>
-            <Menu.Item key="profile" icon={<UserOutlined />}>
-              <a href="/child-create">Profile</a>
+            <Menu.Item key="childs" icon={<UserOutlined />}>
+              <a href="/child-create">Your Childs</a>
             </Menu.Item>
             <Menu.Item key="about" icon={<InfoCircleOutlined />}>
               <a href="/about-us">About</a>
@@ -100,16 +107,10 @@ const AppHeader: React.FC = () => {
           </Menu>
         </Col>
 
-        <Col>
-          <Space>
-            <Button type="primary" onClick={() => navigate('/manage-profile')}>
-              Manage Profile
-            </Button>
-            <Button type="default" danger onClick={handleLogout}>
-              Logout
-            </Button>
-            <Avatar icon={<UserOutlined />} />
-          </Space>
+        <Col style={{ minWidth: '100px', marginLeft: '0px' }}> {/* Giảm margin để xích vào */}
+          <Dropdown overlay={menu} trigger={['click']}>
+            <Avatar icon={<UserOutlined />} style={{ cursor: 'pointer' }} />
+          </Dropdown>
         </Col>
       </Row>
     </Header>

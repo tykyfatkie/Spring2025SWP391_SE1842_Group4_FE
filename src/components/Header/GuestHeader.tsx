@@ -42,7 +42,7 @@ const GuestHeader: React.FC = () => {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        width: '98vw',
+        width: '100vw',
         maxWidth: '100%', // Đảm bảo không bị tràn
         minWidth: '320px',
       }}
