@@ -26,11 +26,13 @@ import {
   DollarOutlined, 
   HeartOutlined, 
   CommentOutlined,
-  PlusOutlined
+  PlusOutlined,
+  EditOutlined
 } from '@ant-design/icons';
 import GuestHeader from "../../components/Header/GuestHeader";
 import AppFooter from "../../components/Footer/Footer";
 import doctorImage from "../../assets/doctor.png";
+import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -120,7 +122,12 @@ const ParentProfilePage: React.FC = () => {
                   <Avatar size={64} icon={<UserOutlined />} />
                 </Col>
                 <Col>
-                  <Title level={3}>Nguyễn Văn Bình</Title>
+                  <Title level={3} style={{ display: 'flex', alignItems: 'center' }}>
+                    Nguyễn Văn Bình 
+                    <Link to="/manage-profile" style={{ marginLeft: '8px', fontSize: '16px', color: '#1890ff' }}>
+                      <EditOutlined />
+                    </Link>
+                  </Title>
                   <Tag color="gold"><CrownOutlined /> Premium Member</Tag>
                 </Col>
               </Row>
@@ -170,9 +177,10 @@ const ParentProfilePage: React.FC = () => {
                   <Button 
                     type="primary" 
                     icon={<PlusOutlined />}
-                    onClick={() => setIsModalVisible(true)}
                   >
-                    Thêm trẻ
+                    <Link to="/child-create" style={{ color: 'inherit' }}>
+                      Thêm trẻ
+                    </Link>
                   </Button>
                 </div>
               }
