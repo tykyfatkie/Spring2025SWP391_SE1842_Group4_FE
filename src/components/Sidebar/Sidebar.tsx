@@ -3,7 +3,6 @@ import { Layout, Menu } from 'antd';
 import { 
   UserOutlined, 
   LineChartOutlined,
-  DashboardOutlined, 
 } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 
@@ -37,10 +36,6 @@ const Sidebar: React.FC = () => {
       >
         <Menu.Item key="analytics" icon={<LineChartOutlined />}>
           <Link to="/child-analytics">Analytics</Link>
-        </Menu.Item>
-
-        <Menu.Item key="dashboard" icon={<DashboardOutlined />}>
-          <Link to="/dashboard">Dashboard</Link>
         </Menu.Item>
 
         <Menu.Item key="create-profile" icon={<UserOutlined />}>

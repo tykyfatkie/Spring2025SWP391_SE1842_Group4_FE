@@ -40,8 +40,8 @@ const AppHeader: React.FC = () => {
 
   const menu = (
     <Menu>
-      <Menu.Item key="manage-profile" onClick={() => navigate('/manage-profile')}>
-        Manage Profile
+      <Menu.Item key="manage-profile" onClick={() => navigate('/profile')}>
+        Profile
       </Menu.Item>
       <Menu.Item key="package" onClick={() => navigate('/package')}>
         Package
