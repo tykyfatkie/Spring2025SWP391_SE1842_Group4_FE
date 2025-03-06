@@ -1,87 +1,124 @@
-// path/to/DoctorPage.tsx
-import React from 'react';
-import { Layout, Typography, Row, Col, Card, Menu } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Layout, Typography, Row, Col, Card, Menu, Spin, Alert } from 'antd';
 import AppFooter from "../../components/Footer/Footer";
 import GuestHeader from "../../components/Header/GuestHeader";
-import doctorImage from "../../assets/doctor.png";
 import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title } = Typography;
 
-const players = [
-  { id: 1, name: "A", price: "86,000 đ", description: "A", rating: 4.9, reviews: 100, image: doctorImage },
-  { id: 2, name: "B", price: "60,000 đ", description: "B", rating: 4.9, reviews: 250, image: doctorImage },
-  { id: 3, name: "C", price: "79,000 đ", description: "C", rating: 5, reviews: 52, image: doctorImage },
-  { id: 4, name: "D", price: "89,000 đ", description: "D", rating: 5, reviews: 137, image: doctorImage },
-];
+interface Doctor {
+  id: string;
+  certificate: string;
+  licenseNumber: string;
+  biography: string;
+  metadata: string;
+  specialize: string;
+  profileImg: string;
+  status: number;
+  userId: string;
+}
 
 const DoctorPage: React.FC = () => {
-  return (
-    <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <GuestHeader />
-      <Content style={{ padding: '0 20px', maxWidth: '1200px', margin: '0 auto' }}>
-        <Row gutter={16}>
-          <Col span={18}>
-            <Title level={2} style={{ marginBottom: '20px', color: '#0b4778' }}>Doctor</Title>
-            <Row gutter={16}>
-              {players.map((player, index) => (
-                <Col span={6} key={index}>
-                  <Link to={`/doctor/${player.id}`}>
-                  <div className="card" style={{ perspective: '1000px' }}>
-                    <div className="wrapper" style={{ position: 'relative', overflow: 'visible' }}>
-                      <Card
-                        hoverable
-                        cover={<img alt={player.name} src={player.image} style={{ transition: 'transform 0.5s', position: 'relative', zIndex: 1 }} />}
-                        style={{ marginBottom: '20px', transition: 'transform 0.5s, box-shadow 0.5s' }}
-                        onMouseEnter={(e) => {
-                          const card = e.currentTarget;
-                          card.style.transform = 'translateY(30px) rotateX(10deg)';
-                          card.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.3)';
-                          const img = card.querySelector('img');
-                          if (img) img.style.transform = 'scale(1.1)';
-                        }}
-                        onMouseLeave={(e) => {
-                          const card = e.currentTarget;
-                          card.style.transform = 'none';
-                          card.style.boxShadow = 'none';
-                          const img = card.querySelector('img');
-                          if (img) img.style.transform = 'none';
-                        }}
-                      >
-                        <Card.Meta
-                          title={<div className="title">{player.name}</div>}
-                          description={
-                            <>
-                              <p>{player.price}</p>
-                              <p>{player.description}</p>
-                              <p>⭐ {player.rating} ({player.reviews} reviews)</p>
-                            </>
-                          }
-                        />
-                      </Card>
-                    </div>
-                  </div>
-                  </Link>
-                </Col>
-              ))}
-            </Row>
-          </Col>
-          <Col span={6} style={{ paddingLeft: '20px' }}>
-            <Card title="Danh mục" style={{ marginTop: '80px' }}>
-              <Menu>
-                <Menu.Item key="1"><a href="/chuyen-khoa">Bác sĩ chuyên khoa</a></Menu.Item>
-                <Menu.Item key="2"><a href="/tu-van">Tư vấn sức khỏe</a></Menu.Item>
-                <Menu.Item key="3"><a href="/khach-hang">Khách hàng</a></Menu.Item>
-                <Menu.Item key="4"><a href="/tin-tuc">Tin tức y tế</a></Menu.Item>
-              </Menu>
-            </Card>
-          </Col>
-        </Row>
-      </Content>
-      <AppFooter />
-    </Layout>
-  );
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await fetch('https://localhost:7217/api/v1/doctors/all');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data.data)) {
+          throw new Error("Invalid API response: Expected an array");
+        }
+
+        setDoctors(data.data);
+      } catch (error: any) {
+        console.error("Fetch Error:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+return (
+  <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
+    <GuestHeader />
+    <Content style={{ padding: '0 10px', maxWidth: '1300px', marginLeft: '100px', marginTop: '70px' }}>
+      <Row gutter={16} style={{ display: 'flex' }}>
+        {/* Cột chứa danh sách bác sĩ */}
+        <Col span={18} style={{ display: 'flex', flexDirection: 'column' }}>
+          <Title level={2} style={{ marginBottom: '10px', color: '#0b4778',  }}>Doctor</Title>
+          {loading && <Spin size="large" style={{ display: 'block', textAlign: 'center' }} />}
+          {error && (
+            <Alert
+              message="Lỗi khi lấy dữ liệu bác sĩ"
+              description={error}
+              type="error"
+              showIcon
+              style={{ marginBottom: '20px' }}
+            />
+          )}
+          <Row gutter={[16, 16]} style={{ flexWrap: 'wrap' }}>
+            {!loading && !error && doctors.map((doctor) => (
+              <Col span={8} key={doctor.id}>
+                <Link to={`/doctor/${doctor.id}`}>
+                  <Card
+                    hoverable
+                    cover={<img alt={doctor.biography} src={doctor.profileImg} style={{ transition: 'transform 0.5s' }} />}
+                    style={{ marginBottom: '20px', marginTop: '20px', transition: 'transform 0.5s, box-shadow 0.5s' }}
+                    onMouseEnter={(e) => {
+                      const card = e.currentTarget;
+                      card.style.transform = 'translateY(-10px)';
+                      card.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      const card = e.currentTarget;
+                      card.style.transform = 'none';
+                      card.style.boxShadow = 'none';
+                    }}
+                  >
+                    <Card.Meta
+                      title={<div className="title">{doctor.biography}</div>}
+                      description={
+                        <>
+                          <p>Chuyên môn: {doctor.specialize}</p>
+                          <p>Giấy phép: {doctor.licenseNumber}</p>
+                        </>
+                      }
+                    />
+                  </Card>
+                </Link>
+              </Col>
+            ))}
+          </Row>
+        </Col>
+
+        {/* Cột chứa danh mục */}
+        <Col span={6} style={{ paddingLeft: '20px' }}>
+          <Card title="Danh mục" style={{ position: 'sticky', top: '80px', marginLeft: '40px', paddingLeft: '10px', marginTop: '60px' }}>
+            <Menu>
+              <Menu.Item key="1"><Link to="/chuyen-khoa">Bác sĩ chuyên khoa</Link></Menu.Item>
+              <Menu.Item key="2"><Link to="/tu-van">Tư vấn sức khỏe</Link></Menu.Item>
+              <Menu.Item key="3"><Link to="/khach-hang">Khách hàng</Link></Menu.Item>
+              <Menu.Item key="4"><Link to="/tin-tuc">Tin tức y tế</Link></Menu.Item>
+            </Menu>
+          </Card>
+        </Col>
+      </Row>
+    </Content>
+    <AppFooter />
+  </Layout>
+);
+
 };
 
 export default DoctorPage;
