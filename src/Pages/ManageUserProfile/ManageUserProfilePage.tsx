@@ -12,7 +12,7 @@ import {
 import axiosInstance from '../../utils/axiosInstance';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import Sidebar from '../../components/Sidebar/Sidebar';
+
 
 const { Content } = Layout;
 const { Title } = Typography;
