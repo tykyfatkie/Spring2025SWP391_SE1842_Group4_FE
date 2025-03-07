@@ -25,8 +25,10 @@ const LoginPage: React.FC = () => {
       });
       
       if (response.status === 200) {
-        localStorage.setItem('token', response.data.token);
-        const user = response.data.user;
+        const { accessToken } = response.data.data; // Lấy accessToken từ phản hồi
+        localStorage.setItem('token', accessToken); // Lưu accessToken vào localStorage
+
+        const user = response.data.user; // Nếu bạn cũng muốn lưu thông tin người dùng
         localStorage.setItem('user', JSON.stringify(user));
 
         message.success("Login successful!");
