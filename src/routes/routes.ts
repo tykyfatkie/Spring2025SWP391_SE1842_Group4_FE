@@ -30,40 +30,48 @@ const routes: LayoutRoute[] = [
         path: '/',
         component: GuestHomePage,
         exact: true,
+        role: ['Guest'],
       },
       {
         path: '/home',
         component: Homepage,
         exact: true,
-        role: ['User', 'Doctor', 'Staff', 'Admin'],
+        role: ['User'],
       },
       {
         path: '/login',
         component: LoginPage,
+        role: ['Guest'],
       },
       {
         path: '/register',
         component: RegisterPage,
+        role: ['Guest'],
       },
       {
         path: '/forgot-password',
         component: ForgotPasswordPage,
+        role: ['User', 'Guest'],
       },
       {
         path: '/about-us',
         component: AboutPage,
+        role: ['User', 'Guest'],
       },
       {
         path: '/contact-us',
         component: ContactPage,
+        role: ['Guest', 'User'],
       },
       {
         path: '/package',
         component: PackagePage,
+        role: ['Guest', 'User'],
       },
       {
         path: '/guestbmi',
         component: GuestBMICalculator,
+        role: ['Guest', 'User'],
       },
       {
         path: '/dashboard',
@@ -83,12 +91,12 @@ const routes: LayoutRoute[] = [
       {
         path: '/doctor',
         component: DoctorPage,
-        role: ['User', 'Doctor', 'Admin'],
+        role: ['User', 'Doctor'],
       },
       {
         path: '/doctor/:id',
         component: DoctorProfilePage,
-        role: ['User', 'Doctor', 'Admin'],
+        role: ['User', 'Doctor'],
       },
       {
         path: '/profile',
@@ -103,7 +111,7 @@ const routes: LayoutRoute[] = [
       {
         path: '/manage-profile',
         component: ManageUserProfile,
-        role: ['User', 'Doctor', 'Staff', 'Admin'],
+        role: ['User'],
       },
     ],
   },
