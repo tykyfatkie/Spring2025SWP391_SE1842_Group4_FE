@@ -70,8 +70,8 @@ const users = [
   },
 ];
 
-const UsersPage = () => {
+const DoctorsPage = () => {
   return <Table columns={columns} dataSource={users} rowKey="key" />;
 };
 
-export default UsersPage;
+export default DoctorsPage;

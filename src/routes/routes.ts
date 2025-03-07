@@ -16,11 +16,12 @@ import DoctorPage from '../Pages/Doctor/DoctorPage'
 import DoctorProfilePage from '../Pages/Doctor/DoctorProfilePage'
 import ParentProfilePage from '../Pages/Parent/ParentProfilePage'
 import DefaultLayout from '../layouts/DefaultLayout'
-import Dashboard from '../Pages/Dashboard/DashboardPage'
+import AdminPage from '../Pages/Dashboard/AdminPage'
 import Settings from '../Pages/Dashboard/Settings'
 import Users from '../Pages/Dashboard/Users'
 import EditChildPage from '../Pages/EditChild/EditChildPage'
 import ManageUserProfile from '../Pages/ManageUserProfile/ManageUserProfilePage'
+import DoctorPage from '../Pages/Doctor/DoctorPage'
 
 const routes: LayoutRoute[] = [
   {
@@ -51,7 +52,7 @@ const routes: LayoutRoute[] = [
       {
         path: '/forgot-password',
         component: ForgotPasswordPage,
-        role: ['User', 'Guest'],
+        role: ['Guest'],
       },
       {
         path: '/about-us',
@@ -112,24 +113,29 @@ const routes: LayoutRoute[] = [
         path: '/manage-profile',
         component: ManageUserProfile,
         role: ['User'],
-      },
+      },    
     ],
   },
   {
     layout: DefaultLayout,
     data: [
       {
-        path: '/dashboards',
-        component: Dashboard,
+        path: '/my-admin',
+        component: AdminPage,
         role: ['Admin'],
       },
       {
-        path: '/users',
+        path: '/my-admin/users',
         component: Users,
-        role: ['Admin', 'Staff'],
+        role: ['Admin'],
       },
       {
-        path: '/settings',
+        path: '/my-admin/doctors',
+        component: DoctorPage,
+        role: ['Admin'],
+      },
+      {
+        path: '/my-admin/settings',
         component: Settings,
         role: ['Admin'],
       },

@@ -25,7 +25,7 @@ const users = [
   { id: 3, name: "Lê Văn C", email: "c@example.com" },
 ];
 
-const   DashboardPage: React.FC = () => {
+const   AdminPage: React.FC = () => {
   return (
     <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
       <Title level={3}>Dashboard</Title>
@@ -59,4 +59,4 @@ const   DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage;
+export default AdminPage;

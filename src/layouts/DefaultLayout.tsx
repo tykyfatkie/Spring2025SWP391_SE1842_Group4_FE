@@ -40,13 +40,13 @@ const DefaultLayout: React.FC = () => {
             selectedKeys={[location.pathname]}
             onClick={(e) => navigate(e.key)}
           >
-            <Menu.Item key="/dashboard" icon={<DashboardOutlined />}>
-              Dashboard
-            </Menu.Item>
-            <Menu.Item key="/users" icon={<UserOutlined />}>
+            <Menu.Item key="/my-admin/users" icon={<UserOutlined />}>
               Users
             </Menu.Item>
-            <Menu.Item key="/settings" icon={<SettingOutlined />}>
+            <Menu.Item key="/my-admin/doctor" icon={<UserOutlined />}>
+              Doctor
+            </Menu.Item>
+            <Menu.Item key="/my-admin/settings" icon={<SettingOutlined />}>
               Settings
             </Menu.Item>
           </Menu>
