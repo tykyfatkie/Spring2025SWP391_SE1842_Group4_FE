@@ -1,9 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { jwtDecode } from 'jwt-decode';
-import Cookies from 'js-cookie';
-import { UserData, AuthState } from '../../types/auth';
-// import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query';
-
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
+import { UserData, AuthState } from "../../types/auth";
 
 // Type for decoded token (customize it based on your token structure)
 interface DecodedToken {
@@ -14,10 +12,19 @@ interface DecodedToken {
   avatar?: string; // Optional
 }
 
-// Get userData from cookies
-const userData: UserData | null = Cookies.get('userData')
-  ? JSON.parse(Cookies.get('userData') as string)
-  : null;
+// Function to safely get and parse cookies
+const getUserDataFromCookies = (): UserData | null => {
+  try {
+    const cookieData = Cookies.get("userData");
+    return cookieData ? JSON.parse(cookieData) : null;
+  } catch (error) {
+    console.error("Error parsing userData from cookies:", error);
+    return null;
+  }
+};
+
+// Get userData from cookies safely
+const userData: UserData | null = getUserDataFromCookies();
 
 const initialState: AuthState = {
   userData,
@@ -27,7 +34,7 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-  name: 'authSlice',
+  name: "authSlice",
   initialState,
   reducers: {
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -36,24 +43,28 @@ const authSlice = createSlice({
     login: (state, action: PayloadAction<{ accessToken: string }>) => {
       const { accessToken } = action.payload;
 
-      // Decode the JWT token
-      const decodedToken: DecodedToken = jwtDecode(accessToken);
+      try {
+        // Decode the JWT token safely
+        const decodedToken: DecodedToken = jwtDecode(accessToken);
 
-      // Populate the state with decoded token data
-      state.userData = {
-        email: decodedToken.sub,
-        id: decodedToken.id,
-        role: decodedToken.role,
-        name: decodedToken.name || '', // Optional fallback
-        avatar: decodedToken.avatar || '', // Optional fallback
-      };
+        // Populate the state with decoded token data
+        state.userData = {
+          email: decodedToken.sub,
+          id: decodedToken.id,
+          role: decodedToken.role,
+          name: decodedToken.name || "", // Optional fallback
+          avatar: decodedToken.avatar || "", // Optional fallback
+        };
 
-      // Store access token in the state (refresh token can be added here if needed)
-      state.userToken = { token: accessToken, refreshToken: '' }; // Store only the access token for now
-      state.isAuthenticated = true;
+        // Store access token in the state (refresh token can be added here if needed)
+        state.userToken = { token: accessToken, refreshToken: "" }; // Store only the access token for now
+        state.isAuthenticated = true;
 
-      // Store user data in cookies with a 7-day expiration
-      Cookies.set('userData', JSON.stringify(state.userData), { expires: 7 });
+        // Store user data in cookies with a 7-day expiration (Avoid storing tokens!)
+        Cookies.set("userData", JSON.stringify(state.userData), { expires: 7 });
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
     },
     logout: (state) => {
       state.userData = null;
@@ -61,18 +72,20 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
 
       // Remove user data from cookies
-      Cookies.remove('userData');
+      Cookies.remove("userData");
+
+      // Optionally clear all auth-related cookies
+      Cookies.remove("accessToken"); 
+      Cookies.remove("refreshToken");
     },
     refreshToken: (state, action: PayloadAction<string>) => {
       // Assuming the new refresh token is provided
-      state.userToken = {
-        token: state.userToken?.token || '', // Retain the current token
-        refreshToken: action.payload, // Store the new refresh token
-      };
+      if (state.userToken) {
+        state.userToken.refreshToken = action.payload;
+      }
     },
   },
 });
-
 
 export const { login, logout, refreshToken, setLoading } = authSlice.actions;
 export default authSlice.reducer;

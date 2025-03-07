@@ -22,11 +22,6 @@ import Users from '../Pages/Dashboard/Users'
 import EditChildPage from '../Pages/EditChild/EditChildPage'
 import ManageUserProfile from '../Pages/ManageUserProfile/ManageUserProfilePage'
 
-// const token = localStorage.getItem('childgrowthtrackingsystem');
-// const { account } = useAppSelector((state) => state.auth);
-// const isAdmin = account && account.user && account.user.role.includes('Admin');
-// const isStoreOwner = account && account.user && account.user.role.includes('User');
-// const isCustomer = account && account.user && account.user.role.includes('Guest');
 const routes: LayoutRoute[] = [
   {
     layout: MainLayout,

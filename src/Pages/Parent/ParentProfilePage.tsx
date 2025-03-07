@@ -136,7 +136,7 @@ const ParentProfilePage: React.FC = () => {
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       } finally {
-        setLoading(false); // Ngừng loading trong mọi trường hợp
+        setLoading(false);
       }
     };
 
