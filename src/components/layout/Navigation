@@ -1,31 +1,31 @@
-import MainLayout from "../components/layout/MainLayout";
-import LoginPage from "../Pages/Login/LoginPage";
-import RegisterPage from "../Pages/Register/RegisterPage";
-import Homepage from "../Pages/Home/HomePage";
-import GuestHomePage from "../Pages/Home/GuestHomePage";
-import { LayoutRoute } from "../types/routes";
-import AboutPage from "../Pages/About/AboutPage";
-import ContactPage from "../Pages/Contact/ContactPage";
-import PackagePage from "../Pages/PremiumSubscription/PremiumSubscriptionPage";
-import GuestBMICalculator from "../Pages/BMI cal/GuestBMICalculator";
-import ForgotPasswordPage from "../Pages/ForgotPassword/ForgotPasswordPage";
-import UpdateChildPage from "../Pages/UpdateChild/UpdateChildPage";
-import CreateChild from "../Pages/CreateChild/CreateChild";
-import AnalyticsPage from "../Pages/Analytics/AnalyticsPage";
-import DoctorPage from "../Pages/Doctor/DoctorPage";
-import DoctorProfilePage from "../Pages/Doctor/DoctorProfilePage";
-import ParentProfilePage from "../Pages/Parent/ParentProfilePage";
-import DefaultLayout from "../layouts/DefaultLayout";
-import AdminPage from "../Pages/Dashboard/AdminPage";
-import Settings from "../Pages/Dashboard/Settings";
-import Users from "../Pages/Dashboard/Users";
-import EditChildPage from "../Pages/EditChild/EditChildPage";
-import ManageUserProfile from "../Pages/ManageUserProfile/ManageUserProfilePage";
-import ProtectedRoute from "../utils/ProtectedRoute";  
+import MainLayout from "../../components/layout/MainLayout";
+import LoginPage from "../../Pages/Login/LoginPage";
+import RegisterPage from "../../Pages/Register/RegisterPage";
+import Homepage from "../../Pages/Home/HomePage";
+import GuestHomePage from "../../Pages/Home/GuestHomePage";
+import AboutPage from "../../Pages/About/AboutPage";
+import ContactPage from "../../Pages/Contact/ContactPage";
+import PackagePage from "../../Pages/PremiumSubscription/PremiumSubscriptionPage";
+import GuestBMICalculator from "../../Pages/BMI cal/GuestBMICalculator";
+import ForgotPasswordPage from "../../Pages/ForgotPassword/ForgotPasswordPage";
+import UpdateChildPage from "../../Pages/UpdateChild/UpdateChildPage";
+import CreateChild from "../../Pages/CreateChild/CreateChild";
+import AnalyticsPage from "../../Pages/Analytics/AnalyticsPage";
+import DoctorPage from "../../Pages/Doctor/DoctorPage";
+import DoctorProfilePage from "../../Pages/Doctor/DoctorProfilePage";
+import ParentProfilePage from "../../Pages/Parent/ParentProfilePage";
+import DefaultLayout from "../../layouts/DefaultLayout";
+import AdminPage from "../../Pages/Dashboard/AdminPage";
+import Settings from "../../Pages/Dashboard/Settings";
+import Users from "../../Pages/Dashboard/Users";
+import EditChildPage from "../../Pages/EditChild/EditChildPage";
+import ManageUserProfile from "../../Pages/ManageUserProfile/ManageUserProfilePage";
+import ProtectedRoute from "../../utils/ProtectedRoute";
+import { LayoutRoute } from "../../types/routes";
 
-
-const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
-  return (props: any) => <ProtectedRoute Component={Component} role={allowedRoles} {...props} />;
+// ✅ Helper function for protected components
+const ProtectedComponent = (Component, allowedRoles) => {
+  return (props) => <ProtectedRoute {...props} component={Component} role={allowedRoles} />;
 };
 
 const routes: LayoutRoute[] = [

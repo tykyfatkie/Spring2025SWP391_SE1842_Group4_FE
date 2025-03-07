@@ -17,35 +17,32 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); // Bắt đầu loading
+    setLoading(true);
+
     try {
-      const response = await axios.post("https://localhost:7217/api/v1/auth/login", {
-        email,
-        password,
-      });
-      
-      if (response.status === 200) {
-        const { accessToken } = response.data.data; // Lấy accessToken từ phản hồi
-        localStorage.setItem('token', accessToken); // Lưu accessToken vào localStorage
+        const response = await axios.post("https://localhost:7217/api/v1/auth/login", {
+            email,
+            password,
+        });
 
-        const user = response.data.user; // Nếu bạn cũng muốn lưu thông tin người dùng
-        localStorage.setItem('user', JSON.stringify(user));
+        if (response.status === 200) {
+            const { accessToken, user } = response.data.data;
+            localStorage.setItem('token', accessToken);
+            localStorage.setItem('role', user.roleName); 
 
-        message.success("Login successful!");
-        setTimeout(() => {
-          navigate("/home");
-        }, 1500);
-      }
-    } catch (error: any) {
-      if (error.response) {
-        message.error(error.response.data.message || "Login failed. Please try again.");
-      } else {
-        message.error("Network error. Please check your connection and try again.");
-      }
+            message.success("Login successful!");
+            setTimeout(() => {
+                navigate("/home");
+            }, 1500);
+        }
+    // } catch (error) {
+    //     message.error(error.response?.data?.message || "Login failed. Please try again.");
     } finally {
-      setLoading(false); // Kết thúc loading
+        setLoading(false);
     }
-  };
+};
+;
+
 
   return (
     <div className="login" style={{ backgroundColor: "#ffffff" }}>
