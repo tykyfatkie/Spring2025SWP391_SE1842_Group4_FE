@@ -159,16 +159,7 @@ const BMICalculator: React.FC = () => {
           </div>
         )}
 
-        {/* Thêm div màu xám bên ngoài */}
-        <div style={{ backgroundColor: '#d9d9d9', color: 'black', padding: '20px', marginTop: '30px',  width: '100%', textAlign: 'left' }}>
-          <Title level={4}>Miễn trừ trách nhiệm</Title>
-          <Paragraph>
-            Lưu ý, kết quả từ công cụ tính BMI online chỉ mang tính tham khảo, không thể thay thế các phương pháp chẩn đoán chuyên sâu tại cơ sở y tế. Nếu có nhu cầu chẩn đoán chính xác tình trạng cơ thể và sức khỏe, bạn có thể đến các cơ sở y tế có chuyên môn như Hệ thống Bệnh viện Đa khoa trong nước.
-          </Paragraph>
-          <Paragraph>
-            Kết quả tính BMI trên website giúp đánh giá tình trạng thừa cân, béo phì theo tiêu chuẩn của WHO áp dụng cho người Châu Á từ 18 tuổi trở lên, được Bộ Y tế công bố. <a href="https://thuvienphapluat.vn/van-ban/The-thao-Y-te/Quyet-dinh-2892-QD-BYT-2022-tai-lieu-Huong-dan-chan-doan-va-dieu-tri-benh-beo-phi-533849.aspx" target="_blank" rel="noopener noreferrer">(1)</a>
-          </Paragraph>
-        </div>
+        
       </Content>
 
       <AppFooter />

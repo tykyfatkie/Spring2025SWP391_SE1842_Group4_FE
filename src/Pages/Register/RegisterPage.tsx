@@ -177,7 +177,7 @@ const RegisterPage: React.FC = () => {
       </div>
 
       <div className="login__background">
-        <img src="src/assets/img/bg-img.jpg" alt="Background" className="login__bg" style={{ display: "block" }} />
+        <img src="src/assets/img/child1.jpg" alt="Background" className="login__bg" style={{ display: "block" }} />
       </div>
     </div>
   );

@@ -7,10 +7,7 @@ import {
   Card, 
   Avatar, 
   Button, 
-  Table, 
   Tag, 
-  Timeline, 
-  Statistic, 
   Progress, 
   Rate,
   Modal,
@@ -18,14 +15,12 @@ import {
   Input,
   DatePicker,
   Select,
-  InputNumber
+  InputNumber,
+  message
 } from 'antd';
 import { 
   UserOutlined, 
   CrownOutlined, 
-  DollarOutlined, 
-  HeartOutlined, 
-  CommentOutlined,
   PlusOutlined,
   EditOutlined
 } from '@ant-design/icons';
@@ -33,19 +28,18 @@ import GuestHeader from "../../components/Header/GuestHeader";
 import AppFooter from "../../components/Footer/Footer";
 import doctorImage from "../../assets/doctor.png";
 import { Link } from 'react-router-dom';
-import { message } from 'antd';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-// Dữ liệu cứng cho trẻ em
+// Static data for children
 const childrenData = [
   {
     id: 1,
     name: "Nguyễn Văn An",
     age: 5,
-    gender: "Nam",
+    gender: "Male",
     weight: 20,
     height: 110,
     bmi: 16.5,
@@ -53,37 +47,12 @@ const childrenData = [
   }
 ];
 
-
-// Dữ liệu cứng cho bác sĩ gợi ý
-const recommendedDoctors = [
-  {
-    id: 1,
-    name: "Bs. Nguyễn Văn A",
-    specialty: "Nhi khoa",
-    rating: 4.9,
-    image: doctorImage
-  },
-  {
-    id: 2,
-    name: "Bs. Trần Thị B",
-    specialty: "Dinh dưỡng",
-    rating: 4.8,
-    image: doctorImage
-  },
-  {
-    id: 3,
-    name: "Bs. Lê Văn C",
-    specialty: "Nhi khoa",
-    rating: 4.7,
-    image: doctorImage
-  }
-];
-
 const ParentProfilePage: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [userData, setUserData] = useState<any>(null);
-  const [loading, setLoading] = useState(true); // Thêm trạng thái loading
+  const [loading, setLoading] = useState(true);
+  const [doctors, setDoctors] = useState<any[]>([]); // State to hold the list of doctors
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -92,7 +61,7 @@ const ParentProfilePage: React.FC = () => {
 
         if (!token || token.split('.').length !== 3) {
           message.error("Invalid token. Please log in again.");
-          setLoading(false); // Ngừng loading
+          setLoading(false);
           return;
         }
 
@@ -115,7 +84,7 @@ const ParentProfilePage: React.FC = () => {
 
         const data = await response.json();
         console.log('User data:', data);
-        setUserData(data);
+        setUserData(data.data); // Lưu dữ liệu người dùng từ trường data
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       } finally {
@@ -123,7 +92,25 @@ const ParentProfilePage: React.FC = () => {
       }
     };
 
+    const fetchDoctors = async () => {
+      try {
+        const response = await fetch('https://localhost:7217/api/v1/doctors/all');
+        if (!response.ok) {
+          throw new Error('Failed to fetch doctors');
+        }
+        const data = await response.json();
+        if (!Array.isArray(data.data)) {
+          throw new Error('Invalid API response: Expected an array');
+        }
+        setDoctors(data.data); // Save the doctor list into state
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        message.error('Failed to load doctors');
+      }
+    };
+
     fetchUserData();
+    fetchDoctors(); // Call the fetchDoctors function
   }, []);
 
   const handleAddChild = (values: any) => {
@@ -141,7 +128,7 @@ const ParentProfilePage: React.FC = () => {
         margin: '0 auto',
         marginBottom: '50px'
       }}>
-        {loading ? ( // Kiểm tra trạng thái loading
+        {loading ? (
           <div>Loading...</div>
         ) : (
           <Row gutter={[24, 24]}>
@@ -163,51 +150,18 @@ const ParentProfilePage: React.FC = () => {
                 </Row>
               </Card>
 
-              <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-                <Col span={8}>
-                  <Card>
-                    <Statistic
-                      title="Số dư tài khoản"
-                      value={userData ? userData.balance : 0}
-                      prefix={<DollarOutlined />}
-                      suffix="VNĐ"
-                    />
-                    <Button type="primary" style={{ marginTop: '16px' }}>
-                      Nạp tiền
-                    </Button>
-                  </Card>
-                </Col>
-                <Col span={8}>
-                  <Card>
-                    <Statistic
-                      title="Bác sĩ đang theo dõi"
-                      value={5} // Có thể cập nhật từ API nếu cần
-                      prefix={<HeartOutlined />}
-                    />
-                  </Card>
-                </Col>
-                <Col span={8}>
-                  <Card>
-                    <Statistic
-                      title="Lượt bình luận"
-                      value={12} // Có thể cập nhật từ API nếu cần
-                      prefix={<CommentOutlined />}
-                    />
-                  </Card>
-                </Col>
-              </Row>
-
+              {/* Child Information */}
               <Card 
                 style={{ marginTop: '24px' }}
                 title={
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Title level={4} style={{ margin: 0 }}>Thông tin trẻ</Title>
+                    <Title level={4} style={{ margin: 0 }}>Child Information</Title>
                     <Button 
                       type="primary" 
                       icon={<PlusOutlined />}
                       onClick={() => setIsModalVisible(true)}
                     >
-                      Thêm trẻ
+                      Add Child
                     </Button>
                   </div>
                 }
@@ -217,19 +171,19 @@ const ParentProfilePage: React.FC = () => {
                     <Row gutter={[16, 16]}>
                       <Col span={12}>
                         <Title level={5}>{child.name}</Title>
-                        <p>Tuổi: {child.age}</p>
-                        <p>Giới tính: {child.gender}</p>
-                        <p>Lần khám gần nhất: {child.lastCheckup}</p>
+                        <p>Age: {child.age}</p>
+                        <p>Gender: {child.gender}</p>
+                        <p>Last Checkup: {child.lastCheckup}</p>
                       </Col>
                       <Col span={12}>
-                        <Title level={5}>Chỉ số BMI</Title>
+                        <Title level={5}>BMI</Title>
                         <Progress
                           percent={75}
                           status="active"
                           format={() => `${child.bmi} kg/m²`}
                         />
-                        <p>Chiều cao: {child.height} cm</p>
-                        <p>Cân nặng: {child.weight} kg</p>
+                        <p>Height: {child.height} cm</p>
+                        <p>Weight: {child.weight} kg</p>
                       </Col>
                     </Row>
                   </Card>
@@ -237,7 +191,7 @@ const ParentProfilePage: React.FC = () => {
               </Card>
 
               <Modal
-                title="Thêm thông tin trẻ"
+                title="Add Child Information"
                 open={isModalVisible}
                 onCancel={() => {
                   setIsModalVisible(false);
@@ -248,10 +202,10 @@ const ParentProfilePage: React.FC = () => {
                     setIsModalVisible(false);
                     form.resetFields();
                   }}>
-                    Hủy
+                    Cancel
                   </Button>,
                   <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    Thêm
+                    Add
                   </Button>
                 ]}
               >
@@ -262,28 +216,28 @@ const ParentProfilePage: React.FC = () => {
                 >
                   <Form.Item
                     name="name"
-                    label="Họ và tên"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên trẻ' }]}
+                    label="Full Name"
+                    rules={[{ required: true, message: 'Please enter the child\'s name' }]}
                   >
-                    <Input placeholder="Nhập họ và tên trẻ" />
+                    <Input placeholder="Enter child's name" />
                   </Form.Item>
 
                   <Form.Item
                     name="birthDate"
-                    label="Ngày sinh"
-                    rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+                    label="Date of Birth"
+                    rules={[{ required: true, message: 'Please select a date of birth' }]}
                   >
-                    <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày sinh" />
+                    <DatePicker style={{ width: '100%' }} placeholder="Select date of birth" />
                   </Form.Item>
 
                   <Form.Item
                     name="gender"
-                    label="Giới tính"
-                    rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
+                    label="Gender"
+                    rules={[{ required: true, message: 'Please select a gender' }]}
                   >
-                    <Select placeholder="Chọn giới tính">
-                      <Option value="male">Nam</Option>
-                      <Option value="female">Nữ</Option>
+                    <Select placeholder="Select gender">
+                      <Option value="male">Male</Option>
+                      <Option value="female">Female</Option>
                     </Select>
                   </Form.Item>
 
@@ -291,33 +245,29 @@ const ParentProfilePage: React.FC = () => {
                     <Col span={12}>
                       <Form.Item
                         name="height"
-                        label="Chiều cao (cm)"
-                        rules={[{ required: true, message: 'Vui lòng nhập chiều cao' }]}
+                        label="Height (cm)"
+                        rules={[{ required: true, message: 'Please enter height' }]}
                       >
-                        <InputNumber min={1} style={{ width: '100%' }} placeholder="Nhập chiều cao" />
+                        <InputNumber min={1} style={{ width: '100%' }} placeholder="Enter height" />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
                       <Form.Item
                         name="weight"
-                        label="Cân nặng (kg)"
-                        rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]}
+                        label="Weight (kg)"
+                        rules={[{ required: true, message: 'Please enter weight' }]}
                       >
-                        <InputNumber min={1} style={{ width: '100%' }} placeholder="Nhập cân nặng" />
+                        <InputNumber min={1} style={{ width: '100%' }} placeholder="Enter weight" />
                       </Form.Item>
                     </Col>
                   </Row>
                 </Form>
               </Modal>
-           
             </Col>
 
             <Col span={8}>
-              <Card 
-                title="Bác sĩ gợi ý" 
-                bodyStyle={{ padding: '0' }}
-              >
-                {recommendedDoctors.map(doctor => (
+              <Card title="Recommended Doctors" bodyStyle={{ padding: '0' }}>
+                {doctors.map(doctor => (
                   <div key={doctor.id} style={{ 
                     padding: '16px',
                     borderBottom: '1px solid #f0f0f0',
@@ -330,20 +280,20 @@ const ParentProfilePage: React.FC = () => {
                       alignItems: 'center', 
                       gap: '16px'
                     }}>
-                      <Avatar src={doctor.image} size={48} />
+                      <Avatar src={doctor.profileImg || doctorImage} size={48} />
                       <div style={{ flex: 1 }}>
                         <Text strong style={{ 
                           display: 'block',
                           fontSize: '16px'
                         }}>
-                          {doctor.name}
+                          {doctor.biography}
                         </Text>
                         <Text type="secondary" style={{ 
                           fontSize: '14px',
                           marginTop: '4px',
                           display: 'block'
                         }}>
-                          {doctor.specialty}
+                          {doctor.specialize}
                         </Text>
                       </div>
                     </div>
@@ -355,22 +305,22 @@ const ParentProfilePage: React.FC = () => {
                     }}>
                       <Rate 
                         disabled 
-                        defaultValue={doctor.rating} 
+                        defaultValue={4.5} // Static value, or you can use actual value from API
                         style={{ fontSize: '16px' }} 
                       />
                       <Button type="primary" size="middle">
-                        Theo dõi
+                        Follow
                       </Button>
                     </div>
                   </div>
                 ))}
               </Card>
 
-              <Card title="Thông tin gói thành viên" style={{ marginTop: '24px' }}>
-                <p><CrownOutlined /> Gói Premium</p>
-                <p>Ngày hết hạn: 15/04/2024</p>
+              <Card title="Membership Information" style={{ marginTop: '24px' }}>
+                <p><CrownOutlined /> Premium Package</p>
+                <p>Expiration Date: 15/04/2024</p>
                 <Button type="primary" block style={{ marginTop: '16px' }}>
-                  Gia hạn gói
+                  Renew Package
                 </Button>
               </Card>
             </Col>
