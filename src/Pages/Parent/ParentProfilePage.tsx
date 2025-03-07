@@ -53,23 +53,6 @@ const childrenData = [
   }
 ];
 
-// Dữ liệu cứng cho lịch sử giao dịch
-const transactionHistory = [
-  {
-    id: 1,
-    date: "2024-03-15",
-    type: "Nạp tiền",
-    amount: 1000000,
-    status: "Thành công"
-  },
-  {
-    id: 2,
-    date: "2024-03-10",
-    type: "Thanh toán gói Premium",
-    amount: -500000,
-    status: "Thành công"
-  }
-];
 
 // Dữ liệu cứng cho bác sĩ gợi ý
 const recommendedDoctors = [
@@ -326,43 +309,7 @@ const ParentProfilePage: React.FC = () => {
                   </Row>
                 </Form>
               </Modal>
-
-              <Card style={{ marginTop: '24px' }}>
-                <Title level={4}>Lịch sử giao dịch</Title>
-                <Table
-                  dataSource={transactionHistory}
-                  columns={[
-                    { title: 'Ngày', dataIndex: 'date' },
-                    { title: 'Loại giao dịch', dataIndex: 'type' },
-                    { 
-                      title: 'Số tiền', 
-                      dataIndex: 'amount',
-                      render: (amount) => (
-                        <Text type={amount > 0 ? 'success' : 'danger'}>
-                          {amount.toLocaleString()} VNĐ
-                        </Text>
-                      )
-                    },
-                    { 
-                      title: 'Trạng thái', 
-                      dataIndex: 'status',
-                      render: (status) => (
-                        <Tag color="green">{status}</Tag>
-                      )
-                    },
-                  ]}
-                  pagination={false}
-                />
-              </Card>
-
-              <Card style={{ marginTop: '24px' }}>
-                <Title level={4}>Lịch sử bình luận</Title>
-                <Timeline>
-                  <Timeline.Item>Bình luận về Bs. Nguyễn Văn A - 2 ngày trước</Timeline.Item>
-                  <Timeline.Item>Đánh giá dịch vụ khám - 1 tuần trước</Timeline.Item>
-                  <Timeline.Item>Hỏi đáp về dinh dưỡng - 2 tuần trước</Timeline.Item>
-                </Timeline>
-              </Card>
+           
             </Col>
 
             <Col span={8}>

@@ -35,6 +35,7 @@ const routes: LayoutRoute[] = [
         path: '/home',
         component: Homepage,
         exact: true,
+        role: ['User', 'Doctor', 'Staff', 'Admin'],
       },
       {
         path: '/login',
@@ -67,51 +68,65 @@ const routes: LayoutRoute[] = [
       {
         path: '/dashboard',
         component: UpdateChildPage,
+        role: ['Admin', 'Staff'],
       },
       {
         path: '/child-create',
         component: CreateChild,
+        role: ['User'],
       },
       {
         path: '/child-analytics',
         component: AnalyticsPage,
+        role: ['User', 'Doctor'],
       },
       {
         path: '/doctor',
         component: DoctorPage,
+        role: ['User', 'Doctor', 'Admin'],
       },
       {
         path: '/doctor/:id',
         component: DoctorProfilePage,
+        role: ['User', 'Doctor', 'Admin'],
       },
       {
         path: '/profile',
         component: ParentProfilePage,
-      }, 
+        role: ['User'],
+      },
       {
         path: '/child-edit',
         component: EditChildPage,
-      }, 
+        role: ['User'],
+      },
       {
         path: '/manage-profile',
-        component: ManageUserProfile,       
-      }, 
+        component: ManageUserProfile,
+        role: ['User', 'Doctor', 'Staff', 'Admin'],
+      },
     ],
-    
   },
-
   {
     layout: DefaultLayout,
     data: [
-      { path: "/dashboards", component: Dashboard},
-      { path: "/users", component: Users},
-      { path: "/settings", component: Settings},
+      {
+        path: '/dashboards',
+        component: Dashboard,
+        role: ['Admin'],
+      },
+      {
+        path: '/users',
+        component: Users,
+        role: ['Admin', 'Staff'],
+      },
+      {
+        path: '/settings',
+        component: Settings,
+        role: ['Admin'],
+      },
     ],
   },
 ]
 
 export default routes
-function useAppSelector(arg0: (state: any) => any): { account: any } {
-  throw new Error('Function not implemented.')
-}
-
