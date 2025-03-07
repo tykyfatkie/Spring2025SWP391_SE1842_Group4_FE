@@ -25,7 +25,8 @@ import ProtectedRoute from "../utils/ProtectedRoute";
 
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
-  return (props: any) => <ProtectedRoute Component={Component} role={allowedRoles} {...props} />;
+  return (props: any) => 
+      React.createElement(ProtectedRoute, { Component, role: allowedRoles, ...props });
 };
 
 const routes: LayoutRoute[] = [
