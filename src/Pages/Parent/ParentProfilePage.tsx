@@ -24,7 +24,6 @@ import {
   PlusOutlined,
   EditOutlined
 } from '@ant-design/icons';
-import GuestHeader from "../../components/Header/GuestHeader";
 import AppFooter from "../../components/Footer/Footer";
 import doctorImage from "../../assets/doctor.png";
 import { Link } from 'react-router-dom';
@@ -121,7 +120,6 @@ const ParentProfilePage: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <GuestHeader />
       <Content style={{ 
         padding: '24px', 
         maxWidth: '1000px',

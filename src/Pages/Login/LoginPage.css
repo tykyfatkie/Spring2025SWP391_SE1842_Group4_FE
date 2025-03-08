@@ -396,3 +396,31 @@ img {
     -webkit-mask-position: center;
   }
   
+  .login {
+    position: relative; /* Để có thể sử dụng absolute cho các phần tử con */
+}
+
+.login__return-button {
+    position: absolute; /* Định vị tuyệt đối */
+    top: 20px; /* Khoảng cách từ trên */
+    left: 20px; /* Khoảng cách từ trái */
+    background-color: transparent; /* Nền trong suốt */
+    border: none; /* Không viền */
+    cursor: pointer; /* Con trỏ khi rê chuột */
+    font-size: 16px; /* Kích thước chữ */
+    color: #007bff; /* Màu chữ */
+    font-weight: bold; /* Chữ đậm */
+    transition: color 0.3s, transform 0.3s; /* Hiệu ứng chuyển tiếp */
+}
+
+.login__return-button:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    color: #0056b3; /* Màu chữ khi hover */
+    transform: scale(1.05); /* Phóng to nhẹ khi hover */
+}
+
+/* Thêm một chút không gian cho nút */
+.login__return-button:focus {
+    outline: none; /* Xóa viền khi nút được chọn */
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Hiệu ứng bóng khi chọn */
+}

@@ -48,6 +48,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="login" style={{ backgroundColor: "#ffffff" }}>
+      <button onClick={() => navigate("/")} className="login__return-button">{"< Return"}</button>
       <div className="login__access">
         <h1 className="login__title">Log in to your account.</h1>
         <div className="login__area">

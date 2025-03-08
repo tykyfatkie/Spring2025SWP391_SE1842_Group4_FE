@@ -1,14 +1,20 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Navigate } from 'react-router-dom';
 import { Layout } from 'antd';
-import AppHeader from '../Header/Header'; // Import AppHeader
+import AppHeader from '../Header/Header';
 
 const { Content } = Layout;
 
 function MainLayout() {
   const location = useLocation();
+  const token = localStorage.getItem('token'); // Lấy token từ localStorage
   
   // Kiểm tra xem có phải là trang login hoặc register không
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
+  // Nếu đã đăng nhập và cố gắng truy cập trang auth, chuyển hướng về /home
+  if (token && isAuthPage) {
+    return <Navigate to="/home" replace />;
+  }
 
   return (
     <Layout
@@ -17,7 +23,7 @@ function MainLayout() {
         overflow: 'hidden',
       }}
     >
-      {!isAuthPage && <AppHeader />} {/* Chỉ hiển thị AppHeader nếu không phải là trang auth */}
+      {!isAuthPage && <AppHeader />}
       
       <Content
         style={{
