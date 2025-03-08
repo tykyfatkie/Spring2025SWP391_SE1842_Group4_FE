@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Card, Table, Select, Spin, message } from 'antd';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import axios from 'axios';
-import Header from '../../components/Header/Header';
 import Sidebar from '../../components/Sidebar/Sidebar.tsx';
 import Footer from '../../components/Footer/Footer';
 
@@ -52,7 +51,6 @@ const AnalyticsPage: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <Header />
       <Layout>
         <Sidebar /> {/* Sidebar Component */}
         <Content style={{ padding: '24px', background: '#f5f5f5' }}>

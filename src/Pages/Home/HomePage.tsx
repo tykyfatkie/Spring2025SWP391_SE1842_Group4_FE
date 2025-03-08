@@ -1,7 +1,6 @@
 import React from 'react';
 import { Layout, Typography, Button, Card, Row, Col, Statistic, Space } from 'antd';
 import { HeartOutlined, LineChartOutlined, UserOutlined, MedicineBoxOutlined } from '@ant-design/icons';
-import Header from '../../components/Header/Header';
 import AppFooter from '../../components/Footer/Footer';
 import HomePagePicture from '../../assets/homepaagepic.jpg';
 
@@ -34,7 +33,6 @@ const Homepage: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <Header />
 
       {/* Hero Section */}
       <Content>

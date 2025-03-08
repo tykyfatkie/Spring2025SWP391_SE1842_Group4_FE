@@ -1,7 +1,6 @@
 import React from 'react';
 import { Layout, Typography, Button, Card, Row, Col, Statistic, Space } from 'antd';
 import { HeartOutlined, LineChartOutlined, UserOutlined, MedicineBoxOutlined } from '@ant-design/icons';
-import GuestHeader from '../../components/Header/GuestHeader';
 import AppFooter from '../../components/Footer/Footer';
 import HomePagePicture from '../../assets/homepaagepic.jpg';
 import { Link } from 'react-router-dom';
@@ -36,8 +35,6 @@ const Homepage: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin:'-25px'}}>
-      <GuestHeader />
-
       {/* Hero Section */}
       <Content>
         <div style={{ background: 'linear-gradient(to right, #e6f7ff, #f0f5ff)', padding: '64px 0' }}>

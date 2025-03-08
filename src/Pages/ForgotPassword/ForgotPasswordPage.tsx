@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Card, Typography, Layout, Steps, message, Result } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined, KeyOutlined } from '@ant-design/icons';
-import GuestHeader from '../../components/Header/GuestHeader';
 import axios from 'axios';
 
 const { Title, Text, Paragraph } = Typography;
@@ -242,7 +241,6 @@ const ForgotPasswordPage: React.FC = () => {
 
   return (
     <Layout className="min-h-screen bg-gray-50" >
-      <GuestHeader />
       <Content className="py-12">
         <div className="max-w-md mx-auto px-4">
           <Card className="shadow-md rounded-lg">

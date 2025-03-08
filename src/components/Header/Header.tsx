@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Row, Col, Space, Typography, Dropdown, Avatar } from 'antd';
+import { Layout, Menu, Row, Col, Space, Typography, Button, Dropdown, Avatar } from 'antd';
 import { 
-  HomeOutlined, 
-  UserOutlined, 
-  InfoCircleOutlined, 
-  ContactsOutlined 
+    ContactsOutlined,
+    CrownOutlined,
+    HomeOutlined, 
+    InfoCircleOutlined,
+    LoginOutlined,
+    UserAddOutlined,
+    UserOutlined 
 } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -15,6 +18,7 @@ const AppHeader: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState('home');
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const path = location.pathname;
@@ -34,7 +38,7 @@ const AppHeader: React.FC = () => {
   };
 
   const handleLogout = () => {
-    console.log("User logged out");
+    localStorage.removeItem('token'); // Xóa token
     navigate('/login');
   };
 
@@ -98,19 +102,39 @@ const AppHeader: React.FC = () => {
             <Menu.Item key="contact" icon={<ContactsOutlined />}>
               <a href="/contact-us">Contact Us</a>
             </Menu.Item>
-            <Menu.Item key="childs" icon={<UserOutlined />}>
-              <a href="/child-create">Your Childs</a>
-            </Menu.Item>
+            {token && (
+              <Menu.Item key="childs" icon={<UserOutlined />}>
+                <a href="/child-create">Your Childs</a>
+              </Menu.Item>
+            )}
             <Menu.Item key="about" icon={<InfoCircleOutlined />}>
               <a href="/about-us">About</a>
             </Menu.Item>
           </Menu>
         </Col>
 
-        <Col style={{ minWidth: '100px', marginLeft: '0px' }}> {/* Giảm margin để xích vào */}
-          <Dropdown overlay={menu} trigger={['click']}>
-            <Avatar icon={<UserOutlined />} style={{ cursor: 'pointer' }} />
-          </Dropdown>
+        <Col style={{ minWidth: '100px', marginLeft: '0px' }}>
+          {token ? (
+            <Dropdown overlay={menu} trigger={['click']}>
+              <Avatar icon={<UserOutlined />} style={{ cursor: 'pointer' }} />
+            </Dropdown>
+          ) : (
+            <Space size="middle">
+              <Button type="primary" icon={<LoginOutlined />} href="/login">
+                Login
+              </Button>
+              <Button icon={<UserAddOutlined />} href="/register">
+                Register
+              </Button>
+              <Button
+                style={{ color: '#faad14', borderColor: '#faad14' }}
+                icon={<CrownOutlined style={{ color: '#faad14' }} />}
+                href="/package"
+              >
+                Package
+              </Button>
+            </Space>
+          )}
         </Col>
       </Row>
     </Header>

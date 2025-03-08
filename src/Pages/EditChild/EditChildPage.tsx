@@ -19,7 +19,6 @@ import {
 import { EditOutlined, ReloadOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import axios from 'axios';
-import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import Sidebar from '../../components/Sidebar/Sidebar'; // Imported Sidebar component
 
@@ -116,7 +115,6 @@ const EditChildPage: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <Header />
       <Layout>
         <Sidebar />
         <Content style={{ padding: '24px' }}>

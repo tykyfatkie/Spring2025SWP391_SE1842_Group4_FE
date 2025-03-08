@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, Radio, Button, Form, Input, message, Row, Col, Typography, Layout } from 'antd';
 import { CrownOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import type { RadioChangeEvent } from 'antd';
-import GuestHeader from '../../components/Header/GuestHeader';
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
@@ -82,7 +81,6 @@ const PremiumSubscriptionPage: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <GuestHeader />
       <Content>
         <div className="p-6 max-w-6xl mx-auto">
           <Title level={2} className="text-center mb-8">

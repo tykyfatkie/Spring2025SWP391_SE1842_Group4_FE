@@ -1,12 +1,7 @@
 import React from 'react';
 import { Layout, Typography, Row, Col, Card, Space, Form, Input, Button, message } from 'antd';
-import { 
-  MailOutlined, 
-  PhoneOutlined, 
-  EnvironmentOutlined 
-} from '@ant-design/icons';
-import GuestHeader from '../../components/Header/GuestHeader';
 import AppFooter from '../../components/Footer/Footer';
+import { EnvironmentOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -22,7 +17,6 @@ const ContactPage: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <GuestHeader />
       <Layout.Content style={{ padding: '40px 50px', background: '#fff' }}>
         <Space direction="vertical" size={64} style={{ width: '100%' }}>
           <div style={{ textAlign: 'center' }}>
