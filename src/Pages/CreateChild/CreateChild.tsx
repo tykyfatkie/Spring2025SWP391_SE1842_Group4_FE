@@ -14,7 +14,6 @@ import {
 } from 'antd';
 import moment from 'moment';
 import axiosInstance from '../../utils/axiosInstance.ts'; 
-import Header from '../../components/Header/Header.tsx';
 import Footer from '../../components/Footer/Footer.tsx';
 import Sidebar from '../../components/Sidebar/Sidebar.tsx';
 
@@ -90,7 +89,6 @@ const CreateChild: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <Header />
       <Layout>
         <Sidebar />  {/* Sidebar Component */}
         <Content style={{ padding: '24px', background: '#f5f5f5' }}>

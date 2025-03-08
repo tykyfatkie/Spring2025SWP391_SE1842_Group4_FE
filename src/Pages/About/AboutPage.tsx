@@ -5,15 +5,13 @@ import {
   SafetyOutlined, 
   RocketOutlined
 } from '@ant-design/icons';
-import GuestHeader from '../../components/Header/GuestHeader';
 
 const { Title, Paragraph } = Typography;
 
 const AboutPage: React.FC = () => {
-
+  
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <GuestHeader />
       <Layout.Content style={{ padding: '40px 50px', background: '#fff' }}>
         <Space direction="vertical" size={64} style={{ width: '100%' }}>
           <div style={{ textAlign: 'center' }}>

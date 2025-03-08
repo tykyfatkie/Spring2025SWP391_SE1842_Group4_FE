@@ -21,7 +21,6 @@ import {
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import Header from '../../components/Header/Header';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -110,7 +109,6 @@ export const UpdateChildPage: React.FC = () => {
 
   return (
     <>
-      <Header />
       <Row justify="center" align="middle" style={{ padding: '24px' }}>
         <Col xs={24} sm={20} md={16} lg={12} xl={10}>
           <Card 

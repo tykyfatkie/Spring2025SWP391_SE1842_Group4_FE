@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline } from 'antd';
 import { UserOutlined, ClockCircleOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
-import GuestHeader from "../../components/Header/GuestHeader";
 import doctorImage from "../../assets/doctor.png";
 
 const { Content } = Layout;
@@ -63,7 +62,6 @@ const DoctorProfilePage: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <GuestHeader />
       <Content style={{ 
         padding: '0 20px', 
         maxWidth: '1200px', 

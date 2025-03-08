@@ -1,9 +1,15 @@
-import { Outlet } from 'react-router-dom'
-import { Layout } from 'antd'
+import { Outlet, useLocation } from 'react-router-dom';
+import { Layout } from 'antd';
+import AppHeader from '../Header/Header'; // Import AppHeader
 
-const { Content } = Layout
+const { Content } = Layout;
 
 function MainLayout() {
+  const location = useLocation();
+  
+  // Kiểm tra xem có phải là trang login hoặc register không
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
   return (
     <Layout
       style={{
@@ -11,6 +17,8 @@ function MainLayout() {
         overflow: 'hidden',
       }}
     >
+      {!isAuthPage && <AppHeader />} {/* Chỉ hiển thị AppHeader nếu không phải là trang auth */}
+      
       <Content
         style={{
           margin: '24px',
@@ -21,7 +29,7 @@ function MainLayout() {
         <Outlet />
       </Content>
     </Layout>
-  )
+  );
 }
 
-export default MainLayout
+export default MainLayout;

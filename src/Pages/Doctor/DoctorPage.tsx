@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Layout, Typography, Row, Col, Card, Menu, Spin, Alert } from 'antd';
 import AppFooter from "../../components/Footer/Footer";
-import GuestHeader from "../../components/Header/GuestHeader";
 import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
@@ -51,7 +50,6 @@ const DoctorPage: React.FC = () => {
 
 return (
   <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-    <GuestHeader />
     <Content style={{ padding: '0 10px', maxWidth: '1300px', marginLeft: '100px', marginTop: '70px' }}>
       <Row gutter={16} style={{ display: 'flex' }}>
         {/* Cột chứa danh sách bác sĩ */}

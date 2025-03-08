@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Layout, Typography, Input, Button, Card, Radio, message } from 'antd';
 import './BMICalculator.css'; // Import file CSS
-import GuestHeader from '../../components/Header/GuestHeader';
 import AppFooter from '../../components/Footer/Footer';
 
 const { Content } = Layout;
@@ -86,8 +85,6 @@ const BMICalculator: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <GuestHeader />
-
       <Content style={{ padding: '64px 0', textAlign: 'center' }}>
         <Title level={1} style={{ fontSize: '36px', marginBottom: '20px', color: 'blue'}}>CÔNG CỤ TÍNH BMI</Title>
         
