@@ -22,6 +22,7 @@ import Users from "../Pages/Dashboard/Users";
 import EditChildPage from "../Pages/EditChild/EditChildPage";
 import ManageUserProfile from "../Pages/ManageUserProfile/ManageUserProfilePage";
 import ProtectedRoute from "../utils/ProtectedRoute";  
+import React from "react";
 
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
@@ -40,7 +41,7 @@ const routes: LayoutRoute[] = [
       { path: "/forgot-password", component: ForgotPasswordPage, role: ["Guest"] },
       { path: "/about-us", component: AboutPage, role: ["User", "Guest"] },
       { path: "/contact-us", component: ContactPage, role: ["Guest", "User"] },
-      { path: "/package", component: PackagePage, role: ["Guest", "User"] },
+      { path: "/package", component: PackagePage, role: ["User"] },
       { path: "/guestbmi", component: GuestBMICalculator, role: ["Guest", "User"] },
       { path: "/dashboard", component: ProtectedComponent(UpdateChildPage, ["Admin", "Staff"]) },
       { path: "/child-create", component: ProtectedComponent(CreateChild, ["User"]) },

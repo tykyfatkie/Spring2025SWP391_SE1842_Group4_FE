@@ -3,7 +3,7 @@ import "./LoginPage.css"; // Giữ nguyên CSS
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { message, Spin } from "antd";
-
+import { jwtDecode } from "jwt-decode";
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,9 +26,11 @@ const LoginPage: React.FC = () => {
         });
 
         if (response.status === 200) {
-            const { accessToken, user } = response.data.data;
+            const { accessToken } = response.data.data;
             localStorage.setItem('token', accessToken);
-            localStorage.setItem('role', user.roleName); 
+            const userData = jwtDecode(accessToken)
+            console.log(userData)
+            localStorage.setItem('role', userData.role)
 
             message.success("Login successful!");
             setTimeout(() => {
