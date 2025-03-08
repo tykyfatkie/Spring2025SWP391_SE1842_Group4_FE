@@ -1,64 +1,119 @@
+// Modifying DoctorProfilePage.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline } from 'antd';
+import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline, Spin, Alert } from 'antd';
 import { UserOutlined, ClockCircleOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
-import doctorImage from "../../assets/doctor.png";
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
 
-const doctorsData = [
-  {
-    id: 1,
-    name: "Bác sĩ Nguyễn Văn A",
-    specialty: "Bác sĩ chuyên khoa Tim mạch",
-    experience: "15 năm kinh nghiệm",
-    rating: 4.9,
-    reviews: 100,
-    address: "123 Đường ABC, Quận 1, TP.HCM",
-    phone: "0123 456 789",
-    email: "doctor.a@hospital.com",
-    workingHours: "8:00 - 17:00 (Thứ 2 - Thứ 7)",
-    image: doctorImage,
-    price: "86,000 đ",
-    degrees: [
-      "Tiến sĩ Y khoa - Đại học Y Hà Nội (2010)",
-      "Thạc sĩ Y học - Đại học Y Dược TP.HCM (2005)",
-      "Bác sĩ Đa khoa - Đại học Y Hà Nội (2000)"
-    ],
-    certificates: [
-      "Chứng chỉ Tim mạch nâng cao - Bệnh viện Johns Hopkins (2012)",
-      "Chứng nhận Specialist về Tim mạch can thiệp (2015)",
-      "Fellow of the American College of Cardiology (FACC)"
-    ],
-    research: [
-      "Nghiên cứu về bệnh mạch vành ở người trẻ tuổi (2018)",
-      "Đồng tác giả 15 công trình nghiên cứu về Tim mạch",
-      "Chủ nhiệm 3 đề tài nghiên cứu cấp Nhà nước"
-    ],
-    languages: ["Tiếng Việt", "Tiếng Anh", "Tiếng Pháp"],
-    specializations: [
-      "Tim mạch can thiệp",
-      "Điều trị rối loạn nhịp tim",
-      "Siêu âm tim",
-      "Bệnh mạch vành",
-      "Suy tim"
-    ]
-  },
-  // Thêm data cho các bác sĩ khác tương tự
-];
+interface DoctorProfile {
+  certificate: string;
+  licenseNumber: string;
+  biography: string;
+  metadata: string;
+  specialize: string;
+  profileImg: string;
+  status: number;
+  userId: string;
+  user?: {
+    name: string;
+    userName: string;
+    email: string;
+    phone?: string;
+    address?: string;
+  };
+}
 
 const DoctorProfilePage: React.FC = () => {
-  const { id } = useParams();
-  const [doctor, setDoctor] = useState(doctorsData[0]);
+  const { id } = useParams<{ id: string }>();
+  const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const doctorId = parseInt(id || "1");
-    const foundDoctor = doctorsData.find(d => d.id === doctorId) || doctorsData[0];
-    setDoctor(foundDoctor);
+    const fetchDoctorProfile = async () => {
+      try {
+        if (!id) {
+          throw new Error("Doctor ID is required");
+        }
+
+        const response = await fetch(`https://localhost:7217/api/v1/doctors/doctorprofile/${id}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (!result.data || !Array.isArray(result.data) || result.data.length === 0) {
+          throw new Error("Invalid API response or no doctor found");
+        }
+
+        setDoctor(result.data[0]);
+      } catch (error: any) {
+        console.error("Fetch Error:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctorProfile();
   }, [id]);
+
+  // Parse metadata if it exists and is in JSON format
+  const getMetadata = () => {
+    try {
+      if (doctor?.metadata) {
+        return JSON.parse(doctor.metadata);
+      }
+      return null;
+    } catch (e) {
+      console.error("Error parsing metadata:", e);
+      return null;
+    }
+  };
+
+  const metadata = getMetadata();
+
+  if (loading) {
+    return (
+      <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
+        <Content style={{ padding: '0 20px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+            <Spin size="large" />
+          </div>
+        </Content>
+      </Layout>
+    );
+  }
+
+  if (error || !doctor) {
+    return (
+      <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
+        <Content style={{ padding: '0 20px', maxWidth: '1200px', margin: '0 auto' }}>
+          <Alert
+            message="Lỗi khi lấy thông tin bác sĩ"
+            description={error || "Không tìm thấy thông tin bác sĩ"}
+            type="error"
+            showIcon
+            style={{ marginTop: '24px' }}
+          />
+        </Content>
+      </Layout>
+    );
+  }
+
+  // Extract degrees, certificates, and research items from metadata if available
+  const degrees = metadata?.years ? [`${metadata.years} năm kinh nghiệm`] : ["Tiến sĩ Y khoa", "Thạc sĩ Y học"];
+  const certificates = [doctor.certificate || "Chứng chỉ chuyên khoa"];
+  const research = ["Nghiên cứu lâm sàng", "Công bố khoa học"];
+  const languages = ["Tiếng Việt", "Tiếng Anh"];
+  const specializations = doctor.specialize ? [doctor.specialize] : ["Đa khoa"];
+
+  // Extract hospital information if available
+  const hospital = metadata?.hospital || "Bệnh viện";
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
@@ -72,32 +127,35 @@ const DoctorProfilePage: React.FC = () => {
           <Row gutter={24}>
             <Col span={8}>
               <img 
-                src={doctor.image} 
-                alt={doctor.name} 
+                src={doctor.profileImg} 
+                alt={doctor.biography} 
                 style={{ width: '100%', borderRadius: '8px' }}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://via.placeholder.com/300x400?text=Doctor+Image';
+                }}
               />
               <Button type="primary" block style={{ marginTop: '16px' }}>
                 Đặt lịch khám
               </Button>
             </Col>
             <Col span={16}>
-              <Title level={2}>{doctor.name}</Title>
-              <Rate disabled defaultValue={doctor.rating} style={{ fontSize: '16px' }} />
-              <Text style={{ marginLeft: '8px' }}>({doctor.reviews} đánh giá)</Text>
+              <Title level={2}>{doctor.user?.name || doctor.biography}</Title>
+              <Rate disabled defaultValue={4.5} style={{ fontSize: '16px' }} />
+              <Text style={{ marginLeft: '8px' }}>(80 đánh giá)</Text>
               
               <Row style={{ marginTop: '16px' }}>
                 <Col span={24}>
-                  <Tag color="blue">{doctor.specialty}</Tag>
-                  <Tag color="green">{doctor.experience}</Tag>
+                  <Tag color="blue">{doctor.specialize || "Bác sĩ chuyên khoa"}</Tag>
+                  <Tag color="green">{metadata?.years ? `${metadata.years} năm kinh nghiệm` : "Bác sĩ kinh nghiệm"}</Tag>
                 </Col>
               </Row>
 
               <Paragraph style={{ marginTop: '16px' }}>
                 <ul>
-                  <li><EnvironmentOutlined /> Phòng khám: {doctor.address}</li>
-                  <li><PhoneOutlined /> Số điện thoại: {doctor.phone}</li>
-                  <li><MailOutlined /> Email: {doctor.email}</li>
-                  <li><ClockCircleOutlined /> Giờ làm việc: {doctor.workingHours}</li>
+                  <li><EnvironmentOutlined /> Phòng khám: {hospital || "Chưa cập nhật"}</li>
+                  <li><PhoneOutlined /> Số điện thoại: {doctor.user?.phone || "Chưa cập nhật"}</li>
+                  <li><MailOutlined /> Email: {doctor.user?.email || "Chưa cập nhật"}</li>
+                  <li><ClockCircleOutlined /> Giờ làm việc: 8:00 - 17:00 (Thứ 2 - Thứ 7)</li>
                 </ul>
               </Paragraph>
             </Col>
@@ -109,14 +167,14 @@ const DoctorProfilePage: React.FC = () => {
               <Row gutter={[24, 24]}>
                 <Col span={12}>
                   <Card title="Học vấn" size="small">
-                    {doctor.degrees.map((degree, index) => (
+                    {degrees.map((degree, index) => (
                       <p key={index}>• {degree}</p>
                     ))}
                   </Card>
                 </Col>
                 <Col span={12}>
                   <Card title="Chứng chỉ chuyên môn" size="small">
-                    {doctor.certificates.map((cert, index) => (
+                    {certificates.map((cert, index) => (
                       <p key={index}>• {cert}</p>
                     ))}
                   </Card>
@@ -127,7 +185,7 @@ const DoctorProfilePage: React.FC = () => {
               <Row gutter={[24, 24]}>
                 <Col span={12}>
                   <Card title="Lĩnh vực chuyên sâu" size="small">
-                    {doctor.specializations.map((spec, index) => (
+                    {specializations.map((spec, index) => (
                       <Tag color="blue" key={index} style={{ margin: '4px' }}>
                         {spec}
                       </Tag>
@@ -136,7 +194,7 @@ const DoctorProfilePage: React.FC = () => {
                 </Col>
                 <Col span={12}>
                   <Card title="Ngôn ngữ" size="small">
-                    {doctor.languages.map((lang, index) => (
+                    {languages.map((lang, index) => (
                       <Tag color="green" key={index} style={{ margin: '4px' }}>
                         {lang}
                       </Tag>
@@ -147,16 +205,15 @@ const DoctorProfilePage: React.FC = () => {
 
               <Title level={4} style={{ marginTop: '24px' }}>Nghiên cứu & Công bố</Title>
               <Card size="small">
-                {doctor.research.map((item, index) => (
+                {research.map((item, index) => (
                   <p key={index}>• {item}</p>
                 ))}
               </Card>
 
               <Title level={4} style={{ marginTop: '24px' }}>Kinh nghiệm làm việc</Title>
               <Timeline>
-                <Timeline.Item>2008 - 2013: Bác sĩ nội trú tại Bệnh viện Bạch Mai</Timeline.Item>
-                <Timeline.Item>2013 - 2018: Bác sĩ chuyên khoa tại Bệnh viện Tim Hà Nội</Timeline.Item>
-                <Timeline.Item>2018 - nay: Trưởng khoa Tim mạch tại Bệnh viện ABC</Timeline.Item>
+                <Timeline.Item>{metadata?.years ? `${new Date().getFullYear() - parseInt(metadata.years)} - ${new Date().getFullYear()}` : "2018 - nay"}: Bác sĩ tại {hospital || "Bệnh viện"}</Timeline.Item>
+                <Timeline.Item>Kinh nghiệm làm việc chuyên môn {metadata?.years || "nhiều"} năm</Timeline.Item>
               </Timeline>
             </TabPane>
 
@@ -168,7 +225,7 @@ const DoctorProfilePage: React.FC = () => {
                       <Row align="middle">
                         <Avatar icon={<UserOutlined />} />
                         <div style={{ marginLeft: '12px' }}>
-                          <Text strong>Nguyễn Văn X</Text>
+                          <Text strong>Người dùng ẩn danh</Text>
                           <br />
                           <Rate disabled defaultValue={5} style={{ fontSize: '12px' }} />
                           <Text type="secondary" style={{ marginLeft: '8px' }}>1 tháng trước</Text>
