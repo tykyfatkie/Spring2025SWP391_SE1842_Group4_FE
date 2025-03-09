@@ -11,22 +11,20 @@ const UsersPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [page, setPage] = useState(0); 
   const [pageSize, setPageSize] = useState(10); 
-  const [roleIds, setRoleIds] = useState<string[]>(["00000000-0000-0000-0000-000000000001"]); 
-
+  // Fix TypeScript error - removed type annotation
+  const [roleIds, setRoleIds] = useState(["00000000-0000-0000-0000-000000000001"]); 
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
   
-      const params: any = {
-        SearchKeyword: searchKeyword || undefined, 
+      const params = {
+        SearchKeyword: searchKeyword || undefined,
         Page: page,
         PageSize: pageSize,
+        RoleIds: roleIds.length > 0 ? roleIds : undefined
       };
-  
-      if (roleIds.length > 0) params.RoleIds = roleIds; 
-      if (status !== undefined && status !== "") params.status = status;
   
       const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/users/all`, {
         params,
@@ -36,26 +34,35 @@ const UsersPage = () => {
       });
   
       console.log("API Response:", response.data);
-      setUsers(Array.isArray(response.data.data) ? response.data.data : []);
-    } catch (error: any) {
+      
+      // Fix data extraction - access nested data structure
+      const userData = response.data.data.data;
+      setUsers(Array.isArray(userData) ? userData : []);
+      
+    } catch (error) {
+      console.error("Fetch error:", error);
       message.error("Failed to fetch users");
     } finally {
       setLoading(false);
     }
   };
-  
-  
 
   useEffect(() => {
     fetchUsers();
-  }, [searchKeyword, page, pageSize]); 
+  }, [page, pageSize]); // Removed searchKeyword to prevent automatic search on every keystroke
+  
+  // Add separate useEffect for debugging to see updated state
+  useEffect(() => {
+    console.log("Users State:", users);
+  }, [users]);
 
+  // Modify columns to match API response structure
   const columns = [
     {
       title: "Avatar",
       dataIndex: "avatar",
       key: "avatar",
-      render: (avatar: string) =>
+      render: (avatar) =>
         avatar ? (
           <Avatar src={avatar} />
         ) : (
@@ -66,28 +73,27 @@ const UsersPage = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text: string) => <Text strong>{text}</Text>,
+      render: (text) => <Text strong>{text}</Text>,
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
-      render: (email: string) => <Text>{email}</Text>,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => (
-        <Tag color={status === "active" ? "green" : "red"}>
-          {status === "active" ? "Active" : "Inactive"}
+      render: (status) => (
+        <Tag color={status === 3 ? "green" : "red"}>
+          {status === 3 ? "Active" : "Inactive"}
         </Tag>
       ),
     },
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: any) => (
+      render: (_, record) => (
         <Space>
           <a style={{ color: "#1677ff" }}>
             <EditOutlined /> Edit
@@ -102,7 +108,6 @@ const UsersPage = () => {
 
   return (
     <div>
-      {/* Search Filter */}
       <div style={{ marginBottom: 16, display: "flex", gap: "10px" }}>
         <Input
           placeholder="Search users..."
