@@ -34,7 +34,7 @@ const routes: LayoutRoute[] = [
   {
     layout: MainLayout,
     data: [
-      { path: "/", component: GuestHomePage, exact: true, role: ["Guest"] },
+      { path: "/", component: Homepage, exact: true, role: ["Guest"] },
       { path: "/home", component: ProtectedComponent(Homepage, ["User"]) },
       { path: "/login", component: LoginPage, role: ["Guest"] },
       { path: "/register", component: RegisterPage, role: ["Guest"] },

@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, Button, Card, Row, Col, Space, Statistic, Spin, Alert } from 'antd';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectCoverflow, Pagination, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/effect-coverflow';
-import 'swiper/css/pagination';
+import { Layout, Typography, Button, Card, Row, Col, Space, Statistic} from 'antd';
 import AppFooter from '../../components/Footer/Footer';
 import HomePagePicture from '../../assets/homepaagepic.jpg';
 import { SmileOutlined, HeartOutlined, StarOutlined, UserOutlined } from '@ant-design/icons';
+import DoctorsSection from '../../components/Doctor section/DoctorsSection ';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -81,7 +77,7 @@ const Homepage: React.FC = () => {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px'}}>
       <Content>
         {/* Hero Section */}
         <div style={{ background: 'linear-gradient(to right, #e6f7ff, #f0f5ff)', padding: '64px 0' }}>
@@ -132,78 +128,10 @@ const Homepage: React.FC = () => {
         </div>
 
         {/* Doctors Section */}
-        <div style={{ padding: '64px 0', background: '#fff' }}>
-          <Row justify="center" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-            <Col span={24} style={{ textAlign: 'center', marginBottom: 48 }}>
-              <Title level={2}>Our Doctors</Title>
-            </Col>
-            {loading && <Spin size="large" style={{ display: 'block', textAlign: 'center' }} />}
-            {error && (
-              <Alert
-                message="Lỗi khi lấy dữ liệu bác sĩ"
-                description={error}
-                type="error"
-                showIcon
-                style={{ marginBottom: '20px' }}
-              />
-            )}
-            <Col span={24}>
-              <Swiper
-                effect="coverflow"
-                grabCursor={true}
-                slidesPerView={3} // Hiển thị 3 bác sĩ
-                spaceBetween={30} // Khoảng cách giữa các bác sĩ
-                autoplay={{ delay: 2500, disableOnInteraction: false }}
-                pagination={{ clickable: true }}
-                modules={[EffectCoverflow, Pagination, Autoplay]}
-                className="mySwiper"
-                style={{ width: '100%', padding: '50px 0' }}
-              >
-                {doctors.map((doctor, index) => (
-                  <SwiperSlide key={index} style={{ width: '250px', position: 'relative' }}> 
-                    <Card 
-                      hoverable 
-                      style={{
-                        textAlign: 'center',
-                        boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
-                        borderRadius: '16px',
-                        transition: 'transform 0.3s ease-in-out',
-                        backdropFilter: 'blur(10px)', 
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                        height: '350px', // Chiều cao của card
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                      <div style={{ 
-                        width: '90px', 
-                        height: '90px', 
-                        borderRadius: '50%', 
-                        overflow: 'hidden', 
-                        margin: '0 auto', 
-                        marginBottom: '16px' 
-                      }}>
-                        <img 
-                          src={doctor.profileImg} 
-                          alt={doctor.biography} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        />
-                      </div>
-                      <div style={{ padding: '16px' }}>
-                        <Title level={4} style={{ margin: 0 }}>{doctor.biography}</Title>
-                        <Paragraph style={{ fontWeight: 'bold', color: '#1890ff', margin: 0 }}>{doctor.specialize}</Paragraph>
-                        <Paragraph style={{ color: 'rgba(0, 0, 0, 0.65)', margin: 0 }}>Giấy phép: {doctor.licenseNumber}</Paragraph>
-                      </div>
-                    </Card>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </Col>
-          </Row>
-        </div>
+        <DoctorsSection doctors={doctors} loading={loading} error={error} />
 
         {/* Stats Section */}
-        <div style={{ background: '#f0f5ff', padding: '64px 0' }}>
+        <div style={{ background: '#f0f5ff', padding: '64px 0'}}>
           <Row justify="center" gutter={[32, 32]} style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
             <Col xs={24} md={8}>
               <Card bordered={false}>
