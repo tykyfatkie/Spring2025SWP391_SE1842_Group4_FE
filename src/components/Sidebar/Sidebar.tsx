@@ -43,7 +43,7 @@ const Sidebar: React.FC = () => {
         </Menu.Item>
 
         <Menu.Item key="manage-profile" icon={<UserOutlined />}>
-          <Link to="/child-edit">Manage Children</Link>
+          <Link to="/child-manage">Manage Children</Link>
         </Menu.Item>
 
       </Menu>

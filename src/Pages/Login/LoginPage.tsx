@@ -27,8 +27,11 @@ const LoginPage: React.FC = () => {
         });
 
         if (response.status === 200) {
-            const { accessToken } = response.data.data;
+            const { accessToken, userId } = response.data.data;
+            
+            // Store token and user ID
             localStorage.setItem("token", accessToken);
+            localStorage.setItem("userId", userId);
 
             const userData: any = jwtDecode(accessToken);
             console.log(userData);
