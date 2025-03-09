@@ -34,7 +34,7 @@ const RegisterPage: React.FC = () => {
     };
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}auth/register`, apiData);
+      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/auth/register`, apiData);
 
       if (response.status === 200) {
         message.success("Registration successful!");

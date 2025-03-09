@@ -57,10 +57,10 @@ const CreateChild: React.FC = () => {
     setLoading(true);
     try {
       if (values.dob && moment.isMoment(values.dob)) {
-        values.dob = values.dob.format('YYYY-MM-DD'); // Ensure correct format
+        values.dob = values.dob.format('YYYY-MM-DD'); 
       }
 
-      console.log('Submitting data:', values); // Debugging output
+      console.log('Submitting data:', values); 
 
       let response;
       if (editing && currentProfile) {
