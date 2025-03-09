@@ -2,7 +2,6 @@ import MainLayout from "../components/layout/MainLayout";
 import LoginPage from "../Pages/Login/LoginPage";
 import RegisterPage from "../Pages/Register/RegisterPage";
 import Homepage from "../Pages/Home/HomePage";
-import GuestHomePage from "../Pages/Home/GuestHomePage";
 import { LayoutRoute } from "../types/routes";
 import AboutPage from "../Pages/About/AboutPage";
 import ContactPage from "../Pages/Contact/ContactPage";
@@ -19,11 +18,11 @@ import DefaultLayout from "../layouts/DefaultLayout";
 import AdminPage from "../Pages/Dashboard/AdminPage";
 import Settings from "../Pages/Dashboard/Settings";
 import Users from "../Pages/Dashboard/Users";
-import EditChildPage from "../Pages/EditChild/EditChildPage";
 import ManageUserProfile from "../Pages/ManageUserProfile/ManageUserProfilePage";
 import ProtectedRoute from "../utils/ProtectedRoute"; 
 import DoctorsPage from "../Pages/Dashboard/Doctors"; 
 import React from "react";
+import ChildManage from "../Pages/ChildManage/ChildManage";
 
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
@@ -50,7 +49,7 @@ const routes: LayoutRoute[] = [
       { path: "/doctor", component: ProtectedComponent(DoctorPage, ["User", "Doctor"]) },
       { path: "/doctor/:id", component: ProtectedComponent(DoctorProfilePage, ["User", "Doctor"]) },
       { path: "/profile", component: ProtectedComponent(ParentProfilePage, ["User"]) },
-      { path: "/child-edit", component: ProtectedComponent(EditChildPage, ["User"]) },
+      { path: "/child-manage", component: ProtectedComponent(ChildManage, ["User"]) },
       { path: "/manage-profile", component: ProtectedComponent(ManageUserProfile, ["User"]) },
     ],
   },
