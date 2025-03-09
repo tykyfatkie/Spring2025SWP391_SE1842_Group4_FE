@@ -64,7 +64,7 @@ const ParentProfilePage: React.FC = () => {
           return;
         }
 
-        const response = await fetch('https://localhost:7217/api/v1/users/profile', {
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}users/profile`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -93,7 +93,7 @@ const ParentProfilePage: React.FC = () => {
 
     const fetchDoctors = async () => {
       try {
-        const response = await fetch('https://localhost:7217/api/v1/doctors/all');
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}doctors/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch doctors');
         }

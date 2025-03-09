@@ -12,7 +12,7 @@ const BMICalculator: React.FC = () => {
   const [height, setHeight] = useState<number | undefined>(undefined);
   const [bmiResult, setBmiResult] = useState<number | null>(null);
   const [angle, setAngle] = useState<number>(0);
-  const [gender, setGender] = useState<string>('male'); // Thêm state cho giới tính
+  const [gender, setGender] = useState<string>('male'); 
 
   const calculateBMI = () => {
     if (weight && height) {
@@ -20,25 +20,25 @@ const BMICalculator: React.FC = () => {
         message.error('Cân nặng và chiều cao phải lớn hơn 0.');
         return;
       }
-      const heightInMeters = height / 100; // Chuyển đổi chiều cao từ cm sang m
+      const heightInMeters = height / 100; 
       const bmi = weight / (heightInMeters * heightInMeters);
       setBmiResult(bmi);
 
-      // Tính góc cho kim chỉ dựa trên các khoảng BMI
+   
       let calculatedAngle = 0;
       if (bmi < 18.5) {
-        calculatedAngle = -75; // Góc 1
+        calculatedAngle = -75; 
       } else if (bmi >= 18.5 && bmi < 23) {
-        calculatedAngle = -36; // Góc 2
+        calculatedAngle = -36; 
       } else if (bmi >= 23 && bmi < 25) {
-        calculatedAngle = 0; // Góc 3
+        calculatedAngle = 0; 
       } else if (bmi >= 25 && bmi < 30) {
-        calculatedAngle = 37; // Góc 4
+        calculatedAngle = 37; 
       } else {
-        calculatedAngle = 73; // Góc 5
+        calculatedAngle = 73; 
       }
 
-      setAngle(calculatedAngle); // Cập nhật góc cho kim chỉ
+      setAngle(calculatedAngle); 
     } else {
       message.error('Vui lòng nhập đầy đủ cân nặng và chiều cao.');
     }
@@ -90,11 +90,11 @@ const BMICalculator: React.FC = () => {
         
         <Card 
           style={{ 
-            width: '500px', // Tăng chiều rộng
-            height: '400px', // Tăng chiều cao
+            width: '500px', 
+            height: '400px', 
             margin: '0 auto', 
             padding: '20px', 
-            border: '2px solid #87CEEB' // Thay đổi màu viền
+            border: '2px solid #87CEEB' 
           }}
         >
           <label style={{ color: '#87CEEB', display: 'block', marginBottom: '8px' }}>Giới tính</label>
@@ -121,12 +121,12 @@ const BMICalculator: React.FC = () => {
             type="primary" 
             onClick={calculateBMI} 
             style={{ 
-              backgroundColor: '#0056b3', // Màu xanh đậm
-              borderColor: '#0056b3', // Màu viền
-              color: 'white', // Màu chữ
-              fontSize: '16px', // Kích thước chữ
-              width: '100%', // Chiếm toàn bộ chiều rộng
-              height: '50px', // Chiều cao nút
+              backgroundColor: '#0056b3', 
+              borderColor: '#0056b3', 
+              color: 'white', 
+              fontSize: '16px', 
+              width: '100%', 
+              height: '50px',
               marginTop: '20px'
             }}
           >
@@ -134,7 +134,6 @@ const BMICalculator: React.FC = () => {
           </Button>
         </Card>
 
-        {/* Di chuyển hình ảnh và kết quả ra ngoài Card */}
         {bmiResult !== null && (
           <div style={{ marginTop: '30px' }}>
             <Title level={3} style={{ color: 'blue' }}>Kết quả chỉ số BMI của bạn: {bmiResult.toFixed(2)}</Title>
@@ -143,7 +142,7 @@ const BMICalculator: React.FC = () => {
                 src="https://tamanhhospital.vn/wp-content/uploads/2024/10/img-bang-ket-qua.png" 
                 alt="Biểu đồ BMI" 
                 className="circle" 
-                style={{ width: '80%', maxWidth: '400px' }} // Điều chỉnh kích thước trực tiếp
+                style={{ width: '80%', maxWidth: '400px' }} 
               />
               <img 
                 src="https://tamanhhospital.vn/wp-content/uploads/2024/10/kim-new2.png" 

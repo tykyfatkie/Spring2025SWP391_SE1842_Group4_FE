@@ -40,7 +40,6 @@ export const UpdateChildPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Fetch child data when component mounts
   useEffect(() => {
     const fetchChildData = async () => {
       try {
@@ -48,7 +47,7 @@ export const UpdateChildPage: React.FC = () => {
         const response = await axios.get(`/api/v1/children/${id}`);
         
         if (response.data) {
-          // Format the date to be compatible with DatePicker
+ 
           const dateOfBirth = response.data.dateOfBirth ? dayjs(response.data.dateOfBirth) : null;
           
           form.setFieldsValue({
@@ -73,7 +72,6 @@ export const UpdateChildPage: React.FC = () => {
     try {
       setLoading(true);
       
-      // Format the data according to API requirements
       const apiData: ChildData = {
         name: values.name,
         dateOfBirth: values.dateOfBirth.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
@@ -82,12 +80,12 @@ export const UpdateChildPage: React.FC = () => {
         height: values.height
       };
       
-      // Call the update API
+
       const response = await axios.put(`/api/v1/children/${id}`, apiData);
       
       if (response.status === 200) {
         message.success('Child information updated successfully!');
-        // Navigate back to child details or list page
+
         setTimeout(() => {
           navigate('/children');
         }, 1500);

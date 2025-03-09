@@ -40,7 +40,7 @@ const DoctorProfilePage: React.FC = () => {
           throw new Error("Doctor ID is required");
         }
 
-        const response = await fetch(`https://localhost:7217/api/v1/doctors/doctorprofile/${id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }

@@ -7,7 +7,7 @@ export const authApi = apiSlice.injectEndpoints({
     login: builder.mutation<{ accessToken: string; user: any }, { email: string; password: string; authType: number; redirect: string }>(
       {
         query: (credentials) => ({
-          url: 'https://localhost:7217/api/v1/auth/login', 
+          url: `${import.meta.env.VITE_API_ENDPOINT}/auth/login`, 
           method: 'POST',
           body: credentials,
         }),

@@ -8,7 +8,7 @@ import Footer from '../../components/Footer/Footer';
 const { Content } = Layout;
 const { Option } = Select;
 
-// Replace with actual Parent ID from auth
+
 const parentId = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
 
 const AnalyticsPage: React.FC = () => {
@@ -17,9 +17,9 @@ const AnalyticsPage: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Fetch children profiles
+
   useEffect(() => {
-    axios.get(`https://localhost:7217/api/v1/children/${parentId}`)
+    axios.get(`${import.meta.env.VITE_API_ENDPOINT}/children/${parentId}`)
       .then((response) => {
         setChildren(response.data);
         if (response.data.length > 0) {

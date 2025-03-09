@@ -27,7 +27,7 @@ const DoctorPage: React.FC = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const response = await fetch('https://localhost:7217/api/v1/doctors/all');
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/all`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
