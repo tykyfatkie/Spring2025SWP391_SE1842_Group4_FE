@@ -21,30 +21,40 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/auth/login`, {
-        email,
-        password,
-    });
-    
+        const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/auth/login`, {
+            email,
+            password,
+        });
 
         if (response.status === 200) {
             const { accessToken } = response.data.data;
-            localStorage.setItem('token', accessToken);
-            const userData = jwtDecode(accessToken)
-            console.log(userData)
-            localStorage.setItem('role', userData.role)
+            localStorage.setItem("token", accessToken);
+
+            const userData: any = jwtDecode(accessToken);
+            console.log(userData);
+
+            const userRole = userData.role;
+            localStorage.setItem("role", userRole);
 
             message.success("Login successful!");
+
             setTimeout(() => {
-                navigate("/home");
+                if (userRole === "Admin") {
+                    navigate("/my-admin");
+                } else if (userRole === "Doctor") {
+                    navigate("/my-doctor");
+                } else {
+                    navigate("/home");
+                }
             }, 1500);
         }
-    // } catch (error) {
-    //     message.error(error.response?.data?.message || "Login failed. Please try again.");
+    } catch (error: any) {
+        message.error(error.response?.data?.message || "Login failed. Please try again.");
     } finally {
         setLoading(false);
     }
 };
+
 ;
 
 

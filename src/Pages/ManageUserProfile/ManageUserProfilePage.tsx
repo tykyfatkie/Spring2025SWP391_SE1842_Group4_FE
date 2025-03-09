@@ -17,7 +17,7 @@ import Footer from '../../components/Footer/Footer';
 const { Content } = Layout;
 const { Title } = Typography;
 
-const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}users`;
+const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/users`;
 
 const ManageUserProfile: React.FC = () => {
   const [form] = Form.useForm();

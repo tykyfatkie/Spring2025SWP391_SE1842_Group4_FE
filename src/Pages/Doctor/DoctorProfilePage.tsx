@@ -62,7 +62,6 @@ const DoctorProfilePage: React.FC = () => {
     fetchDoctorProfile();
   }, [id]);
 
-  // Parse metadata if it exists and is in JSON format
   const getMetadata = () => {
     try {
       if (doctor?.metadata) {

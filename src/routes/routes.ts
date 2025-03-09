@@ -21,7 +21,8 @@ import Settings from "../Pages/Dashboard/Settings";
 import Users from "../Pages/Dashboard/Users";
 import EditChildPage from "../Pages/EditChild/EditChildPage";
 import ManageUserProfile from "../Pages/ManageUserProfile/ManageUserProfilePage";
-import ProtectedRoute from "../utils/ProtectedRoute";  
+import ProtectedRoute from "../utils/ProtectedRoute"; 
+import DoctorsPage from "../Pages/Dashboard/Doctors"; 
 import React from "react";
 
 
@@ -58,7 +59,7 @@ const routes: LayoutRoute[] = [
     data: [
       { path: "/my-admin", component: ProtectedComponent(AdminPage, ["Admin"]) },
       { path: "/my-admin/users", component: ProtectedComponent(Users, ["Admin"]) },
-      { path: "/my-admin/doctors", component: ProtectedComponent(DoctorPage, ["Admin"]) },
+      { path: "/my-admin/doctors", component: ProtectedComponent(DoctorsPage, ["Admin"]) },
       { path: "/my-admin/settings", component: ProtectedComponent(Settings, ["Admin"]) },
     ],
   },

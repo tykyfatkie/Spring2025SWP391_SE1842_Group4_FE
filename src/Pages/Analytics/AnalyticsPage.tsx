@@ -23,7 +23,7 @@ const AnalyticsPage: React.FC = () => {
       .then((response) => {
         setChildren(response.data);
         if (response.data.length > 0) {
-          setSelectedChild(response.data[0].id); // Auto-select first child
+          setSelectedChild(response.data[0].id); 
         }
       })
       .catch((error) => {
@@ -33,7 +33,7 @@ const AnalyticsPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Fetch analytics data for the selected child
+
   useEffect(() => {
     if (selectedChild) {
       setLoading(true);
@@ -52,7 +52,7 @@ const AnalyticsPage: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
       <Layout>
-        <Sidebar /> {/* Sidebar Component */}
+        <Sidebar /> 
         <Content style={{ padding: '24px', background: '#f5f5f5' }}>
           <Card title="Select Child Profile">
             <Select

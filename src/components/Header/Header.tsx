@@ -38,7 +38,7 @@ const AppHeader: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Xóa token
+    localStorage.removeItem('token');
     navigate('/login');
   };
 

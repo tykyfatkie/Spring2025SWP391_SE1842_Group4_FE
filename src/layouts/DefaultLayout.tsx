@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Layout, Menu, Switch, theme, ConfigProvider } from "antd";
-import { DashboardOutlined, UserOutlined, SettingOutlined, BulbOutlined } from "@ant-design/icons";
+import { DashboardOutlined, UserOutlined, SettingOutlined, BulbOutlined, CrownOutlined } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import LogoutButton from "../components/LogoutButton/LogoutButton";
 
 const { Sider, Content, Header } = Layout;
 
@@ -43,13 +44,19 @@ const DefaultLayout: React.FC = () => {
             <Menu.Item key="/my-admin/users" icon={<UserOutlined />}>
               Users
             </Menu.Item>
-            <Menu.Item key="/my-admin/doctor" icon={<UserOutlined />}>
+            <Menu.Item key="/my-admin/doctors" icon={<UserOutlined />}>
               Doctor
             </Menu.Item>
             <Menu.Item key="/my-admin/settings" icon={<SettingOutlined />}>
               Settings
             </Menu.Item>
-          </Menu>
+            <Menu.Item key="/my-admin/packages" icon={<CrownOutlined />}>
+              Package
+            </Menu.Item>
+            </Menu>
+              <div style={{ padding: "16px" }}>
+            <LogoutButton />
+</div>
         </Sider>
 
         {/* Main Layout */}
@@ -75,7 +82,6 @@ const DefaultLayout: React.FC = () => {
             />
           </Header>
 
-          {/* Nội dung */}
           <Content style={{ padding: "16px" }}>
             <Outlet />
           </Content>
