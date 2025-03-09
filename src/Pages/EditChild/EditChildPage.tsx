@@ -26,8 +26,6 @@ const { Content } = Layout;
 const { Title } = Typography;
 const { Option } = Select;
 
-const API_BASE_URL = 'https://localhost:7217';
-
 interface ChildProfile {
   id: string;
   name: string;
@@ -55,7 +53,7 @@ const EditChildPage: React.FC = () => {
     setApiError(null);
     
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/children`);
+      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/api/children`);
       setChildrenList(response.data);
     } catch (error: any) {
       setApiError(`Failed to fetch children: ${error.message || 'Unknown error'}`);
@@ -101,7 +99,7 @@ const EditChildPage: React.FC = () => {
         dateOfBirth: values.dateOfBirth ? moment(values.dateOfBirth).format('YYYY-MM-DD') : ''
       };
       
-      await axios.put(`${API_BASE_URL}/update/${selectedChild.id}`, formattedValues);
+      await axios.put(`${import.meta.env.VITE_API_ENDPOINT}/update/${selectedChild.id}`, formattedValues);
       
       message.success('Child profile updated successfully!');
       setEditModalVisible(false);

@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { message, Spin } from "antd";
 import { jwtDecode } from "jwt-decode";
+
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,10 +21,11 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-        const response = await axios.post("https://localhost:7217/api/v1/auth/login", {
-            email,
-            password,
-        });
+      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/auth/login`, {
+        email,
+        password,
+    });
+    
 
         if (response.status === 200) {
             const { accessToken } = response.data.data;
