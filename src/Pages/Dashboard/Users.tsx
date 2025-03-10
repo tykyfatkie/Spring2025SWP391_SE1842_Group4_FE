@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Table, Avatar, Tag, Space, Typography, message, Spin, Input, Button } from "antd";
-import { UserOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
+import { UserOutlined, SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 
@@ -9,38 +10,34 @@ const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [page, setPage] = useState(0); 
-  const [pageSize, setPageSize] = useState(10); 
-  // Fix TypeScript error - removed type annotation
-  const [roleIds, setRoleIds] = useState(["00000000-0000-0000-0000-000000000001"]); 
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [roleIds, setRoleIds] = useState(["00000000-0000-0000-0000-000000000001"]);
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-  
+
       const params = {
         SearchKeyword: searchKeyword || undefined,
         Page: page,
         PageSize: pageSize,
         RoleIds: roleIds.length > 0 ? roleIds : undefined
       };
-  
+
       const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/users/all`, {
         params,
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
-      console.log("API Response:", response.data);
-      
-      // Fix data extraction - access nested data structure
+
       const userData = response.data.data.data;
       setUsers(Array.isArray(userData) ? userData : []);
-      
+
     } catch (error) {
-      console.error("Fetch error:", error);
       message.error("Failed to fetch users");
     } finally {
       setLoading(false);
@@ -49,14 +46,14 @@ const UsersPage = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, pageSize]); // Removed searchKeyword to prevent automatic search on every keystroke
-  
-  // Add separate useEffect for debugging to see updated state
-  useEffect(() => {
-    console.log("Users State:", users);
-  }, [users]);
+  }, [page, pageSize]);
 
-  // Modify columns to match API response structure
+  // Function to handle viewing a user's children
+  const handleViewChildren = (userId) => {
+    localStorage.setItem("parentId", userId);
+    navigate("/my-admin/children-view");
+  };
+
   const columns = [
     {
       title: "Avatar",
@@ -73,7 +70,11 @@ const UsersPage = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text) => <Text strong>{text}</Text>,
+      render: (text, record) => (
+        <a onClick={() => handleViewChildren(record.id)}>
+          <Text strong>{text}</Text>
+        </a>
+      ),
     },
     {
       title: "Email",
@@ -95,12 +96,17 @@ const UsersPage = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <a style={{ color: "#1677ff" }}>
-            <EditOutlined /> Edit
-          </a>
-          <a style={{ color: "red" }}>
-            <DeleteOutlined /> Delete
-          </a>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewChildren(record.id);
+            }}
+            type="primary"
+            ghost
+          >
+            View Children
+          </Button>
         </Space>
       ),
     },
@@ -128,8 +134,12 @@ const UsersPage = () => {
           columns={columns}
           dataSource={users}
           rowKey="id"
+          onRow={(record) => ({
+            onClick: () => handleViewChildren(record.id),
+            style: { cursor: 'pointer' }
+          })}
           pagination={{
-            current: page + 1, // Ant Design pagination starts from 1
+            current: page + 1,
             pageSize,
             onChange: (page) => setPage(page - 1),
             showSizeChanger: true,

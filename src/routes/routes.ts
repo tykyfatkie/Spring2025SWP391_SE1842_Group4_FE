@@ -23,6 +23,7 @@ import ProtectedRoute from "../utils/ProtectedRoute";
 import DoctorsPage from "../Pages/Dashboard/Doctors"; 
 import React from "react";
 import ChildManage from "../Pages/ChildManage/ChildManage";
+import ChildrenView from "../Pages/Dashboard/ChildrenView";
 
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
@@ -60,6 +61,7 @@ const routes: LayoutRoute[] = [
       { path: "/my-admin/users", component: ProtectedComponent(Users, ["Admin"]) },
       { path: "/my-admin/doctors", component: ProtectedComponent(DoctorsPage, ["Admin"]) },
       { path: "/my-admin/settings", component: ProtectedComponent(Settings, ["Admin"]) },
+      { path: "/my-admin/children-view", component: ProtectedComponent(ChildrenView, ["Admin"]) },
     ],
   },
 ];
