@@ -36,7 +36,7 @@ const ChildManage: React.FC = () => {
       }
 
       const response = await axios.get(
-        `${import.meta.env.VITE_API_ENDPOINT}/children/getChildByParent/${parentId}`,
+        `${import.meta.env.VITE_API_ENDPOINT}/children/getChildByToken`,
         {
           headers: {
             Authorization: `Bearer ${token}`
