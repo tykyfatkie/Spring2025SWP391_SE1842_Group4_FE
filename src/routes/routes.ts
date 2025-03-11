@@ -26,6 +26,7 @@ import ChildManage from "../Pages/ChildManage/ChildManage";
 import ChildrenView from "../Pages/Dashboard/ChildrenView";
 import MyDoctorProfilePage from "../Pages/MyDoctor/MyDoctor";
 import UpdateDoctorProfile from "../Pages/MyDoctor/UpdateDoctorProfile";
+import PackagesPage from "../Pages/Dashboard/PackagePage";
 
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
@@ -66,6 +67,7 @@ const routes: LayoutRoute[] = [
       { path: "/my-admin/doctors", component: ProtectedComponent(DoctorsPage, ["Admin"]) },
       { path: "/my-admin/settings", component: ProtectedComponent(Settings, ["Admin"]) },
       { path: "/my-admin/children-view", component: ProtectedComponent(ChildrenView, ["Admin"]) },
+      { path: "/my-admin/packages", component: ProtectedComponent(PackagesPage, ["Admin"]) },
     ],
   },
 ];
