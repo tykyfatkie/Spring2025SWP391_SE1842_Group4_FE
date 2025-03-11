@@ -45,11 +45,11 @@ const DefaultLayout: React.FC = () => {
               Users
             </Menu.Item>
             <Menu.Item key="/my-admin/doctors" icon={<UserOutlined />}>
-              Doctor
+              Doctors
             </Menu.Item>
-            <Menu.Item key="/my-admin/settings" icon={<SettingOutlined />}>
+            {/* <Menu.Item key="/my-admin/settings" icon={<SettingOutlined />}>
               Settings
-            </Menu.Item>
+            </Menu.Item> */}
             <Menu.Item key="/my-admin/packages" icon={<CrownOutlined />}>
               Package
             </Menu.Item>
