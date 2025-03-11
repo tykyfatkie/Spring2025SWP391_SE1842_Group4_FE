@@ -24,6 +24,8 @@ import DoctorsPage from "../Pages/Dashboard/Doctors";
 import React from "react";
 import ChildManage from "../Pages/ChildManage/ChildManage";
 import ChildrenView from "../Pages/Dashboard/ChildrenView";
+import MyDoctorProfilePage from "../Pages/MyDoctor/MyDoctor";
+import UpdateDoctorProfile from "../Pages/MyDoctor/UpdateDoctorProfile";
 
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
@@ -49,6 +51,8 @@ const routes: LayoutRoute[] = [
       { path: "/child-analytics", component: ProtectedComponent(AnalyticsPage, ["User", "Doctor"]) },
       { path: "/doctor", component: ProtectedComponent(DoctorPage, ["User", "Doctor"]) },
       { path: "/doctor/:id", component: ProtectedComponent(DoctorProfilePage, ["User", "Doctor"]) },
+      { path: "/my-doctor", component: ProtectedComponent(MyDoctorProfilePage, [ "Doctor"]) },
+      { path: "/update-doctor-profile", component: ProtectedComponent(UpdateDoctorProfile, [ "Doctor"]) },
       { path: "/profile", component: ProtectedComponent(ParentProfilePage, ["User"]) },
       { path: "/child-manage", component: ProtectedComponent(ChildManage, ["User"]) },
       { path: "/manage-profile", component: ProtectedComponent(ManageUserProfile, ["User"]) },
