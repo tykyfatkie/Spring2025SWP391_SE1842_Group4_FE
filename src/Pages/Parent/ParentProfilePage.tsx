@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Thêm import axios
 import { 
   Layout, 
   Typography, 
@@ -22,7 +23,8 @@ import {
   UserOutlined, 
   CrownOutlined, 
   PlusOutlined,
-  EditOutlined
+  EditOutlined,
+  RightOutlined // Thêm icon này để làm nút xem thêm
 } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
 import doctorImage from "../../assets/doctor.png";
@@ -32,26 +34,13 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-// Static data for children
-const childrenData = [
-  {
-    id: 1,
-    name: "Nguyễn Văn An",
-    age: 5,
-    gender: "Male",
-    weight: 20,
-    height: 110,
-    bmi: 16.5,
-    lastCheckup: "2024-03-15",
-  }
-];
-
 const ParentProfilePage: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [doctors, setDoctors] = useState<any[]>([]); // State to hold the list of doctors
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [childData, setChildData] = useState<any>(null); // Thay đổi state để lưu dữ liệu trẻ
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -64,7 +53,7 @@ const ParentProfilePage: React.FC = () => {
           return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}users/profile`, {
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/profile`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -83,7 +72,7 @@ const ParentProfilePage: React.FC = () => {
 
         const data = await response.json();
         console.log('User data:', data);
-        setUserData(data.data); // Lưu dữ liệu người dùng từ trường data
+        setUserData(data.data);
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       } finally {
@@ -91,9 +80,37 @@ const ParentProfilePage: React.FC = () => {
       }
     };
 
+    const fetchChildData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token || token.split('.').length !== 3) {
+          return;
+        }
+        
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_ENDPOINT}/children/getChildByToken`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        
+        console.log('Child data:', response.data);
+        
+        // Nếu có dữ liệu trẻ, lấy trẻ đầu tiên để hiển thị
+        if (response.data.data && response.data.data.length > 0) {
+          setChildData(response.data.data[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching child data:', error);
+      }
+    };
+
     const fetchDoctors = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}doctors/all`);
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch doctors');
         }
@@ -101,7 +118,7 @@ const ParentProfilePage: React.FC = () => {
         if (!Array.isArray(data.data)) {
           throw new Error('Invalid API response: Expected an array');
         }
-        setDoctors(data.data); // Save the doctor list into state
+        setDoctors(data.data);
       } catch (error) {
         console.error('Error fetching doctors:', error);
         message.error('Failed to load doctors');
@@ -109,13 +126,45 @@ const ParentProfilePage: React.FC = () => {
     };
 
     fetchUserData();
-    fetchDoctors(); // Call the fetchDoctors function
+    fetchChildData(); // Gọi API lấy dữ liệu trẻ
+    fetchDoctors();
   }, []);
 
-  const handleAddChild = (values: any) => {
-    console.log('New child values:', values);
-    setIsModalVisible(false);
-    form.resetFields();
+  const handleAddChild = async (values: any) => {
+    try {
+      // Thêm logic gửi dữ liệu lên API nếu cần
+      console.log('New child values:', values);
+      setIsModalVisible(false);
+      form.resetFields();
+      
+      // Sau khi thêm thành công, cập nhật lại danh sách trẻ
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_ENDPOINT}/children/getChildByToken`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      
+      if (response.data.data && response.data.data.length > 0) {
+        setChildData(response.data.data[0]);
+      }
+      
+      message.success('Child added successfully');
+    } catch (error) {
+      console.error('Error adding child:', error);
+      message.error('Failed to add child');
+    }
+  };
+
+  // Tính BMI từ chiều cao và cân nặng
+  const calculateBMI = (height: number, weight: number) => {
+    // Chuyển chiều cao từ cm sang m
+    const heightInMeters = height / 100;
+    // Tính BMI = cân nặng / (chiều cao ^ 2)
+    return (weight / (heightInMeters * heightInMeters)).toFixed(1);
   };
 
   return (
@@ -154,113 +203,51 @@ const ParentProfilePage: React.FC = () => {
                 title={
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Title level={4} style={{ margin: 0 }}>Child Information</Title>
+                    <div>
                     <Button 
                       type="primary" 
                       icon={<PlusOutlined />}
-                      onClick={() => setIsModalVisible(true)}
+                      style={{ marginRight: '8px' }}
                     >
-                      Add Child
+                      <Link to="/child-create">Add Child</Link>
                     </Button>
+                      <Link to="/child-manage">
+                        <Button type="default">
+                          View All <RightOutlined />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 }
               >
-                {childrenData.map(child => (
-                  <Card key={child.id} type="inner" style={{ marginTop: '16px' }}>
+                {childData ? (
+                  <Card key={childData.id} type="inner" style={{ marginTop: '16px' }}>
                     <Row gutter={[16, 16]}>
                       <Col span={12}>
-                        <Title level={5}>{child.name}</Title>
-                        <p>Age: {child.age}</p>
-                        <p>Gender: {child.gender}</p>
-                        <p>Last Checkup: {child.lastCheckup}</p>
+                        <Title level={5}>{childData.name}</Title>
+                        <p>Age: {childData.age || 'N/A'}</p>
+                        <p>Gender: {childData.gender}</p>
+                        <p>Last Checkup: {childData.lastCheckup || 'No data'}</p>
                       </Col>
                       <Col span={12}>
                         <Title level={5}>BMI</Title>
                         <Progress
                           percent={75}
                           status="active"
-                          format={() => `${child.bmi} kg/m²`}
+                          format={() => `${calculateBMI(childData.height, childData.weight)} kg/m²`}
                         />
-                        <p>Height: {child.height} cm</p>
-                        <p>Weight: {child.weight} kg</p>
+                        <p>Height: {childData.height} cm</p>
+                        <p>Weight: {childData.weight} kg</p>
                       </Col>
                     </Row>
                   </Card>
-                ))}
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <Text type="secondary">No child information. Please add a child.</Text>
+                  </div>
+                )}
               </Card>
 
-              <Modal
-                title="Add Child Information"
-                open={isModalVisible}
-                onCancel={() => {
-                  setIsModalVisible(false);
-                  form.resetFields();
-                }}
-                footer={[
-                  <Button key="cancel" onClick={() => {
-                    setIsModalVisible(false);
-                    form.resetFields();
-                  }}>
-                    Cancel
-                  </Button>,
-                  <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    Add
-                  </Button>
-                ]}
-              >
-                <Form
-                  form={form}
-                  layout="vertical"
-                  onFinish={handleAddChild}
-                >
-                  <Form.Item
-                    name="name"
-                    label="Full Name"
-                    rules={[{ required: true, message: 'Please enter the child\'s name' }]}
-                  >
-                    <Input placeholder="Enter child's name" />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="birthDate"
-                    label="Date of Birth"
-                    rules={[{ required: true, message: 'Please select a date of birth' }]}
-                  >
-                    <DatePicker style={{ width: '100%' }} placeholder="Select date of birth" />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="gender"
-                    label="Gender"
-                    rules={[{ required: true, message: 'Please select a gender' }]}
-                  >
-                    <Select placeholder="Select gender">
-                      <Option value="male">Male</Option>
-                      <Option value="female">Female</Option>
-                    </Select>
-                  </Form.Item>
-
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Form.Item
-                        name="height"
-                        label="Height (cm)"
-                        rules={[{ required: true, message: 'Please enter height' }]}
-                      >
-                        <InputNumber min={1} style={{ width: '100%' }} placeholder="Enter height" />
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item
-                        name="weight"
-                        label="Weight (kg)"
-                        rules={[{ required: true, message: 'Please enter weight' }]}
-                      >
-                        <InputNumber min={1} style={{ width: '100%' }} placeholder="Enter weight" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form>
-              </Modal>
             </Col>
 
             <Col span={8}>
@@ -303,7 +290,7 @@ const ParentProfilePage: React.FC = () => {
                     }}>
                       <Rate 
                         disabled 
-                        defaultValue={4.5} // Static value, or you can use actual value from API
+                        defaultValue={4.5}
                         style={{ fontSize: '16px' }} 
                       />
                       <Button type="primary" size="middle">
