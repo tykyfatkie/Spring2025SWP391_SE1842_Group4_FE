@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Card, Typography, Layout, Steps, message, Result } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined, KeyOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Text, Paragraph } = Typography;
 const { Content } = Layout;
@@ -10,15 +11,14 @@ const { Step } = Steps;
 const ForgotPasswordPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [email, setEmail] = useState<string>('');
-  const [token, setToken] = useState<string>('');
   const [form] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleRequestCode = async (values: { email: string }) => {
     setLoading(true);
     try {
-      
-      const response = await axios.post('/api/v1/auth/forgot-password/request', {
+      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/auth/forgot-password/request`, {
         email: values.email
       });
       
@@ -36,45 +36,20 @@ const ForgotPasswordPage: React.FC = () => {
     }
   };
 
-  const handleVerifyCode = async (values: { code: string }) => {
+  const handleVerifyAndResetPassword = async (values: { code: string, password: string, confirmPassword: string }) => {
     setLoading(true);
     try {
-      
-      const response = await axios.post('/api/v1/auth/forgot-password/verify', {
+      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/api/v1/auth/forgot-password/verify`, {
         email: email,
-        code: values.code
-      });
-      
-      
-      setToken(response.data.token);
-      message.success('Verification code is valid');
-      setCurrentStep(2);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        message.error(error.response.data.message || 'Invalid verification code');
-      } else {
-        message.error('An error occurred. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async (values: { password: string; confirmPassword: string }) => {
-    setLoading(true);
-    try {
-      
-      const response = await axios.post('/api/v1/auth/forgot-password/reset', {
-        email: email,
-        token: token,
-        password: values.password
+        otp: values.code,
+        newPassword: values.password
       });
       
       message.success('Password has been reset successfully');
-      setCurrentStep(3);
+      setCurrentStep(2); // Go directly to success step
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        message.error(error.response.data.message || 'Failed to reset password');
+        message.error(error.response.data.message || 'Verification failed');
       } else {
         message.error('An error occurred. Please try again.');
       }
@@ -117,7 +92,7 @@ const ForgotPasswordPage: React.FC = () => {
         );
       case 1:
         return (
-          <Form form={form} layout="vertical" onFinish={handleVerifyCode}>
+          <Form form={form} layout="vertical" onFinish={handleVerifyAndResetPassword}>
             <Paragraph className="mb-4">
               We've sent a verification code to <Text strong>{email}</Text>. 
               Please check your inbox and enter the verification code.
@@ -136,36 +111,7 @@ const ForgotPasswordPage: React.FC = () => {
                 size="large" 
               />
             </Form.Item>
-            <Form.Item>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                block 
-                size="large"
-                loading={loading}
-              >
-                Verify
-              </Button>
-            </Form.Item>
-            <div className="text-center">
-              <Button 
-                type="link" 
-                onClick={() => handleRequestCode({ email })}
-                disabled={loading}
-              >
-                Resend Code
-              </Button>
-            </div>
-          </Form>
-        );
-      case 2:
-        return (
-          <Form 
-            form={form} 
-            layout="vertical" 
-            onFinish={handleResetPassword}
-            requiredMark={false}
-          >
+
             <Form.Item
               name="password"
               label="New Password"
@@ -185,6 +131,7 @@ const ForgotPasswordPage: React.FC = () => {
                 size="large" 
               />
             </Form.Item>
+            
             <Form.Item
               name="confirmPassword"
               label="Confirm Password"
@@ -208,6 +155,7 @@ const ForgotPasswordPage: React.FC = () => {
                 size="large" 
               />
             </Form.Item>
+            
             <Form.Item>
               <Button 
                 type="primary" 
@@ -219,16 +167,26 @@ const ForgotPasswordPage: React.FC = () => {
                 Reset Password
               </Button>
             </Form.Item>
+            
+            <div className="text-center">
+              <Button 
+                type="link" 
+                onClick={() => handleRequestCode({ email })}
+                disabled={loading}
+              >
+                Resend Code
+              </Button>
+            </div>
           </Form>
         );
-      case 3:
+      case 2:
         return (
           <Result
             status="success"
             title="Password Reset Successfully!"
             subTitle="You can now log in with your new password."
             extra={[
-              <Button type="primary" key="login" size="large" href="/login">
+              <Button type="primary" key="login" size="large" onClick={() => navigate("/login")}>
                 Log In
               </Button>
             ]}
@@ -240,14 +198,14 @@ const ForgotPasswordPage: React.FC = () => {
   };
 
   return (
-    <Layout className="min-h-screen bg-gray-50" >
+    <Layout className="min-h-screen bg-gray-50">
       <Content className="py-12">
         <div className="max-w-md mx-auto px-4">
           <Card className="shadow-md rounded-lg">
             <div className="text-center mb-6">
               <Title level={3}>Forgot Password</Title>
               <Text type="secondary">
-                Reset your password in 3 simple steps
+                Reset your password in a few simple steps
               </Text>
             </div>
             
@@ -260,11 +218,11 @@ const ForgotPasswordPage: React.FC = () => {
                   icon: <UserOutlined />
                 },
                 {
-                  title: 'Verify',
+                  title: 'Verify & Reset',
                   icon: <KeyOutlined />
                 },
                 {
-                  title: 'Reset',
+                  title: 'Done',
                   icon: <LockOutlined />
                 }
               ]}
