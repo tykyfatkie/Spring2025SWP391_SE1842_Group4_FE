@@ -17,11 +17,11 @@ import Sidebar from '../../components/Sidebar/Sidebar.tsx';
 const { Content } = Layout;
 const { Option } = Select;
 
-const token = localStorage.getItem('token');
-
 const CreateChild: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+
+  const token = localStorage.getItem('token');
 
   const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_ENDPOINT,
@@ -42,8 +42,9 @@ const CreateChild: React.FC = () => {
   
     try {
       const formattedValues = {
-        name: values.name, // 
-        DoB: values.DoB ? moment(values.DoB).format('YYYY-MM-DD') : undefined, 
+        name: values.name,
+        // Fixed: Use the Moment object directly instead of wrapping it again
+        DoB: values.DoB ? values.DoB.format('YYYY-MM-DD') : undefined,
         gender: Number(values.gender),
         weight: Number(values.weight),
         height: Number(values.height),
@@ -74,9 +75,6 @@ const CreateChild: React.FC = () => {
     }
   };
   
-  
-  
-
   const resetForm = () => {
     form.resetFields();
   };
