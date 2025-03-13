@@ -43,7 +43,7 @@ const CreateChild: React.FC = () => {
     try {
       const formattedValues = {
         name: values.name, // 
-        dob: values.doB ? moment(values.doB).format('YYYY-MM-DD') : undefined, 
+        DoB: values.DoB ? moment(values.DoB).format('YYYY-MM-DD') : undefined, 
         gender: Number(values.gender),
         weight: Number(values.weight),
         height: Number(values.height),
@@ -53,7 +53,7 @@ const CreateChild: React.FC = () => {
       console.log('Submitting data:', formattedValues);
   
       const response = await axios.post(
-        `${import.meta.env.VITE_API_ENDPOINT}/api/v1/children/create`,
+        `${import.meta.env.VITE_API_ENDPOINT}/children/create`,
         formattedValues,
         {
           headers: {
@@ -82,7 +82,7 @@ const CreateChild: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
       <Layout>
         <Sidebar />
         <Content style={{ padding: '24px', background: '#f5f5f5' }}>
@@ -103,7 +103,7 @@ const CreateChild: React.FC = () => {
               </Form.Item>
               
               <Form.Item 
-                name="doB" 
+                name="DoB" 
                 label="Date of Birth" 
                 rules={[{ required: true, message: 'Please select date of birth' }]}
               > 
