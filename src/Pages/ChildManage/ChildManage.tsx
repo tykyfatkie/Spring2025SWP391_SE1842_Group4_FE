@@ -77,8 +77,9 @@ const ChildManage: React.FC = () => {
         gender: values.gender,
         weight: Number(values.weight),
         height: Number(values.height),
-        notes: values.notes,
+        notes: values.notes || "", // Nếu notes là undefined thì thay bằng chuỗi rỗng ""
       };
+      
 
       const response = await axios.put(
         `${import.meta.env.VITE_API_ENDPOINT}/children/update/${editingChild.id}`,
