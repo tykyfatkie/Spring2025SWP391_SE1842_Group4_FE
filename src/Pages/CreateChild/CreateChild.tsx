@@ -122,6 +122,7 @@ const CreateChild: React.FC = () => {
                 <Select placeholder="Select gender">
                   <Option value={0}>Male</Option>
                   <Option value={1}>Female</Option>
+                  <Option value={2}>Other</Option>
                 </Select> 
               </Form.Item>
 
