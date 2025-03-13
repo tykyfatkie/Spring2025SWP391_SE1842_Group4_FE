@@ -43,12 +43,8 @@ const CreateChild: React.FC = () => {
     try {
       const formattedValues = {
         name: values.name,
-        // Fixed: Use the Moment object directly instead of wrapping it again
         DoB: values.DoB ? values.DoB.format('YYYY-MM-DD') : undefined,
         gender: Number(values.gender),
-        weight: Number(values.weight),
-        height: Number(values.height),
-        notes: values.notes
       };
   
       console.log('Submitting data:', formattedValues);
@@ -103,12 +99,24 @@ const CreateChild: React.FC = () => {
               <Form.Item 
                 name="DoB" 
                 label="Date of Birth" 
-                rules={[{ required: true, message: 'Please select date of birth' }]}
+                rules={[
+                  {
+                    required: true, 
+                    message: 'Please select date of birth',
+                  }, 
+                  {
+                    validator: (_, value) =>
+                      value && value.isAfter(moment(), 'day')
+                        ? Promise.reject(new Error('Date of birth cannot be in the future'))
+                        : Promise.resolve(),
+                  }
+                ]}
               > 
                 <DatePicker 
                   style={{ width: '100%' }} 
                   format="YYYY-MM-DD" 
                   placeholder="YYYY-MM-DD"
+                  disabledDate={(current) => current && current.isAfter(moment(), 'day')} // Chặn chọn ngày tương lai
                 /> 
               </Form.Item>
               
@@ -121,18 +129,6 @@ const CreateChild: React.FC = () => {
                   <Option value={0}>Male</Option>
                   <Option value={1}>Female</Option>
                 </Select> 
-              </Form.Item>
-
-              <Form.Item name="weight" label="Weight (kg)">
-                <Input type="number" placeholder="Enter weight" />
-              </Form.Item>
-
-              <Form.Item name="height" label="Height (cm)">
-                <Input type="number" placeholder="Enter height" />
-              </Form.Item>
-
-              <Form.Item name="notes" label="Notes">
-                <Input.TextArea placeholder="Additional notes" />
               </Form.Item>
               
               <Form.Item> 
