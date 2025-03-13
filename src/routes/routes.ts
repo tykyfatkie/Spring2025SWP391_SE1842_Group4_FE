@@ -45,6 +45,7 @@ const routes: LayoutRoute[] = [
       { path: "/about-us", component: AboutPage, role: ["User", "Guest"] },
       { path: "/contact-us", component: ContactPage, role: ["Guest", "User"] },
       { path: "/package", component: PackagePage, role: ["User"] },
+      { path: "/bmi", component: PackagePage, role: ["User"] },
       { path: "/guestbmi", component: GuestBMICalculator, role: ["Guest", "User"] },
       { path: "/dashboard", component: ProtectedComponent(UpdateChildPage, ["Admin", "Staff"]) },
       { path: "/child-create", component: ProtectedComponent(CreateChild, ["User", "Doctor"]) },
