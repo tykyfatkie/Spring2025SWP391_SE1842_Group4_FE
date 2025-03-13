@@ -10,7 +10,6 @@ import {
   Spin 
 } from 'antd';
 import axiosInstance from '../../utils/axiosInstance';
-import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 
 
