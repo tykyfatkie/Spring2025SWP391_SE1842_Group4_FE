@@ -38,9 +38,18 @@ const AppHeader: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.clear(); 
+    sessionStorage.clear(); 
+
+    document.cookie.split(";").forEach((cookie) => {
+        document.cookie = cookie
+            .replace(/^ +/, "")
+            .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
+    });
+
     navigate('/login');
-  };
+};
+
 
   const menu = (
     <Menu>

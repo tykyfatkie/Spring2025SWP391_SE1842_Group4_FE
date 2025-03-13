@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import "./LoginPage.css"; // Giữ nguyên CSS
+import React, { useState, useEffect } from "react";
+import "./LoginPage.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { message, Spin } from "antd";
 import { jwtDecode } from "jwt-decode";
 
@@ -9,8 +9,44 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // Trạng thái loading
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Handle Google OAuth callback
+  useEffect(() => {
+    // Check if this is a callback from Google OAuth
+    const query = new URLSearchParams(location.search);
+    const token = query.get('token');
+    const userId = query.get('userId');
+    
+    if (token && userId) {
+      // Store token and user ID
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", userId);
+
+      try {
+        const userData: any = jwtDecode(token);
+        const userRole = userData.role;
+        localStorage.setItem("role", userRole);
+
+        message.success("Google login successful!");
+
+        // Redirect based on role
+        setTimeout(() => {
+          if (userRole === "Admin") {
+            navigate("/my-admin");
+          } else if (userRole === "Doctor") {
+            navigate("/my-doctor");
+          } else {
+            navigate("/home");
+          }
+        }, 1500);
+      } catch (error) {
+        message.error("Error processing login information.");
+      }
+    }
+  }, [location, navigate]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -21,45 +57,55 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-        const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/auth/login`, {
-            email,
-            password,
-        });
+      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/auth/login`, {
+        email,
+        password,
+      });
 
-        if (response.status === 200) {
-            const { accessToken, userId } = response.data.data;
-            
-            // Store token and user ID
-            localStorage.setItem("token", accessToken);
-            localStorage.setItem("userId", userId);
+      if (response.status === 200) {
+        const { accessToken, userId } = response.data.data;
+        
+        // Store token and user ID
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("userId", userId);
 
-            const userData: any = jwtDecode(accessToken);
-            console.log(userData);
+        const userData: any = jwtDecode(accessToken);
+        const userRole = userData.role;
+        localStorage.setItem("role", userRole);
 
-            const userRole = userData.role;
-            localStorage.setItem("role", userRole);
+        message.success("Login successful!");
 
-            message.success("Login successful!");
-
-            setTimeout(() => {
-                if (userRole === "Admin") {
-                    navigate("/my-admin");
-                } else if (userRole === "Doctor") {
-                    navigate("/my-doctor");
-                } else {
-                    navigate("/home");
-                }
-            }, 1500);
-        }
+        setTimeout(() => {
+          if (userRole === "Admin") {
+            navigate("/my-admin");
+          } else if (userRole === "Doctor") {
+            navigate("/my-doctor");
+          } else {
+            navigate("/home");
+          }
+        }, 1500);
+      }
     } catch (error: any) {
-        message.error(error.response?.data?.message || "Login failed. Please try again.");
+      message.error(error.response?.data?.message || "Login failed. Please try again.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
 
-;
-
+  const handleGoogleLogin = () => {
+    // Generate a random state for CSRF protection
+    const state = Math.random().toString(36).substring(2);
+    localStorage.setItem('oauth_state', state);
+    
+    // Get the redirect URL from your environment variables or use a default
+    const redirectUri = `${window.location.origin}/login`; // Assuming your login page will handle the callback
+    
+    // Construct the Google login URL
+    const googleLoginUrl = `${import.meta.env.VITE_API_ENDPOINT}/api/v1/auth/google/login?redirect=${encodeURIComponent(redirectUri)}&state=${state}`;
+    
+    // Redirect to Google login
+    window.location.href = googleLoginUrl;
+  };
 
   return (
     <div className="login" style={{ backgroundColor: "#ffffff" }}>
@@ -67,7 +113,7 @@ const LoginPage: React.FC = () => {
       <div className="login__access">
         <h1 className="login__title">Log in to your account.</h1>
         <div className="login__area">
-          {loading ? ( // Hiển thị loading nếu đang xử lý
+          {loading ? (
             <Spin />
           ) : (
             <form className="login__form" onSubmit={handleLogin} autoComplete="off">
@@ -115,7 +161,7 @@ const LoginPage: React.FC = () => {
           <div className="login__social">
             <p className="login__social-title">Or login with</p>
             <div className="login__social-links">
-              <a href="" className="login__social-link">
+              <a onClick={handleGoogleLogin} className="login__social-link" style={{ cursor: "pointer" }}>
                 <img src="src/assets/img/icon-google.svg" alt="Google" className="login__social-img" />
               </a>
               <a href="" className="login__social-link">
