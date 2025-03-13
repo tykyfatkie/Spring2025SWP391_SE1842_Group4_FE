@@ -7,6 +7,10 @@ const { Title, Text } = Typography;
 
 const PaymentSuccessPage: React.FC = () => {
   const navigate = useNavigate();
+  const token = localStorage.getItem("payment_token");
+  if (token) {
+      console.log("Retrieved Token:", token);
+  }
 
   useEffect(() => {
     // Redirect to dashboard after 5 seconds

@@ -31,7 +31,7 @@ const ManageUserProfile: React.FC = () => {
   const fetchUserProfile = async () => {
     setProfileLoading(true);
     try {
-      const response = await axiosInstance.get(`${import.meta.env.VITE_API_ENDPOINT}/profile`);
+      const response = await axiosInstance.get(`${import.meta.env.VITE_API_ENDPOINT}/users/profile`);
       form.setFieldsValue(response.data);
     } catch (error: any) {
       message.error('Failed to fetch user profile');

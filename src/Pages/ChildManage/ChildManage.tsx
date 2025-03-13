@@ -45,7 +45,7 @@ const ChildManage: React.FC = () => {
         setChildren(response.data.data);
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to fetch children data.");
+      message.error(error.response?.data?.message || "You do not have any children yet.");
       console.error("Error fetching children:", error);
     } finally {
       setLoading(false);

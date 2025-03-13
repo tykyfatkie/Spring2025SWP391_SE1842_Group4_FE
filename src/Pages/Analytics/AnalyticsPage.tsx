@@ -92,7 +92,7 @@ const AnalyticsPage: React.FC = () => {
           )}
         </Content>
       </Layout>
-      <Footer />
+
     </Layout>
   );
 };
