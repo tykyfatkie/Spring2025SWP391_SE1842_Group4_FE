@@ -1,145 +1,140 @@
-import React, { useState } from 'react';
-import { Card, Radio, Button, Form, Input, message, Row, Col, Typography, Layout } from 'antd';
-import { CrownOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import type { RadioChangeEvent } from 'antd';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Card, Button, Typography, Layout, Spin, message } from "antd";
+import { CheckCircleOutlined, CrownOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
 
-interface PlanType {
+interface PackageType {
   id: string;
-  name: string;
+  packageName: string;
   price: number;
-  duration: string;
-  features: string[];
-}
-
-interface SubscriptionFormData {
-  name: string;
-  email: string;
-  phone: string;
-  planId: string;
+  durationMonths: number;
+  maxChildrenAllowed: number;
+  trialPeriodDays: number;
+  status: number;
 }
 
 const PremiumSubscriptionPage: React.FC = () => {
-  const [selectedPlan, setSelectedPlan] = useState<string>('');
-  const [form] = Form.useForm();
+  const [packages, setPackages] = useState<PackageType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const plans: PlanType[] = [
-    {
-      id: 'Basic',
-      name: 'Basic Premium',
-      price: 99000,
-      duration: 'month',
-      features: [
-        '    Free medical examination 3 times',
-        '    50% discount on medicine when purchased at the hospital',
-        '    Have access to all features of the system',
-        '    ',
-        '    ',
+  useEffect(() => {
+    fetchPackages();
+  }, []);
 
-      ],
-    },
-    {
-      id: 'Standard',
-      name: 'Standard Premium',
-      price: 169000,
-      duration: 'month',
-      features: [
-        '    Free medical examination 5 times',
-        '    70% discount on medicine when purchased at the hospital',
-        '    Have access to all features of the system',
-        '    1:1 consulting support',
-        '    ',
+  const fetchPackages = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("token");
 
-      ],
-    },
-    {
-      id: 'Premium',
-      name: 'Premium Plus',
-      price: 199000,
-      duration: 'month',
-      features: [
-        '    Free medical examination unlimited times',
-        '    90% discount on medicine when purchased at the hospital',
-        '    Have access to all features of the system',
-        '    1:1 consulting support',
-        '    Priority when going to the doctor',
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      ],
-    },
-  ];
-
-  const handlePlanChange = (e: RadioChangeEvent) => {
-    setSelectedPlan(e.target.value);
+      // Filter only active packages (status === 2)
+      if (response.data && response.data.data) {
+        const activePackages = response.data.data.filter((pkg: PackageType) => pkg.status === 1);
+        setPackages(activePackages);
+      }
+    } catch (error) {
+      console.error("Error fetching packages:", error);
+      message.error("Failed to fetch packages.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubscribe = (planId: string) => {
-    // Xử lý logic đăng ký ở đây
-    message.success(`Đang chuyển đến trang thanh toán cho gói ${planId}`);
+  const handleSubscribe = async (packageId: string, price: number) => {
+    setSubmitting(true);
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_ENDPOINT}/payment/vnpay`,
+        {
+          packageId,
+          amount: price,
+          description: "Subscription to premium package",
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data) {
+        window.location.href = response.data;
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      message.error("Failed to initiate payment.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
+    <Layout style={{ minHeight: "100vh", margin: "-25px" }}>
       <Content>
-        <div className="p-6 max-w-6xl mx-auto">
-          <Title level={2} className="text-center mb-8">
-            <CrownOutlined className="mr-2" style={{ color: '#FFD700' }} />
-            Đăng Ký Gói Premium
+        <div style={{ padding: 20, maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
+          <Title level={2}>
+            <CrownOutlined style={{ color: "#FFD700", marginRight: 8 }} />
+            Choose Your Premium Plan
           </Title>
+          <Text style={{ color: "#666" }}>
+            Unlock exclusive benefits and take full advantage of our system with a Premium plan.
+          </Text>
 
-          <Row gutter={[24, 24]} className="mb-8">
-            {plans.map((plan) => (
-              <Col xs={24} md={8} key={plan.id}>
-                <Card
-                  className={`h-full ${
-                    selectedPlan === plan.id ? 'border-blue-500 border-2' : ''
-                  }`}
-                  hoverable
+          {loading ? (
+            <Spin size="large" style={{ display: "block", margin: "50px auto" }} />
+          ) : (
+            packages.map((plan) => (
+              <Card
+                key={plan.id}
+                style={{
+                  border: "2px solid #1890ff",
+                  marginTop: 20,
+                  textAlign: "left",
+                  padding: 20,
+                  borderRadius: 10,
+                }}
+              >
+                <Title level={4} style={{ color: "#1890ff" }}>
+                  <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+                  {plan.packageName}
+                </Title>
+                <Title level={3} style={{ color: "#1890ff" }}>
+                  ${plan.price.toFixed(2)}
+                  <Text style={{ fontSize: 16, color: "#666" }}> / {plan.durationMonths} month(s)</Text>
+                </Title>
+
+                <ul style={{ paddingLeft: 20, fontSize: 16, color: "#444" }}>
+                  <li>✅ Includes essential features for child growth tracking.</li>
+                  <li>✅ {plan.maxChildrenAllowed} children allowed</li>
+                  <li>✅ {plan.trialPeriodDays} trial days</li>
+                </ul>
+
+                <Button
+                  type="primary"
+                  block
+                  loading={submitting}
+                  style={{
+                    marginTop: 20,
+                    height: 50,
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    backgroundColor: "#1890ff",
+                    borderColor: "#1890ff",
+                  }}
+                  onClick={() => handleSubscribe(plan.id, plan.price)}
                 >
-                  <Radio.Group onChange={handlePlanChange} value={selectedPlan}>
-                    <Radio value={plan.id}>
-                      <Title level={4}>{plan.name}</Title>
-                    </Radio>
-                  </Radio.Group>
-                  
-                  <div className="mt-4">
-                    <Title level={3} className="mb-2">
-                      {plan.price.toLocaleString()}đ
-                      <Text className="text-gray-500 text-base">/{plan.duration}</Text>
-                    </Title>
-                    
-                    <ul className="list-none p-0">
-                      {plan.features.map((feature, index) => (
-                        <li key={index} className="mb-2">
-                          <CheckCircleOutlined className="text-green-500 mr-2" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    <div className="mt-6">
-                      <Button 
-                        type="primary" 
-                        size="large" 
-                        block
-                        onClick={() => handleSubscribe(plan.id)}
-                        style={{
-                          background: '#1890ff',
-                          borderColor: '#1890ff',
-                          height: '48px',
-                          fontSize: '16px',
-                          fontWeight: 500
-                        }}
-                      >
-                        Subscribe Now
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+                  Subscribe Now
+                </Button>
+              </Card>
+            ))
+          )}
         </div>
       </Content>
     </Layout>

@@ -61,12 +61,11 @@ const Homepage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Change the background image every 3 seconds
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
     }, 5000);
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval); 
   }, []);
 
   const features = [
@@ -93,7 +92,7 @@ const Homepage: React.FC = () => {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', margin: "-25px" }}>
       <Content>
         {/* Hero Section with Right-to-Left Sliding Background */}
         <div

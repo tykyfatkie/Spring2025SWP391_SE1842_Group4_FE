@@ -102,7 +102,7 @@ const GuestHeader: React.FC = () => {
             <Button
               style={{ color: '#faad14', borderColor: '#faad14' }}
               icon={<CrownOutlined style={{ color: '#faad14' }} />}
-              href="/package"
+              href="/login"
             >
               Package
             </Button>

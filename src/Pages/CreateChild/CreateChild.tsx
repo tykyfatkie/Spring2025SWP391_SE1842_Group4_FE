@@ -82,7 +82,7 @@ const CreateChild: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', margin: "-25px" }}>
       <Layout>
         <Sidebar />
         <Content style={{ padding: '24px', background: '#f5f5f5' }}>
@@ -122,7 +122,6 @@ const CreateChild: React.FC = () => {
                 <Select placeholder="Select gender">
                   <Option value={0}>Male</Option>
                   <Option value={1}>Female</Option>
-                  <Option value={2}>Other</Option>
                 </Select> 
               </Form.Item>
 

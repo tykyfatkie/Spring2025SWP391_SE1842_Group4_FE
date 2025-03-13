@@ -231,7 +231,7 @@ const PackagesPage = () => {
             <Input.TextArea placeholder="Description" />
           </Form.Item>
 
-          <Form.Item name="price" label="Price ($)" rules={[{ required: true, message: "Please enter price" }]}>
+          <Form.Item name="price" label="Price (VND)" rules={[{ required: true, message: "Please enter price" }]}>
             <InputNumber placeholder="Price" style={{ width: "100%" }} min={0} />
           </Form.Item>
 

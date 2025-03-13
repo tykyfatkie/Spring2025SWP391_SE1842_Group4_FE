@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Table, Avatar, Tag, Space, Typography, message, Spin, Input, Button } from "antd";
-import { UserOutlined, SearchOutlined, EyeOutlined } from "@ant-design/icons";
+import { Table, Avatar, Tag, Space, Typography, message, Spin, Input, Button, Modal } from "antd";
+import { UserOutlined, SearchOutlined, EyeOutlined, FileOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 
@@ -10,21 +9,21 @@ const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [roleIds, setRoleIds] = useState(["00000000-0000-0000-0000-000000000001"]);
-  const navigate = useNavigate();
+  const [filterStatus, setFilterStatus] = useState(3);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-
       const params = {
         SearchKeyword: searchKeyword || undefined,
-        Page: page,
-        PageSize: pageSize,
-        RoleIds: roleIds.length > 0 ? roleIds : undefined
+        Page: page - 1,
+        PageSize: 10,
+        Status: filterStatus,
       };
 
       const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/users/all`, {
@@ -34,9 +33,7 @@ const UsersPage = () => {
         },
       });
 
-      const userData = response.data.data.data;
-      setUsers(Array.isArray(userData) ? userData : []);
-
+      setUsers(response.data.data.data || []);
     } catch (error) {
       message.error("Failed to fetch users");
     } finally {
@@ -46,75 +43,58 @@ const UsersPage = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, pageSize]);
+  }, [page, filterStatus]);
 
-  // Function to handle viewing a user's children
-  const handleViewChildren = (userId) => {
-    localStorage.setItem("parentId", userId);
-    navigate("/my-admin/children-view");
+  const handleViewUser = (user) => {
+    setSelectedUser(user);
+    setIsModalVisible(true);
   };
 
-  const columns = [
-    {
-      title: "Avatar",
-      dataIndex: "avatar",
-      key: "avatar",
-      render: (avatar) =>
-        avatar ? (
-          <Avatar src={avatar} />
-        ) : (
-          <Avatar icon={<UserOutlined />} />
-        ),
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: (text, record) => (
-        <a onClick={() => handleViewChildren(record.id)}>
-          <Text strong>{text}</Text>
-        </a>
-      ),
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag color={status === 3 ? "green" : "red"}>
-          {status === 3 ? "Active" : "Inactive"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, record) => (
-        <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewChildren(record.id);
-            }}
-            type="primary"
-            ghost
-          >
-            View Children
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+  const handleDeactivateUser = async (userId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(`${import.meta.env.VITE_API_ENDPOINT}/users/deactivate/${userId}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      message.success("User deactivated successfully");
+      fetchUsers();
+    } catch (error) {
+      message.error("Failed to deactivate user");
+    }
+  };
+
+  const getStatusTag = (status) => {
+    switch (status) {
+      case 0:
+        return <Tag color="green">Active</Tag>;
+      case 1:
+        return <Tag color="red">Inactive</Tag>;
+      case 2:
+        return <Tag color="gray">Archived</Tag>;
+      case 4:
+        return <Tag color="orange">Not Verified</Tag>;
+      default:
+        return <Tag color="default">Unknown</Tag>;
+    }
+  };
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: "flex", gap: "10px" }}>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "right", gap: "10px" }}>
+        <Button type={filterStatus === 0 ? "primary" : "default"} onClick={() => setFilterStatus(0)} icon={<UserOutlined />}>
+          Active Users
+        </Button>
+        <Button type={filterStatus === 1 ? "primary" : "default"} onClick={() => setFilterStatus(1)} icon={<ExclamationCircleOutlined />}>
+          Inactive Users
+        </Button>
+        <Button type={filterStatus === 2 ? "primary" : "default"} onClick={() => setFilterStatus(2)} icon={<FileOutlined />}>
+          Archived Users
+        </Button>
+        {/* <Button type={filterStatus === 4 ? "primary" : "default"} onClick={() => setFilterStatus(4)} icon={<EyeOutlined />}>
+          Not Verified Users
+        </Button> */}
         <Input
           placeholder="Search users..."
           value={searchKeyword}
@@ -131,20 +111,59 @@ const UsersPage = () => {
         <Spin size="large" style={{ display: "block", margin: "50px auto" }} />
       ) : (
         <Table
-          columns={columns}
+          columns={[
+            {
+              title: "Avatar",
+              dataIndex: "avatar",
+              key: "avatar",
+              render: (avatar) => avatar ? <Avatar src={avatar} /> : <Avatar icon={<UserOutlined />} />, 
+            },
+            {
+              title: "Name",
+              dataIndex: "name",
+              key: "name",
+              render: (text, record) => (
+                <Text strong style={{ cursor: "pointer" }} onClick={() => handleViewUser(record)}>
+                  {text}
+                </Text>
+              ),
+            },
+            {
+              title: "Email",
+              dataIndex: "email",
+              key: "email",
+            },
+            {
+              title: "Status",
+              dataIndex: "status",
+              key: "status",
+              render: (status) => getStatusTag(status),
+            },
+            {
+              title: "Actions",
+              key: "actions",
+              align: "right",
+              render: (_, record) => (
+                <Space>
+                  <Button icon={<EyeOutlined />} onClick={() => handleViewUser(record)} type="primary" ghost>
+                    View Details
+                  </Button>
+                  {record.status === 0 && (
+                    <Button type="default" danger onClick={() => handleDeactivateUser(record.id)}>
+                      Deactivate
+                    </Button>
+                  )}
+                </Space>
+              ),
+            },
+          ]}
           dataSource={users}
           rowKey="id"
-          onRow={(record) => ({
-            onClick: () => handleViewChildren(record.id),
-            style: { cursor: 'pointer' }
-          })}
           pagination={{
-            current: page + 1,
-            pageSize,
-            onChange: (page) => setPage(page - 1),
-            showSizeChanger: true,
-            pageSizeOptions: ["6", "10", "20"],
-            onShowSizeChange: (_, size) => setPageSize(size),
+            current: page,
+            pageSize: 10,
+            onChange: (newPage) => setPage(newPage),
+            showSizeChanger: false,
           }}
         />
       )}
