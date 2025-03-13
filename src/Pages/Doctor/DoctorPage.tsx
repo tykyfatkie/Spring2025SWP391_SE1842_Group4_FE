@@ -89,7 +89,7 @@ const DoctorPage: React.FC = () => {
                   <Link to={`/doctor/${doctor.userId}`}>
                     <Card
                       hoverable
-                      cover={<img alt={doctor.user?.name || "Doctor Image"} src={doctor.profileImg || "https://png.pngtree.com/png-clipart/20231129/original/pngtree-smiling-medical-doctor-showing-thumbs-up-american-photo-png-image_13736955.png"} style={{ transition: 'transform 0.5s', objectFit: 'cover', width: '100%', height: '250px' }} />}
+                      cover={<img alt={doctor.user?.name || "Doctor Image"} src={doctor.profileImg} style={{ transition: 'transform 0.5s', objectFit: 'cover', width: '100%', height: '250px' }} />}
                       style={{ marginBottom: '20px', marginTop: '20px', transition: 'transform 0.5s, box-shadow 0.5s' }}
                       onMouseEnter={(e) => {
                         const card = e.currentTarget;
