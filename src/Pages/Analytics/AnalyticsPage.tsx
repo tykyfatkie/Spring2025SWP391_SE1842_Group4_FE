@@ -87,19 +87,7 @@ const AnalyticsPage: React.FC = () => {
                 </ResponsiveContainer>
               </Card>
 
-              <Card title="Data Table">
-                <Table
-                  dataSource={analyticsData}
-                  columns={[
-                    { title: "Date", dataIndex: "date", key: "date" },
-                    { title: "Weight (lbs)", dataIndex: "weight", key: "weight" },
-                    { title: "Height (cm)", dataIndex: "height", key: "height" },
-                    { title: "BMI", dataIndex: "bmi", key: "bmi" },
-                  ]}
-                  rowKey="date"
-                  pagination={false}
-                />
-              </Card>
+              
             </>
           )}
         </Content>

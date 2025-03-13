@@ -107,7 +107,11 @@ const ChildManage: React.FC = () => {
       title: "Date of Birth",
       dataIndex: "doB",
       key: "doB",
-      render: (text: string) => text ? moment(text).format("DD/MM/YYYY") : "N/A",
+      render: (text: string) => {
+        return text && moment(text, "YYYY-MM-DD", true).isValid() 
+          ? moment(text).format("YYYY/MM/DD") 
+          : "Invalid Date";
+      }      
     },
     {
       title: "Actions",
