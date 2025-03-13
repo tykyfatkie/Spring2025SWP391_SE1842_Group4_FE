@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Button, Modal, message, Spin, Space, Layout, Form, Input, DatePicker, Select } from "antd";
-import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import Sidebar from "../../components/Sidebar/Sidebar";
@@ -45,7 +45,7 @@ const ChildManage: React.FC = () => {
         setChildren(response.data.data);
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "You do not have any children yet.");
+      message.error(error.response?.data?.message || "Failed to fetch children data.");
       console.error("Error fetching children:", error);
     } finally {
       setLoading(false);
@@ -71,15 +71,19 @@ const ChildManage: React.FC = () => {
       const values = await form.validateFields();
       const token = localStorage.getItem("token");
 
+      if (!token) {
+        message.error("Authentication information missing. Please login again.");
+        return;
+      }
+
       const formattedValues = {
-        name: values.name,
+        name: values.name?.trim(),
         dob: values.dob ? moment(values.dob).format("YYYY-MM-DD") : undefined,
         gender: values.gender,
-        weight: Number(values.weight),
-        height: Number(values.height),
-        notes: values.notes || "", // Nếu notes là undefined thì thay bằng chuỗi rỗng ""
+        weight: values.weight ? Number(values.weight) : null,
+        height: values.height ? Number(values.height) : null,
+        notes: values.notes?.trim() || "",
       };
-      
 
       const response = await axios.put(
         `${import.meta.env.VITE_API_ENDPOINT}/children/update/${editingChild.id}`,
@@ -94,7 +98,7 @@ const ChildManage: React.FC = () => {
 
       if (response.status === 200) {
         message.success("Child updated successfully!");
-        fetchChildren(); 
+        fetchChildren();
         setEditModalVisible(false);
       }
     } catch (error: any) {
@@ -106,7 +110,12 @@ const ChildManage: React.FC = () => {
   const handleDeleteChild = async (childId: string) => {
     try {
       const token = localStorage.getItem("token");
-  
+
+      if (!token) {
+        message.error("Authentication information missing. Please login again.");
+        return;
+      }
+
       Modal.confirm({
         title: "Are you sure you want to delete this child's record?",
         content: "This action cannot be undone.",
@@ -115,26 +124,76 @@ const ChildManage: React.FC = () => {
         cancelText: "Cancel",
         onOk: async () => {
           setLoading(true);
-          const response = await axios.delete(
-            `${import.meta.env.VITE_API_ENDPOINT}/children/delete/${childId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+          try {
+            const response = await axios.delete(
+              `${import.meta.env.VITE_API_ENDPOINT}/children/delete/${childId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            if (response.status === 200) {
+              message.success("Child deleted successfully");
+              fetchChildren();
             }
-          );
-  
-          if (response.status === 200) {
-            message.success("Child deleted successfully");
-            fetchChildren();
+          } catch (error: any) {
+            message.error(error.response?.data?.message || "Failed to delete child.");
+            console.error("Error deleting child:", error);
+          } finally {
+            setLoading(false);
           }
         },
       });
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to delete child.");
-      console.error("Error deleting child:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error in delete child flow:", error);
+    }
+  };
+
+  const handleHideChild = async (childId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        message.error("Authentication information missing. Please login again.");
+        return;
+      }
+  
+      Modal.confirm({
+        title: "Hide Child Record",
+        content: "Are you sure you want to hide this child's record? You can unhide it later if needed.",
+        okText: "Yes, Hide",
+        cancelText: "Cancel",
+        onOk: async () => {
+          setLoading(true);
+          try {
+            // Fix: Send 'true' as the request body instead of an empty object
+            const response = await axios.post(
+              `${import.meta.env.VITE_API_ENDPOINT}/children/hideChildren/${childId}`,
+              true, // Change here from {} to true
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+  
+            if (response.status === 200) {
+              message.success("Child record hidden successfully");
+              fetchChildren();
+            }
+          } catch (error: any) {
+            console.error("Error hiding child:", error);
+            message.error(error.response?.data?.message || "Failed to hide child record.");
+          } finally {
+            setLoading(false);
+          }
+        },
+      });
+    } catch (error: any) {
+      console.error("Error in hide child flow:", error);
     }
   };
 
@@ -165,8 +224,22 @@ const ChildManage: React.FC = () => {
       key: "actions",
       render: (_: any, record: any) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => handleEditChild(record)} type="default" />
-          <Button icon={<DeleteOutlined />} onClick={() => handleDeleteChild(record.id)} danger />
+          <Button 
+            icon={<EditOutlined />} 
+            onClick={() => handleEditChild(record)} 
+            type="default" 
+          />
+          <Button 
+            icon={<EyeInvisibleOutlined />} 
+            onClick={() => handleHideChild(record.id)} 
+            type="default"
+            title="Hide"
+          />
+          <Button 
+            icon={<DeleteOutlined />} 
+            onClick={() => handleDeleteChild(record.id)} 
+            danger 
+          />
         </Space>
       ),
     },
