@@ -32,14 +32,33 @@ const ManageUserProfile: React.FC = () => {
     setProfileLoading(true);
     try {
       const response = await axiosInstance.get(`${import.meta.env.VITE_API_ENDPOINT}/users/profile`);
-      form.setFieldsValue(response.data);
-    } catch (error: any) {
+      
+      console.log("Full API Response:", response); // Kiểm tra API Response
+  
+      // Kiểm tra response.data có tồn tại không
+      if (!response.data || !response.data.data) {
+        throw new Error("API response is missing 'data' key");
+      }
+  
+      const { name, phone, address } = response.data.data;
+  
+      console.log("Setting form fields:", { name, phone, address });
+  
+      form.setFieldsValue({ 
+        name: name || "", 
+        phone: phone || "", 
+        address: address || "" 
+      });
+  
+    } catch (error) {
       message.error('Failed to fetch user profile');
-      console.error('Error fetching profile:', error);
+      console.error("Error fetching profile:", error);
     } finally {
       setProfileLoading(false);
     }
   };
+  
+  
 
   const updateProfile = async (values: any) => {
     setLoading(true);
