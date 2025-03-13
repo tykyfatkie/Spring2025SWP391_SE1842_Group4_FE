@@ -1,4 +1,3 @@
-// Modifying DoctorPage.tsx
 import React, { useEffect, useState } from 'react';
 import { Layout, Typography, Row, Col, Card, Menu, Spin, Alert } from 'antd';
 import AppFooter from "../../components/Footer/Footer";
@@ -17,6 +16,9 @@ interface Doctor {
   profileImg: string;
   status: number;
   userId: string;
+  user?: {
+    name: string;
+  };
 }
 
 const DoctorPage: React.FC = () => {
@@ -37,7 +39,23 @@ const DoctorPage: React.FC = () => {
           throw new Error("Invalid API response: Expected an array");
         }
 
-        setDoctors(data.data);
+        // Fetch additional profile data to get the correct doctor name
+        const updatedDoctors = await Promise.all(data.data.map(async (doctor) => {
+          try {
+            const profileResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${doctor.userId}`);
+            if (profileResponse.ok) {
+              const profileData = await profileResponse.json();
+              if (profileData.data && Array.isArray(profileData.data) && profileData.data.length > 0) {
+                doctor.user = { name: profileData.data[0].user?.name || "Bác sĩ chưa cập nhật tên" };
+              }
+            }
+          } catch (profileError) {
+            console.error("Error fetching doctor profile:", profileError);
+          }
+          return doctor;
+        }));
+
+        setDoctors(updatedDoctors);
       } catch (error: any) {
         console.error("Fetch Error:", error);
         setError(error.message);
@@ -53,9 +71,8 @@ const DoctorPage: React.FC = () => {
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
       <Content style={{ padding: '0 10px', maxWidth: '1300px', marginLeft: '100px', marginTop: '70px' }}>
         <Row gutter={16} style={{ display: 'flex' }}>
-          {/* Cột chứa danh sách bác sĩ */}
           <Col span={18} style={{ display: 'flex', flexDirection: 'column' }}>
-            <Title level={2} style={{ marginBottom: '10px', color: '#0b4778',  }}>Doctor</Title>
+            <Title level={2} style={{ marginBottom: '10px', color: '#0b4778' }}>Doctor</Title>
             {loading && <Spin size="large" style={{ display: 'block', textAlign: 'center' }} />}
             {error && (
               <Alert
@@ -72,7 +89,7 @@ const DoctorPage: React.FC = () => {
                   <Link to={`/doctor/${doctor.userId}`}>
                     <Card
                       hoverable
-                      cover={<img alt={doctor.biography} src={doctor.profileImg} style={{ transition: 'transform 0.5s' }} />}
+                      cover={<img alt={doctor.user?.name || "Doctor Image"} src={doctor.profileImg || "https://png.pngtree.com/png-clipart/20231129/original/pngtree-smiling-medical-doctor-showing-thumbs-up-american-photo-png-image_13736955.png"} style={{ transition: 'transform 0.5s', objectFit: 'cover', width: '100%', height: '250px' }} />}
                       style={{ marginBottom: '20px', marginTop: '20px', transition: 'transform 0.5s, box-shadow 0.5s' }}
                       onMouseEnter={(e) => {
                         const card = e.currentTarget;
@@ -86,7 +103,7 @@ const DoctorPage: React.FC = () => {
                       }}
                     >
                       <Card.Meta
-                        title={<div className="title">{doctor.biography}</div>}
+                        title={<div className="title">{doctor.user?.name || "Bác sĩ chưa cập nhật tên"}</div>}
                         description={
                           <>
                             <p>Chuyên môn: {doctor.specialize}</p>
@@ -101,7 +118,6 @@ const DoctorPage: React.FC = () => {
             </Row>
           </Col>
 
-          {/* Cột chứa danh mục */}
           <Col span={6} style={{ paddingLeft: '20px' }}>
             <Card title="Danh mục" style={{ position: 'sticky', top: '80px', marginLeft: '40px', paddingLeft: '10px', marginTop: '60px' }}>
               <Menu>
