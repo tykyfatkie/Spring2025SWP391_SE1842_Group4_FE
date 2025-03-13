@@ -28,6 +28,7 @@ import UpdateDoctorProfile from "../Pages/MyDoctor/UpdateDoctorProfile";
 import PackagesPage from "../Pages/Dashboard/PackagePage";
 import PaymentSuccessPage from "../Pages/PaymentSuccess/PaymentSuccessPage";
 import BMITrackingPage from "../Pages/Analytics/AnalyticsPage";
+import BMIPage from "../Pages/BMI cal/BMIPage";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -46,7 +47,7 @@ const routes: LayoutRoute[] = [
       { path: "/about-us", component: AboutPage, role: ["User", "Guest"] },
       { path: "/contact-us", component: ContactPage, role: ["Guest", "User"] },
       { path: "/package", component: PackagePage, role: ["User"] },
-      { path: "/bmi", component: PackagePage, role: ["User"] },
+      { path: "/bmi", component: BMIPage, role: ["User"] },
       { path: "/guestbmi", component: GuestBMICalculator, role: ["Guest", "User"] },
       { path: "/dashboard", component: ProtectedComponent(UpdateChildPage, ["Admin", "Staff"]) },
       { path: "/child-create", component: ProtectedComponent(CreateChild, ["User", "Doctor"]) },

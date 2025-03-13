@@ -47,7 +47,7 @@ const Sidebar: React.FC = () => {
         </Menu.Item>
 
         <Menu.Item key="bmi" icon={<UserOutlined />}>
-          <Link to="/child-manage">BMI</Link>
+          <Link to="/bmi">BMI</Link>
         </Menu.Item>
       </Menu>
     </Sider>
