@@ -52,12 +52,10 @@ const ChildManage: React.FC = () => {
     }
   };
 
-  // ✅ Open Edit Modal
   const handleEditChild = (child: any) => {
     setEditingChild(child);
     setEditModalVisible(true);
 
-    // ✅ Pre-fill form with existing child data
     form.setFieldsValue({
       name: child.name,
       dob: moment(child.doB),
@@ -68,7 +66,6 @@ const ChildManage: React.FC = () => {
     });
   };
 
-  // ✅ Update Child API Call
   const handleUpdateChild = async () => {
     try {
       const values = await form.validateFields();
@@ -188,7 +185,6 @@ const ChildManage: React.FC = () => {
           <Table dataSource={children} columns={columns} rowKey="id" pagination={{ pageSize: 10 }} />
         )}
 
-        {/* ✅ Edit Child Modal */}
         <Modal
           title="Edit Child Profile"
           visible={editModalVisible}

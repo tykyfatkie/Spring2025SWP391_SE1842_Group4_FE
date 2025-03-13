@@ -13,9 +13,9 @@ const PaymentSuccessPage: React.FC = () => {
   }
 
   useEffect(() => {
-    // Redirect to dashboard after 5 seconds
+
     const timer = setTimeout(() => {
-      navigate("/home"); // Change to the relevant page
+      navigate("/home"); 
     }, 5000);
 
     return () => clearTimeout(timer);
@@ -29,7 +29,7 @@ const PaymentSuccessPage: React.FC = () => {
           title={<Title level={2}>Payment Successful!</Title>}
           subTitle={
             <Text style={{ fontSize: 16 }}>
-              Thank you for your purchase. Your premium plan is now activated. You will be redirected to your Home.
+              Thank you for your purchase. Your premium plan is now activated. You will be redirected to your Home
               shortly.
             </Text>
           }

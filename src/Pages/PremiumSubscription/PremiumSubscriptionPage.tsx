@@ -34,7 +34,6 @@ const PremiumSubscriptionPage: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Filter only active packages (status === 2)
       if (response.data && response.data.data) {
         const activePackages = response.data.data.filter((pkg: PackageType) => pkg.status === 1);
         setPackages(activePackages);
