@@ -84,7 +84,7 @@ const ChildManage: React.FC = () => {
       };
 
       const response = await axios.put(
-        `${import.meta.env.VITE_API_ENDPOINT}/update/${editingChild.id}`,
+        `${import.meta.env.VITE_API_ENDPOINT}/children/update/${editingChild.id}`,
         formattedValues,
         {
           headers: {
@@ -108,7 +108,7 @@ const ChildManage: React.FC = () => {
   const handleDeleteChild = async (childId: string) => {
     try {
       const token = localStorage.getItem("token");
-
+  
       Modal.confirm({
         title: "Are you sure you want to delete this child's record?",
         content: "This action cannot be undone.",
@@ -118,14 +118,14 @@ const ChildManage: React.FC = () => {
         onOk: async () => {
           setLoading(true);
           const response = await axios.delete(
-            `${import.meta.env.VITE_API_ENDPOINT}/children/${childId}`,
+            `${import.meta.env.VITE_API_ENDPOINT}/children/delete/${childId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             }
           );
-
+  
           if (response.status === 200) {
             message.success("Child deleted successfully");
             fetchChildren();
