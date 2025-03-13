@@ -11,7 +11,7 @@ interface PackageType {
   packageName: string;
   price: number;
   durationMonths: number;
-  maxChildrenAllowed: number;
+  maxChildrentAllowed: number;
   trialPeriodDays: number;
   status: number;
 }
@@ -106,13 +106,14 @@ const PremiumSubscriptionPage: React.FC = () => {
                   {plan.packageName}
                 </Title>
                 <Title level={3} style={{ color: "#1890ff" }}>
-                  ${plan.price.toFixed(2)}
-                  <Text style={{ fontSize: 16, color: "#666" }}> / {plan.durationMonths} month(s)</Text>
+                  {new Intl.NumberFormat("vi-VN").format(plan.price)} VND <span style={{ color: "#666" }}>•</span>
+                  <Text style={{ fontSize: 16, color: "#666" }}> {plan.durationMonths} month(s)</Text>
                 </Title>
+
 
                 <ul style={{ paddingLeft: 20, fontSize: 16, color: "#444" }}>
                   <li>✅ Includes essential features for child growth tracking.</li>
-                  <li>✅ {plan.maxChildrenAllowed} children allowed</li>
+                  <li>✅ {plan.maxChildrentAllowed} children allowed</li>
                   <li>✅ {plan.trialPeriodDays} trial days</li>
                 </ul>
 

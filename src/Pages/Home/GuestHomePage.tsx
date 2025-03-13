@@ -3,10 +3,11 @@ import { Layout, Typography, Button, Card, Row, Col, Statistic, Space } from 'an
 import { HeartOutlined, LineChartOutlined, UserOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import AppFooter from '../../components/Footer/Footer';
 import HomePagePicture from '../../assets/homepaagepic.jpg';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
+const navigate = useNavigate();
 
 const Homepage: React.FC = () => {
   const features = [
@@ -48,9 +49,9 @@ const Homepage: React.FC = () => {
                   Trusted by thousands of parents and healthcare professionals.
               </Paragraph>
               <Space size="middle">
-                <Button type="primary" size="large">
-                  Get Started
-                </Button>
+              <Button type="primary" size="large" onClick={() => navigate("/login")}>
+                Get Started
+              </Button>
                 <Button size="large">
                   Learn More
                 </Button>
@@ -74,7 +75,7 @@ const Homepage: React.FC = () => {
             </Col>
             {features.map((feature, index) => (
               <Col xs={24} sm={12} lg={6} key={index} style={{ padding: 12 }}>
-                <Link to={feature.link || '#'}> {/* Thêm liên kết cho Track Weight & Height */}
+                <Link to={feature.link || '#'}> 
                   <Card 
                     hoverable 
                     style={{ height: '100%', textAlign: 'center' }}

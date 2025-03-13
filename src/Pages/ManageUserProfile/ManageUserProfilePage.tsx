@@ -56,7 +56,6 @@ const ManageUserProfile: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <Header />
       <Layout>       
         <Content style={{ padding: '24px', background: '#f5f5f5' }}>
           <Card title="Manage Profile" style={{ maxWidth: 600, margin: '0 auto' }}>

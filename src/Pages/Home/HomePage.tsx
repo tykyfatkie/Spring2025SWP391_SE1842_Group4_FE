@@ -3,6 +3,7 @@ import { Layout, Typography, Button, Card, Row, Col, Space, Statistic } from 'an
 import AppFooter from '../../components/Footer/Footer';
 import { SmileOutlined, HeartOutlined, StarOutlined, UserOutlined } from '@ant-design/icons';
 import DoctorsSection from '../../components/Doctor section/DoctorsSection ';
+import { useNavigate } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -32,6 +33,7 @@ const Homepage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -154,7 +156,7 @@ const Homepage: React.FC = () => {
                 Trusted by thousands of parents and healthcare professionals.
               </Paragraph>
               <Space size="middle">
-                <Button type="primary" size="large">Get Started</Button>
+                <Button type="primary" size="large" onClick={() => navigate("/login")}>Get Started</Button>
                 <Button size="large">Learn More</Button>
               </Space>
             </Col>

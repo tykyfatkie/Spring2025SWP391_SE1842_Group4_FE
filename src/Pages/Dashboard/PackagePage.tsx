@@ -146,10 +146,10 @@ const PackagesPage = () => {
       ellipsis: true,
     },
     {
-      title: "Price ($)",
+      title: "Price (Vietnam Dong)",
       dataIndex: "price",
       key: "price",
-      render: (text) => `$${text}`,
+      render: (text) => `${text} VND`,
     },
     {
       title: "Duration (Months)",
