@@ -39,14 +39,14 @@ const ForgotPasswordPage: React.FC = () => {
   const handleVerifyAndResetPassword = async (values: { code: string, password: string, confirmPassword: string }) => {
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/api/v1/auth/forgot-password/verify`, {
-        email: email,
+      const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}/auth/forgot-password/verify`, {
+        email: email, 
         otp: values.code,
         newPassword: values.password
       });
       
       message.success('Password has been reset successfully');
-      setCurrentStep(2); // Go directly to success step
+      setCurrentStep(2); 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         message.error(error.response.data.message || 'Verification failed');
@@ -56,7 +56,8 @@ const ForgotPasswordPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+};
+
 
   const renderStepContent = () => {
     switch (currentStep) {
