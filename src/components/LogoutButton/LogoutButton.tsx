@@ -6,8 +6,9 @@ const LogoutButton = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+
+    localStorage.clear(); 
+
     navigate("/login");
   };
 
@@ -19,3 +20,4 @@ const LogoutButton = () => {
 };
 
 export default LogoutButton;
+

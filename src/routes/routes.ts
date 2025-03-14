@@ -29,6 +29,8 @@ import PackagesPage from "../Pages/Dashboard/PackagePage";
 import PaymentSuccessPage from "../Pages/PaymentSuccess/PaymentSuccessPage";
 import BMITrackingPage from "../Pages/Analytics/AnalyticsPage";
 import BMIPage from "../Pages/BMI cal/BMIPage";
+import UserConsultationRequests from "../Pages/UserConsultationRequests/UserConsultationRequestsPage";
+import DoctorConsultationResponse from "../Pages/DoctorConsultationResponse/DoctorConsultationResponse";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -49,17 +51,20 @@ const routes: LayoutRoute[] = [
       { path: "/package", component: PackagePage, role: ["User"] },
       { path: "/bmi", component: BMIPage, role: ["User"] },
       { path: "/guestbmi", component: GuestBMICalculator, role: ["Guest", "User"] },
-      { path: "/dashboard", component: ProtectedComponent(UpdateChildPage, ["Admin", "Staff"]) },
-      { path: "/child-create", component: ProtectedComponent(CreateChild, ["User", "Doctor"]) },
-      { path: "/child-analytics", component: ProtectedComponent(BMITrackingPage, ["User", "Doctor"]) },
+      { path: "/dashboard", component: ProtectedComponent(UpdateChildPage, ["Admin"]) },
+      { path: "/child-create", component: ProtectedComponent(CreateChild, ["User"]) },
+      { path: "/child-analytics", component: ProtectedComponent(BMITrackingPage, ["User"]) },
       { path: "/doctor", component: ProtectedComponent(DoctorPage, ["User", "Doctor"]) },
-      { path: "/doctor/:id", component: ProtectedComponent(DoctorProfilePage, ["User", "Doctor"]) },
+      { path: "/doctor/:id", component: ProtectedComponent(DoctorProfilePage, ["User"]) },
       { path: "/my-doctor", component: ProtectedComponent(MyDoctorProfilePage, [ "Doctor"]) },
       { path: "/update-doctor-profile", component: ProtectedComponent(UpdateDoctorProfile, [ "Doctor"]) },
       { path: "/profile", component: ProtectedComponent(ParentProfilePage, ["User", "Doctor"]) },
-      { path: "/child-manage", component: ProtectedComponent(ChildManage, ["User", "Doctor"]) },
+      { path: "/child-manage", component: ProtectedComponent(ChildManage, ["User"]) },
       { path: "/manage-profile", component: ProtectedComponent(ManageUserProfile, ["User", "Doctor"]) },
       { path: "/payment-success", component: PaymentSuccessPage, exact: true, role: ["User"] },
+      { path: "/consultation-requests", component: UserConsultationRequests, exact: true, role: ["User"] },
+      { path: "/my-doctor/consultation-response", component: DoctorConsultationResponse, exact: true, role: ["Doctor"] },
+
     ],
   },
   {

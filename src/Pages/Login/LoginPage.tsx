@@ -79,7 +79,7 @@ const LoginPage: React.FC = () => {
           if (userRole === "Admin") {
             navigate("/my-admin/users");
           } else if (userRole === "Doctor") {
-            navigate("/my-doctor");
+            navigate("/my-doctor/consultation-response");
           } else {
             navigate("/home");
           }

@@ -219,7 +219,7 @@ const ChildManage: React.FC = () => {
   
             message.success("Child record hidden successfully");
   
-            // Cập nhật UI ngay lập tức mà không cần gọi lại API
+
             setChildren((prevChildren) => prevChildren.filter(child => child.id !== childId));
             setArchivedChildren((prevArchived) => [
               ...prevArchived,
@@ -267,7 +267,7 @@ const ChildManage: React.FC = () => {
   
             message.success("Child record unhidden successfully");
   
-            // Cập nhật UI ngay lập tức mà không cần gọi lại API
+
             setArchivedChildren((prevArchived) =>
               prevArchived.filter(child => child.id !== childId)
             );

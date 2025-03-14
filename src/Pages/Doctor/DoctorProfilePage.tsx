@@ -1,4 +1,3 @@
-// Modifying DoctorProfilePage.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline, Spin, Alert } from 'antd';
@@ -93,8 +92,8 @@ const DoctorProfilePage: React.FC = () => {
       <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
         <Content style={{ padding: '0 20px', maxWidth: '1200px', margin: '0 auto' }}>
           <Alert
-            message="Lỗi khi lấy thông tin bác sĩ"
-            description={error || "Không tìm thấy thông tin bác sĩ"}
+            message="Error retrieving doctor information"
+            description={error || "Doctor information not found"}
             type="error"
             showIcon
             style={{ marginTop: '24px' }}
@@ -104,15 +103,13 @@ const DoctorProfilePage: React.FC = () => {
     );
   }
 
-  // Extract degrees, certificates, and research items from metadata if available
-  const degrees = metadata?.years ? [`${metadata.years} năm kinh nghiệm`] : ["Tiến sĩ Y khoa", "Thạc sĩ Y học"];
-  const certificates = [doctor.certificate || "Chứng chỉ chuyên khoa"];
-  const research = ["Nghiên cứu lâm sàng", "Công bố khoa học"];
-  const languages = ["Tiếng Việt", "Tiếng Anh"];
-  const specializations = doctor.specialize ? [doctor.specialize] : ["Đa khoa"];
+  const degrees = metadata?.years ? [`${metadata.years} years of experience`] : ["Doctor of Medicine", "Master of Medicine"];
+  const certificates = [doctor.certificate || "Specialty certificate"];
+  const research = ["Clinical research", "Scientific publications"];
+  const languages = ["Vietnamese", "English"];
+  const specializations = doctor.specialize ? [doctor.specialize] : ["General Medicine"];
 
-  // Extract hospital information if available
-  const hospital = metadata?.hospital || "Bệnh viện";
+  const hospital = metadata?.hospital || "Hospital";
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
@@ -134,45 +131,45 @@ const DoctorProfilePage: React.FC = () => {
                 }}
               />
               <Button type="primary" block style={{ marginTop: '16px' }}>
-                Đặt lịch khám
+                Make an appointment
               </Button>
             </Col>
             <Col span={16}>
               <Title level={2}>{doctor.user?.name || doctor.biography}</Title>
               <Rate disabled defaultValue={4.5} style={{ fontSize: '16px' }} />
-              <Text style={{ marginLeft: '8px' }}>(80 đánh giá)</Text>
+              <Text style={{ marginLeft: '8px' }}>(80 reviews)</Text>
               
               <Row style={{ marginTop: '16px' }}>
                 <Col span={24}>
-                  <Tag color="blue">{doctor.specialize || "Bác sĩ chuyên khoa"}</Tag>
-                  <Tag color="green">{metadata?.years ? `${metadata.years} năm kinh nghiệm` : "Bác sĩ kinh nghiệm"}</Tag>
+                  <Tag color="blue">{doctor.specialize || "Specialist"}</Tag>
+                  <Tag color="green">{metadata?.years ? `${metadata.years} years of experience` : "Experienced doctor"}</Tag>
                 </Col>
               </Row>
 
               <Paragraph style={{ marginTop: '16px' }}>
                 <ul>
-                  <li><EnvironmentOutlined /> Phòng khám: {hospital || "Chưa cập nhật"}</li>
-                  <li><PhoneOutlined /> Số điện thoại: {doctor.user?.phone || "Chưa cập nhật"}</li>
-                  <li><MailOutlined /> Email: {doctor.user?.email || "Chưa cập nhật"}</li>
-                  <li><ClockCircleOutlined /> Giờ làm việc: 8:00 - 17:00 (Thứ 2 - Thứ 7)</li>
+                  <li><EnvironmentOutlined /> Clinic: {hospital || "Not updated"}</li>
+                  <li><PhoneOutlined /> Phone: {doctor.user?.phone || "Not updated"}</li>
+                  <li><MailOutlined /> Email: {doctor.user?.email || "Not updated"}</li>
+                  <li><ClockCircleOutlined /> Working hours: 8:00 AM - 5:00 PM (Monday - Saturday)</li>
                 </ul>
               </Paragraph>
             </Col>
           </Row>
 
           <Tabs defaultActiveKey="1" style={{ marginTop: '24px' }}>
-            <TabPane tab="Thông tin chung" key="1">
-              <Title level={4}>Bằng cấp & Chứng chỉ</Title>
+            <TabPane tab="General Information" key="1">
+              <Title level={4}>Degrees & Certifications</Title>
               <Row gutter={[24, 24]}>
                 <Col span={12}>
-                  <Card title="Học vấn" size="small">
+                  <Card title="Education" size="small">
                     {degrees.map((degree, index) => (
                       <p key={index}>• {degree}</p>
                     ))}
                   </Card>
                 </Col>
                 <Col span={12}>
-                  <Card title="Chứng chỉ chuyên môn" size="small">
+                  <Card title="Specialty Certifications" size="small">
                     {certificates.map((cert, index) => (
                       <p key={index}>• {cert}</p>
                     ))}
@@ -180,10 +177,10 @@ const DoctorProfilePage: React.FC = () => {
                 </Col>
               </Row>
 
-              <Title level={4} style={{ marginTop: '24px' }}>Chuyên môn</Title>
+              <Title level={4} style={{ marginTop: '24px' }}>Specializations</Title>
               <Row gutter={[24, 24]}>
                 <Col span={12}>
-                  <Card title="Lĩnh vực chuyên sâu" size="small">
+                  <Card title="Specialized Fields" size="small">
                     {specializations.map((spec, index) => (
                       <Tag color="blue" key={index} style={{ margin: '4px' }}>
                         {spec}
@@ -192,7 +189,7 @@ const DoctorProfilePage: React.FC = () => {
                   </Card>
                 </Col>
                 <Col span={12}>
-                  <Card title="Ngôn ngữ" size="small">
+                  <Card title="Languages" size="small">
                     {languages.map((lang, index) => (
                       <Tag color="green" key={index} style={{ margin: '4px' }}>
                         {lang}
@@ -202,21 +199,21 @@ const DoctorProfilePage: React.FC = () => {
                 </Col>
               </Row>
 
-              <Title level={4} style={{ marginTop: '24px' }}>Nghiên cứu & Công bố</Title>
+              <Title level={4} style={{ marginTop: '24px' }}>Research & Publications</Title>
               <Card size="small">
                 {research.map((item, index) => (
                   <p key={index}>• {item}</p>
                 ))}
               </Card>
 
-              <Title level={4} style={{ marginTop: '24px' }}>Kinh nghiệm làm việc</Title>
+              <Title level={4} style={{ marginTop: '24px' }}>Work Experience</Title>
               <Timeline>
-                <Timeline.Item>{metadata?.years ? `${new Date().getFullYear() - parseInt(metadata.years)} - ${new Date().getFullYear()}` : "2018 - nay"}: Bác sĩ tại {hospital || "Bệnh viện"}</Timeline.Item>
-                <Timeline.Item>Kinh nghiệm làm việc chuyên môn {metadata?.years || "nhiều"} năm</Timeline.Item>
+                <Timeline.Item>{metadata?.years ? `${new Date().getFullYear() - parseInt(metadata.years)} - ${new Date().getFullYear()}` : "2018 - present"}: Doctor at {hospital || "Hospital"}</Timeline.Item>
+                <Timeline.Item>Specialized work experience {metadata?.years || "many"} years</Timeline.Item>
               </Timeline>
             </TabPane>
 
-            <TabPane tab="Đánh giá" key="2">
+            <TabPane tab="Reviews" key="2">
               <Row gutter={[16, 16]}>
                 {[1, 2, 3].map((review) => (
                   <Col span={24} key={review}>
@@ -224,14 +221,14 @@ const DoctorProfilePage: React.FC = () => {
                       <Row align="middle">
                         <Avatar icon={<UserOutlined />} />
                         <div style={{ marginLeft: '12px' }}>
-                          <Text strong>Người dùng ẩn danh</Text>
+                          <Text strong>Anonymous User</Text>
                           <br />
                           <Rate disabled defaultValue={5} style={{ fontSize: '12px' }} />
-                          <Text type="secondary" style={{ marginLeft: '8px' }}>1 tháng trước</Text>
+                          <Text type="secondary" style={{ marginLeft: '8px' }}>1 month ago</Text>
                         </div>
                       </Row>
                       <Paragraph style={{ marginTop: '12px' }}>
-                        Bác sĩ rất tận tâm và chuyên nghiệp. Tôi rất hài lòng với dịch vụ khám chữa bệnh.
+                        The doctor is very dedicated and professional. I am very satisfied with the medical service.
                       </Paragraph>
                     </Card>
                   </Col>
@@ -239,14 +236,14 @@ const DoctorProfilePage: React.FC = () => {
               </Row>
             </TabPane>
 
-            <TabPane tab="Lịch khám" key="3">
-              <Title level={4}>Lịch khám trong tuần</Title>
+            <TabPane tab="Appointment Schedule" key="3">
+              <Title level={4}>Weekly Appointment Schedule</Title>
               <Row gutter={[16, 16]}>
-                {['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'].map((day) => (
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
                   <Col span={8} key={day}>
                     <Card title={day} size="small">
-                      <p>Sáng: 8:00 - 12:00</p>
-                      <p>Chiều: 13:30 - 17:00</p>
+                      <p>Morning: 8:00 AM - 12:00 PM</p>
+                      <p>Afternoon: 1:30 PM - 5:00 PM</p>
                     </Card>
                   </Col>
                 ))}

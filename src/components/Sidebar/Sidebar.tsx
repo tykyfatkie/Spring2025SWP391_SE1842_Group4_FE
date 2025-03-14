@@ -21,10 +21,10 @@ const Sidebar: React.FC = () => {
       style={{ 
         minHeight: '100vh',
         paddingTop: '10px',
-        background: 'rgba(0, 140, 255, 0.84)', // Semi-transparent background
-        backdropFilter: 'blur(12px)', // Gaussian Blur Effect
-        WebkitBackdropFilter: 'blur(12px)', // Safari Support
-        borderRight: '1px solid rgba(255, 255, 255, 0.2)', // Subtle border
+        background: 'rgba(0, 140, 255, 0.84)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)', 
+        borderRight: '1px solid rgba(255, 255, 255, 0.2)', 
       }}
     >
       {/* Navigation Menu */}
@@ -32,7 +32,7 @@ const Sidebar: React.FC = () => {
         theme="dark" 
         mode="inline" 
         defaultSelectedKeys={['dashboard']}
-        style={{ fontSize: '16px', background: 'transparent' }} // Transparent Menu
+        style={{ fontSize: '16px', background: 'transparent' }} 
       >
         <Menu.Item key="analytics" icon={<LineChartOutlined />}>
           <Link to="/child-analytics">Analytics</Link>
@@ -49,6 +49,12 @@ const Sidebar: React.FC = () => {
         <Menu.Item key="bmi" icon={<UserOutlined />}>
           <Link to="/bmi">BMI</Link>
         </Menu.Item>
+
+        <Menu.Item key="consultation-requests" icon={<UserOutlined />}>
+          <Link to="/consultation-requests">Consultation Requests</Link>
+        </Menu.Item>
+
+
       </Menu>
     </Sider>
   );
