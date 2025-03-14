@@ -9,9 +9,9 @@ import {
   Typography, 
   Spin 
 } from 'antd';
+import { useNavigate } from 'react-router-dom';  // Import useNavigate
 import axiosInstance from '../../utils/axiosInstance';
 import Footer from '../../components/Footer/Footer';
-
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -22,6 +22,7 @@ const ManageUserProfile: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
+  const navigate = useNavigate();  // Sử dụng useNavigate
 
   useEffect(() => {
     fetchUserProfile();
@@ -30,11 +31,10 @@ const ManageUserProfile: React.FC = () => {
   const fetchUserProfile = async () => {
     setProfileLoading(true);
     try {
-      const response = await axiosInstance.get(`${import.meta.env.VITE_API_ENDPOINT}/users/profile`);
+      const response = await axiosInstance.get(`${API_BASE_URL}/profile`);
       
-      console.log("Full API Response:", response); // Kiểm tra API Response
+      console.log("Full API Response:", response);
   
-      // Kiểm tra response.data có tồn tại không
       if (!response.data || !response.data.data) {
         throw new Error("API response is missing 'data' key");
       }
@@ -56,14 +56,15 @@ const ManageUserProfile: React.FC = () => {
       setProfileLoading(false);
     }
   };
-  
-  
 
   const updateProfile = async (values: any) => {
     setLoading(true);
     try {
       await axiosInstance.put(`${API_BASE_URL}/update-profile`, values);
       message.success('Profile updated successfully!');
+      setTimeout(() => {
+        navigate('/profile');  // Chuyển hướng sau khi cập nhật thành công
+      }, 500);  // Delay một chút để hiển thị thông báo
     } catch (error: any) {
       message.error('Failed to update profile. Please try again.');
       console.error('Error updating profile:', error);
