@@ -137,10 +137,28 @@ const ParentProfilePage: React.FC = () => {
       }
     };
 
+    
     fetchUserData();
     fetchChildData();
     fetchDoctors();
   }, []);
+
+  
+  const calculateAge = (doB: string) => {
+    const birthDate = new Date(doB);
+    const today = new Date();
+    
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+  
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+  
+    return `${years} years ${months} months`;
+  };
+
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
@@ -181,22 +199,22 @@ const ParentProfilePage: React.FC = () => {
                     <Row gutter={[16, 16]}>
                       <Col span={12}>
                         <Title level={5}>{childData.name}</Title>
-                        <p>Age: {childData.age || "N/A"}</p>
-                        <p>Gender: {childData.gender === 0 ? "Male" : "Female"}</p>
-                        <p>Last Checkup: {childData.lastCheckup || "N/A"}</p>
+                        <p><strong>Age:</strong> {childData.doB ? calculateAge(childData.doB) : "N/A"}</p>
+                        <p><strong>Gender:</strong> {childData.gender === 0 ? "Male" : "Female"}</p>
+                        <p><strong>Last Checkup:</strong> {childData.lastCheckup || "N/A"}</p>
                       </Col>
                       <Col span={12}>
                         <Title level={5}>BMI</Title>
                         <Progress
                           percent={75}
                           status="active"
-                          format={() => `${childData.bmi || "N/A"} kg/m²`}
+                          format={() => `${childData.bmi ? childData.bmi.toFixed(3) : "N/A"} kg/m²`}
                         />
-                        <p>Height: {childData.height || "N/A"} cm</p>
-                        <p>Weight: {childData.weight || "N/A"} kg</p>
+                        <p><strong>Height:</strong> {childData.height || "N/A"} cm</p>
+                        <p><strong>Weight:</strong> {childData.weight || "N/A"} kg</p>
                       </Col>
                     </Row>
-                  </Card>
+                  </Card>              
                 ) : (
                   <Text>No child information available.</Text>
                 )}

@@ -1,46 +1,45 @@
-import React, { useEffect } from "react";
-import { Result, Button, Layout, Typography } from "antd";
-import { useNavigate } from "react-router-dom";
-
-const { Content } = Layout;
-const { Title, Text } = Typography;
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const PaymentSuccessPage: React.FC = () => {
-  const navigate = useNavigate();
-  const token = localStorage.getItem("payment_token");
-  if (token) {
-      console.log("Retrieved Token:", token);
-  }
+  const [searchParams] = useSearchParams();
+  const [paymentParams, setPaymentParams] = useState<any>(null);
 
   useEffect(() => {
+    // Lấy các tham số từ searchParams
+    const paymentDetails = {
+      amount: searchParams.get("vnp_Amount"),
+      txnRef: searchParams.get("vnp_TxnRef"),
+      responseCode: searchParams.get("vnp_ResponseCode"),
+      secureHash: searchParams.get("vnp_SecureHash"),
+    };
 
-    const timer = setTimeout(() => {
-      navigate("/home"); 
-    }, 5000);
+    setPaymentParams(paymentDetails);
 
-    return () => clearTimeout(timer);
-  }, [navigate]);
+    // Kiểm tra mã phản hồi và xử lý
+    if (paymentDetails.responseCode === "00") {
+      console.log("Thanh toán thành công!");
+      // Xử lý thanh toán thành công
+    } else {
+      console.log("Thanh toán thất bại!");
+      // Xử lý nếu thanh toán thất bại
+    }
+  }, [searchParams]);
 
   return (
-    <Layout style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <Content>
-        <Result
-          status="success"
-          title={<Title level={2}>Payment Successful!</Title>}
-          subTitle={
-            <Text style={{ fontSize: 16 }}>
-              Thank you for your purchase. Your premium plan is now activated. You will be redirected to your Home
-              shortly.
-            </Text>
-          }
-          extra={[
-            <Button type="primary" key="home" onClick={() => navigate("/home")}>
-              Go to Home
-            </Button>,
-          ]}
-        />
-      </Content>
-    </Layout>
+    <div>
+      <h1>Payment Success</h1>
+      {paymentParams ? (
+        <div>
+          <p>Amount: {paymentParams.amount}</p>
+          <p>Transaction Ref: {paymentParams.txnRef}</p>
+          <p>Response Code: {paymentParams.responseCode}</p>
+          <p>Secure Hash: {paymentParams.secureHash}</p>
+        </div>
+      ) : (
+        <p>Loading payment details...</p>
+      )}
+    </div>
   );
 };
 

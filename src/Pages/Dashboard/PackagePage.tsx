@@ -12,7 +12,6 @@ const PackagesPage = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentPackage, setCurrentPackage] = useState(null);
 
-  // Fetch all packages
   const fetchPackages = async () => {
     setLoading(true);
     const token = localStorage.getItem("token");
@@ -22,7 +21,6 @@ const PackagesPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       
-      // Access the data property from the response
       if (response.data && response.data.data) {
         setPackages(response.data.data);
       } else {
@@ -37,7 +35,6 @@ const PackagesPage = () => {
     }
   };
 
-  // Load packages on component mount
   useEffect(() => {
     fetchPackages();
   }, []);
@@ -83,7 +80,7 @@ const PackagesPage = () => {
       message.success("Package created successfully!");
       form.resetFields();
       setIsModalVisible(false);
-      fetchPackages(); // Refresh the package list
+      fetchPackages(); 
     } catch (error) {
       console.error("Submit error:", error);
       message.error("Failed to create package.");

@@ -77,7 +77,7 @@ const LoginPage: React.FC = () => {
 
         setTimeout(() => {
           if (userRole === "Admin") {
-            navigate("/my-admin");
+            navigate("/my-admin/users");
           } else if (userRole === "Doctor") {
             navigate("/my-doctor");
           } else {
