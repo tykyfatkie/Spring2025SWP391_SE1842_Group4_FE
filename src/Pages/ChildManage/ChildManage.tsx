@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Button, Modal, message, Spin, Space, Layout, Form, Input, DatePicker, Select } from "antd";
-import { EditOutlined, DeleteOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { Table, Button, Modal, message, Spin, Space, Layout, Form, Input, DatePicker, Select, Tabs } from "antd";
+import { EditOutlined, DeleteOutlined, EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import Sidebar from "../../components/Sidebar/Sidebar";
 
 const { Content } = Layout;
 const { Option } = Select;
+const { TabPane } = Tabs;
 
 const ChildManage: React.FC = () => {
   const [children, setChildren] = useState<any[]>([]);
+  const [archivedChildren, setArchivedChildren] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [archivedLoading, setArchivedLoading] = useState<boolean>(false);
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [editingChild, setEditingChild] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<string>("active");
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
@@ -49,6 +53,37 @@ const ChildManage: React.FC = () => {
       console.error("Error fetching children:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchArchivedChildren = async () => {
+    setArchivedLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        message.error("Authentication information missing. Please login again.");
+        navigate("/login");
+        return;
+      }
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_ENDPOINT}/children/archive-list`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data?.data) {
+        setArchivedChildren(response.data.data);
+      }
+    } catch (error: any) {
+      message.error(error.response?.data?.message || "Failed to fetch archived children data.");
+      console.error("Error fetching archived children:", error);
+    } finally {
+      setArchivedLoading(false);
     }
   };
 
@@ -136,7 +171,11 @@ const ChildManage: React.FC = () => {
 
             if (response.status === 200) {
               message.success("Child deleted successfully");
-              fetchChildren();
+              if (activeTab === "active") {
+                fetchChildren();
+              } else {
+                fetchArchivedChildren();
+              }
             }
           } catch (error: any) {
             message.error(error.response?.data?.message || "Failed to delete child.");
@@ -166,12 +205,10 @@ const ChildManage: React.FC = () => {
         okText: "Yes, Hide",
         cancelText: "Cancel",
         onOk: async () => {
-          setLoading(true);
           try {
-            // Fix: Send 'true' as the request body instead of an empty object
-            const response = await axios.post(
+            await axios.post(
               `${import.meta.env.VITE_API_ENDPOINT}/children/hideChildren/${childId}`,
-              true, // Change here from {} to true
+              true,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -180,15 +217,17 @@ const ChildManage: React.FC = () => {
               }
             );
   
-            if (response.status === 200) {
-              message.success("Child record hidden successfully");
-              fetchChildren();
-            }
+            message.success("Child record hidden successfully");
+  
+            // Cập nhật UI ngay lập tức mà không cần gọi lại API
+            setChildren((prevChildren) => prevChildren.filter(child => child.id !== childId));
+            setArchivedChildren((prevArchived) => [
+              ...prevArchived,
+              children.find(child => child.id === childId),
+            ]);
           } catch (error: any) {
             console.error("Error hiding child:", error);
             message.error(error.response?.data?.message || "Failed to hide child record.");
-          } finally {
-            setLoading(false);
           }
         },
       });
@@ -196,8 +235,66 @@ const ChildManage: React.FC = () => {
       console.error("Error in hide child flow:", error);
     }
   };
+  
+  
 
-  const columns = [
+  const handleUnhideChild = async (childId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        message.error("Authentication information missing. Please login again.");
+        return;
+      }
+  
+      Modal.confirm({
+        title: "Unhide Child Record",
+        content: "Are you sure you want to unhide this child's record?",
+        okText: "Yes, Unhide",
+        cancelText: "Cancel",
+        onOk: async () => {
+          try {
+            await axios.post(
+              `${import.meta.env.VITE_API_ENDPOINT}/children/hideChildren/${childId}`,
+              false,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+  
+            message.success("Child record unhidden successfully");
+  
+            // Cập nhật UI ngay lập tức mà không cần gọi lại API
+            setArchivedChildren((prevArchived) =>
+              prevArchived.filter(child => child.id !== childId)
+            );
+            setChildren((prevChildren) => [
+              ...prevChildren,
+              archivedChildren.find(child => child.id === childId),
+            ]);
+          } catch (error: any) {
+            console.error("Error unhiding child:", error);
+            message.error(error.response?.data?.message || "Failed to unhide child record.");
+          }
+        },
+      });
+    } catch (error: any) {
+      console.error("Error in unhide child flow:", error);
+    }
+  };
+  
+
+  const handleTabChange = (key: string) => {
+    setActiveTab(key);
+    if (key === "archived" && archivedChildren.length === 0) {
+      fetchArchivedChildren();
+    }
+  };
+
+  const activeColumns = [
     {
       title: "Name",
       dataIndex: "name",
@@ -245,19 +342,75 @@ const ChildManage: React.FC = () => {
     },
   ];
 
+  const archivedColumns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Gender",
+      dataIndex: "gender",
+      key: "gender",
+      render: (gender: number) => (gender === 0 ? "Male" : "Female"),
+    },
+    {
+      title: "Date of Birth",
+      dataIndex: "doB",
+      key: "doB",
+      render: (text: string) => {
+        return text && moment(text, "YYYY-MM-DD", true).isValid()
+          ? moment(text).format("YYYY/MM/DD")
+          : "Invalid Date";
+      },
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: any) => (
+        <Space>
+          <Button 
+            icon={<EyeOutlined />} 
+            onClick={() => handleUnhideChild(record.id)} 
+            type="default"
+            title="Unhide"
+          />
+          <Button 
+            icon={<DeleteOutlined />} 
+            onClick={() => handleDeleteChild(record.id)} 
+            danger 
+          />
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <Layout style={{ minHeight: "100vh", margin: "-25px" }}>
       <Sidebar />
       <Content style={{ padding: "20px" }}>
         <h1>Manage Children</h1>
 
-        {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
-            <Spin size="large" />
-          </div>
-        ) : (
-          <Table dataSource={children} columns={columns} rowKey="id" pagination={{ pageSize: 10 }} />
-        )}
+        <Tabs activeKey={activeTab} onChange={handleTabChange}>
+          <TabPane tab="Active Children" key="active">
+            {loading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
+                <Spin size="large" />
+              </div>
+            ) : (
+              <Table dataSource={children} columns={activeColumns} rowKey="id" pagination={{ pageSize: 10 }} />
+            )}
+          </TabPane>
+          <TabPane tab="Hidden Children" key="archived">
+            {archivedLoading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
+                <Spin size="large" />
+              </div>
+            ) : (
+              <Table dataSource={archivedChildren} columns={archivedColumns} rowKey="id" pagination={{ pageSize: 10 }} />
+            )}
+          </TabPane>
+        </Tabs>
 
         <Modal
           title="Edit Child Profile"
