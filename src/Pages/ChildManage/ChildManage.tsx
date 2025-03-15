@@ -31,7 +31,6 @@ const ChildManage: React.FC = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
         navigate("/login");
         return;
       }
@@ -62,7 +61,6 @@ const ChildManage: React.FC = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
         navigate("/login");
         return;
       }
@@ -107,7 +105,6 @@ const ChildManage: React.FC = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
         return;
       }
 
@@ -147,7 +144,6 @@ const ChildManage: React.FC = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
         return;
       }
 
@@ -195,7 +191,6 @@ const ChildManage: React.FC = () => {
       const token = localStorage.getItem("token");
   
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
         return;
       }
   
@@ -243,7 +238,6 @@ const ChildManage: React.FC = () => {
       const token = localStorage.getItem("token");
   
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
         return;
       }
   
@@ -277,7 +271,6 @@ const ChildManage: React.FC = () => {
             ]);
           } catch (error: any) {
             console.error("Error unhiding child:", error);
-            message.error(error.response?.data?.message || "Failed to unhide child record.");
           }
         },
       });

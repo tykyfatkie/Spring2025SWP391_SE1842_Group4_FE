@@ -50,7 +50,6 @@ const ManageUserProfile: React.FC = () => {
       });
   
     } catch (error) {
-      message.error('Failed to fetch user profile');
       console.error("Error fetching profile:", error);
     } finally {
       setProfileLoading(false);
@@ -63,8 +62,8 @@ const ManageUserProfile: React.FC = () => {
       await axiosInstance.put(`${API_BASE_URL}/update-profile`, values);
       message.success('Profile updated successfully!');
       setTimeout(() => {
-        navigate('/profile');  // Chuyển hướng sau khi cập nhật thành công
-      }, 500);  // Delay một chút để hiển thị thông báo
+        navigate('/profile'); 
+      }, 500);  
     } catch (error: any) {
       message.error('Failed to update profile. Please try again.');
       console.error('Error updating profile:', error);

@@ -22,7 +22,6 @@ const UserConsultationRequests: React.FC = () => {
     try {
       const token = localStorage.getItem('token'); 
       if (!token) {
-        message.error('No authorization token found');
         setLoading(false);
         return;
       }
@@ -43,7 +42,6 @@ const UserConsultationRequests: React.FC = () => {
         setRequests([]); 
       }
     } catch (error: any) {
-      message.error('Failed to fetch consultation requests');
       console.error('Error fetching consultation requests:', error);
     } finally {
       setLoading(false);

@@ -46,7 +46,6 @@ const ParentProfilePage: React.FC = () => {
         const token = localStorage.getItem('token');
 
         if (!token || token.split('.').length !== 3) {
-          message.error("Invalid token. Please log in again.");
           setLoading(false);
           return;
         }
@@ -59,7 +58,6 @@ const ParentProfilePage: React.FC = () => {
         if (!response.ok) {
           const errorData = await response.json();
           if (response.status === 401) {
-            message.error("Unauthorized: Please log in again.");
             return;
           }
           throw new Error('Network response was not ok');
@@ -79,7 +77,6 @@ const ParentProfilePage: React.FC = () => {
         const token = localStorage.getItem('token');
 
         if (!token) {
-          message.error("Authentication information missing.");
           return;
         }
 
@@ -100,7 +97,6 @@ const ParentProfilePage: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching child data:', error);
-        message.error('Failed to load child information');
       }
     };
 
@@ -114,14 +110,13 @@ const ParentProfilePage: React.FC = () => {
         if (!Array.isArray(data.data)) {
           throw new Error('Invalid API response: Expected an array');
         }
-        // Call the API to get the doctor names
         const updatedDoctors = await Promise.all(data.data.map(async (doctor) => {
           try {
             const profileResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${doctor.userId}`);
             if (profileResponse.ok) {
               const profileData = await profileResponse.json();
               if (profileData.data && Array.isArray(profileData.data) && profileData.data.length > 0) {
-                doctor.user = { name: profileData.data[0].user?.name || "Bác sĩ chưa cập nhật tên" };
+                doctor.user = { name: profileData.data[0].user?.name || "Doctor has not updated " };
               }
             }
           } catch (profileError) {
@@ -133,7 +128,6 @@ const ParentProfilePage: React.FC = () => {
         setDoctors(updatedDoctors);
       } catch (error) {
         console.error('Error fetching doctors:', error);
-        message.error('Failed to load doctors');
       }
     };
 
