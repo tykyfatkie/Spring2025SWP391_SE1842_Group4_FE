@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, Row, Col, Card, Menu, Spin, Alert, Button, Modal, Select, Form, Input } from 'antd';
+import { Layout, Typography, Row, Col, Card, Spin, Alert, Button, Modal, Form, Input, Upload, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
-import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title } = Typography;
-const { Option } = Select;
 
 interface Doctor {
   id: string;
@@ -22,20 +21,14 @@ interface Doctor {
   };
 }
 
-interface Child {
-  id: string;
-  name: string;
-}
-
 const DoctorPage: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [children, setChildren] = useState<Child[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-  const [message, setMessage] = useState<string>('');
+  const [messageText, setMessageText] = useState<string>('');
   const [doctorId, setDoctorId] = useState<string>('');
+  const [fileList, setFileList] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -77,56 +70,25 @@ const DoctorPage: React.FC = () => {
     fetchDoctors();
   }, []);
 
-  const fetchChildren = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        message.error("Authentication token missing. Please login again.");
-        return;
-      }
-      
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_ENDPOINT}/children/getChildByToken`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-  
-      if (response.data?.data && Array.isArray(response.data.data)) {
-        setChildren(response.data.data.map((child: any) => ({
-          id: child.id,
-          name: child.name || `Child ${child.id.substring(0, 8)}`,
-        })));
-      } else {
-        throw new Error("Invalid data format received");
-      }
-    } catch (error: any) {
-      console.error("Error fetching children:", error);
-      message.error(error.response?.data?.message || "Failed to load children data");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
   const handleMessageClick = (doctorId: string) => {
     setDoctorId(doctorId);
-    fetchChildren();
     setIsModalVisible(true);
   };
 
   const handleSendMessage = async () => {
     try {
+      const formData = new FormData();
+      formData.append('doctorReceiveId', doctorId);
+      formData.append('title', 'Consultation Request');
+      formData.append('description', messageText);
+
+      fileList.forEach(file => {
+        formData.append('attachments', file.originFileObj);
+      });
+
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          doctorReceiveId: doctorId,
-          childId: selectedChildId,
-          title: 'Consultation Request',
-          description: message,
-          attachments: '',  
-        }),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -136,10 +98,14 @@ const DoctorPage: React.FC = () => {
       Modal.success({
         content: 'Message sent successfully!',
       });
-      setIsModalVisible(false);  
+      setIsModalVisible(false);
     } catch (error) {
       console.error('Error sending message:', error);
     }
+  };
+
+  const handleFileChange = ({ fileList }: any) => {
+    setFileList(fileList);
   };
 
   return (
@@ -176,7 +142,7 @@ const DoctorPage: React.FC = () => {
                       }
                     />
                     <Button type="primary" block onClick={() => handleMessageClick(doctor.id)}>
-                      Message
+                      Contact for support
                     </Button>
                   </Card>
                 </Col>
@@ -193,24 +159,22 @@ const DoctorPage: React.FC = () => {
         onCancel={() => setIsModalVisible(false)}
       >
         <Form>
-          <Form.Item label="Select Child" required>
-            {children.length === 0 ? (
-             <Spin size="small" />
-           ) : (
-              <Select onChange={(value) => setSelectedChildId(value)} placeholder="Select a child">
-                {children.map((child) => (
-                  <Option key={child.id} value={child.id}>{child.name}</Option>
-                ))}
-              </Select>
-            )}
-          </Form.Item>
           <Form.Item label="Message" required>
             <Input.TextArea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
               placeholder="Enter your message here"
               rows={4}
             />
+          </Form.Item>
+          <Form.Item label="Upload Image or PDF">
+            <Upload
+              fileList={fileList}
+              onChange={handleFileChange}
+              beforeUpload={() => false} // Prevent auto upload
+            >
+              <Button icon={<UploadOutlined />}>Select File</Button>
+            </Upload>
           </Form.Item>
         </Form>
       </Modal>

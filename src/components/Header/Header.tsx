@@ -54,9 +54,15 @@ const AppHeader: React.FC = () => {
       <Menu.Item key="profile" onClick={() => navigate("/profile")}>
         Profile
       </Menu.Item>
+
+      <Menu.Item key="logout" onClick={() => navigate("/security")}>
+        Security
+      </Menu.Item>
+
       <Menu.Item key="logout" danger onClick={handleLogout}>
         Logout
       </Menu.Item>
+
     </Menu>
   );
 
@@ -140,9 +146,11 @@ const AppHeader: React.FC = () => {
                 <Button type="primary" icon={<LoginOutlined />} href="/login">
                   Login
                 </Button>
+
                 <Button icon={<UserAddOutlined />} href="/register">
                   Register
                 </Button>
+                
               </>
             )}
           </Space>

@@ -31,6 +31,7 @@ import BMITrackingPage from "../Pages/Analytics/AnalyticsPage";
 import BMIPage from "../Pages/BMI cal/BMIPage";
 import UserConsultationRequests from "../Pages/UserConsultationRequests/UserConsultationRequestsPage";
 import DoctorConsultationResponse from "../Pages/DoctorConsultationResponse/DoctorConsultationResponse";
+import ChangePasswordPage from "../Pages/Security/ChangePassword";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -64,7 +65,8 @@ const routes: LayoutRoute[] = [
       { path: "/payment-success", component: PaymentSuccessPage, exact: true, role: ["User"] },
       { path: "/consultation-requests", component: UserConsultationRequests, exact: true, role: ["User"] },
       { path: "/my-doctor/consultation-response", component: DoctorConsultationResponse, exact: true, role: ["Doctor"] },
-
+      { path: "/my-doctor/consultation-response", component: DoctorConsultationResponse, exact: true, role: ["Doctor"] },
+      { path: "/security", component: ProtectedComponent(ChangePasswordPage, ["User", "Doctor"]) },
     ],
   },
   {
