@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Card, Button, Typography, Layout, Spin, message } from "antd";
+import { Card, Button, Typography, Layout, Spin, message, Badge } from "antd";
 import { CheckCircleOutlined, CrownOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
@@ -36,7 +36,9 @@ const PremiumSubscriptionPage: React.FC = () => {
 
       if (response.data && response.data.data) {
         const activePackages = response.data.data.filter((pkg: PackageType) => pkg.status === 1);
-        setPackages(activePackages);
+        // Sort packages by price (ascending)
+        const sortedPackages = [...activePackages].sort((a, b) => a.price - b.price);
+        setPackages(sortedPackages);
       }
     } catch (error) {
       console.error("Error fetching packages:", error);
@@ -74,66 +76,139 @@ const PremiumSubscriptionPage: React.FC = () => {
     }
   };
 
+  // Define package colors based on tier
+  const getPackageColor = (index: number) => {
+    const colors = [
+      { primary: "#00b8d4", gradient: "linear-gradient(135deg, #00b8d4 0%, #0091ea 100%)" },
+      { primary: "#7b1fa2", gradient: "linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)" },
+      { primary: "#f57c00", gradient: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)" },
+      { primary: "#d32f2f", gradient: "linear-gradient(135deg, #f44336 0%, #d32f2f 100%)" }
+    ];
+    return colors[index % colors.length];
+  };
+
+  const getPackageLabel = (index: number) => {
+    const labels = ["Basic", "Standard", "Premium", "Special"];
+    return labels[index % labels.length];
+  };
+
   return (
-    <Layout style={{ minHeight: "100vh", margin: "-25px" }}>
+    <Layout style={{ minHeight: "100vh", margin:'-25px', background: "linear-gradient(135deg, #6e45e2 0%, #88d3ce 100%)" }}>
       <Content>
-        <div style={{ padding: 20, maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
-          <Title level={2}>
-            <CrownOutlined style={{ color: "#FFD700", marginRight: 8 }} />
-            Choose Your Premium Plan
+        <div style={{ padding: 40, maxWidth: 1200, margin: "0 auto", textAlign: "center" }}>
+          <Title level={1} style={{ color: "#fff", marginBottom: 8 }}>
+            Price List
           </Title>
-          <Text style={{ color: "#666" }}>
-            Unlock exclusive benefits and take full advantage of our system with a Premium plan.
+          <Text style={{ color: "#eef2ff", fontSize: 16, display: "block", maxWidth: 800, margin: "0 auto 40px" }}>
+            Unlock exclusive benefits and take full advantage of our system with a Premium plan. Choose the package that best suits your needs.
           </Text>
 
           {loading ? (
             <Spin size="large" style={{ display: "block", margin: "50px auto" }} />
           ) : (
-            packages.map((plan) => (
-              <Card
-                key={plan.id}
-                style={{
-                  border: "2px solid #1890ff",
-                  marginTop: 20,
-                  textAlign: "left",
-                  padding: 20,
-                  borderRadius: 10,
-                }}
-              >
-                <Title level={4} style={{ color: "#1890ff" }}>
-                  <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                  {plan.packageName}
-                </Title>
-                <Title level={3} style={{ color: "#1890ff" }}>
-                  {new Intl.NumberFormat("vi-VN").format(plan.price)} VND <span style={{ color: "#666" }}>•</span>
-                  <Text style={{ fontSize: 16, color: "#666" }}> {plan.durationMonths} month(s)</Text>
-                </Title>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 20 }}>
+              {packages.map((plan, index) => {
+                const colorScheme = getPackageColor(index);
+                const packageLabel = getPackageLabel(index);
+                
+                return (
+                  <Card
+                    key={plan.id}
+                    style={{
+                      width: 260,
+                      border: 0,
+                      marginTop: 20,
+                      textAlign: "center",
+                      borderRadius: 16,
+                      overflow: "hidden",
+                      boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                      background: "#fff",
+                      position: "relative",
+                    }}
+                    bodyStyle={{ padding: 0 }}
+                  >
+                    <div
+                      style={{
+                        background: colorScheme.gradient,
+                        padding: "30px 20px 50px",
+                        position: "relative",
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 10,
+                          left: -30,
+                          backgroundColor: colorScheme.primary,
+                          color: "#fff",
+                          padding: "5px 30px 5px 30px",
+                          transform: "rotate(-45deg)",
+                          fontWeight: "bold",
+                          zIndex: 1,
+                          borderRadius: "0 0 5px 5px",
+                          boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+                          fontSize: 12,
+                        }}
+                      >
+                        {packageLabel}
+                      </div>
+                      <Title level={1} style={{ color: "#fff", margin: 0, fontWeight: "bold" }}>
+                        {new Intl.NumberFormat("vi-VN").format(plan.price)}
+                        <span style={{ fontSize: 16, fontWeight: "normal", verticalAlign: "top" }}> VND</span>
+                      </Title>
+                      <Text style={{ fontSize: 14, color: "#eef2ff" }}>per {plan.durationMonths} month(s)</Text>
+                    </div>
 
+                    <div style={{ padding: "24px 20px" }}>
+                      <Title level={4} style={{ marginBottom: 20 }}>
+                        {plan.packageName}
+                      </Title>
 
-                <ul style={{ paddingLeft: 20, fontSize: 16, color: "#444" }}>
-                  <li>✅ Includes essential features for child growth tracking.</li>
-                  <li>✅ {plan.maxChildrentAllowed} children allowed</li>
-                  <li>✅ {plan.trialPeriodDays} trial days</li>
-                </ul>
+                      <ul style={{ listStyleType: "none", padding: 0, margin: 0, textAlign: "left", height: 200 }}>
+                        <li style={{ padding: "8px 0", fontSize: 14 }}>
+                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+                          Essential features for growth tracking
+                        </li>
+                        <li style={{ padding: "8px 0", fontSize: 14 }}>
+                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+                          Track up to {plan.maxChildrentAllowed} children
+                        </li>
+                        <li style={{ padding: "8px 0", fontSize: 14 }}>
+                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+                          {plan.trialPeriodDays} day free trial
+                        </li>
+                        <li style={{ padding: "8px 0", fontSize: 14 }}>
+                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+                          Personal growth insights
+                        </li>
+                        <li style={{ padding: "8px 0", fontSize: 14 }}>
+                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+                          Monthly progress reports
+                        </li>
+                      </ul>
 
-                <Button
-                  type="primary"
-                  block
-                  loading={submitting}
-                  style={{
-                    marginTop: 20,
-                    height: 50,
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    backgroundColor: "#1890ff",
-                    borderColor: "#1890ff",
-                  }}
-                  onClick={() => handleSubscribe(plan.id, plan.price)}
-                >
-                  Subscribe Now
-                </Button>
-              </Card>
-            ))
+                      <Button
+                        type="primary"
+                        block
+                        loading={submitting}
+                        style={{
+                          marginTop: 30,
+                          height: 44,
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          background: colorScheme.gradient,
+                          border: "none",
+                          borderRadius: 22,
+                        }}
+                        onClick={() => handleSubscribe(plan.id, plan.price)}
+                      >
+                        BUY NOW
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           )}
         </div>
       </Content>

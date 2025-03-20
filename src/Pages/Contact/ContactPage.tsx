@@ -18,7 +18,7 @@ const ContactPage: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
       <Layout.Content style={{ padding: '40px 50px', background: '#fff' }}>
-        <Space direction="vertical" size={64} style={{ width: '100%' }}>
+        <Space direction="vertical" size={64} style={{ width: '95%' }}>
           <div style={{ textAlign: 'center' }}>
             <Title>Contact Us</Title>
             <Paragraph style={{ fontSize: '18px' }}>

@@ -13,7 +13,7 @@ const AboutPage: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
       <Layout.Content style={{ padding: '40px 50px', background: '#fff' }}>
-        <Space direction="vertical" size={64} style={{ width: '100%' }}>
+        <Space direction="vertical" size={64} style={{ width: '95%' }}>
           <div style={{ textAlign: 'center' }}>
             <Title>About Child Growth Tracking</Title>
             <Paragraph style={{ fontSize: '18px', maxWidth: '800px', margin: '0 auto' }}>
