@@ -8,7 +8,7 @@ import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
 const { Content } = Layout;
 const { Title } = Typography;
 
-const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/response/request`;
+const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/response`;
 
 const DoctorConsultationResponse: React.FC = () => {
   const [requests, setRequests] = useState<any[]>([]);
@@ -32,8 +32,8 @@ const DoctorConsultationResponse: React.FC = () => {
         return;
       }
 
-      const userId = localStorage.getItem('userId'); 
-      const response = await axiosInstance.get(`${API_BASE_URL}/request-${userId}`, {
+      const requestId = localStorage.getItem('requestId'); 
+      const response = await axiosInstance.get(`${API_BASE_URL}/request-${requestId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

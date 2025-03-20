@@ -10,7 +10,12 @@ function MainLayout() {
   
   // Kiểm tra xem có phải là trang login hoặc register không
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  
+  // Thêm điều kiện kiểm tra cho trang DoctorConsultationResponse
+  const isConsultationResponsePage = location.pathname === '/my-doctor/consultation-response';
 
+  const isMyDoctorProfilePage = location.pathname === '/my-doctor'; 
+  
   // Nếu đã đăng nhập và cố gắng truy cập trang auth, chuyển hướng về /home
   if (token && isAuthPage) {
     return <Navigate to="/home" replace />;
@@ -23,7 +28,8 @@ function MainLayout() {
         overflow: 'hidden',
       }}
     >
-      {!isAuthPage && <AppHeader />}
+      {/* Hiển thị header nếu không phải trang xác thực và không phải trang consultation response */}
+      {!isAuthPage && !isConsultationResponsePage && !isMyDoctorProfilePage && <AppHeader /> }
       
       <Content
         style={{

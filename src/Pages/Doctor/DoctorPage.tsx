@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Layout, Typography, Row, Col, Card, Spin, Alert, Button, Modal, Form, Input, Upload, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined, EyeOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
+import { useNavigate } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -22,6 +23,7 @@ interface Doctor {
 }
 
 const DoctorPage: React.FC = () => {
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +72,8 @@ const DoctorPage: React.FC = () => {
     fetchDoctors();
   }, []);
 
-  const handleMessageClick = (doctorId: string) => {
+  const handleMessageClick = (doctorId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Ngăn chặn sự kiện click từ việc lan truyền
     setDoctorId(doctorId);
     setIsModalVisible(true);
   };
@@ -95,17 +98,24 @@ const DoctorPage: React.FC = () => {
         throw new Error('Failed to send message');
       }
 
-      Modal.success({
-        content: 'Message sent successfully!',
-      });
+      message.success('Message sent successfully!');
       setIsModalVisible(false);
+      setMessageText('');
+      setFileList([]);
     } catch (error) {
       console.error('Error sending message:', error);
+      message.error('Failed to send message');
     }
   };
 
   const handleFileChange = ({ fileList }: any) => {
     setFileList(fileList);
+  };
+
+  // Hàm chuyển đến trang profile của bác sĩ
+  const navigateToDoctorProfile = (userId: string) => {
+    console.log("Navigating to doctor profile with userId:", userId);
+    navigate(`/doctor/${userId}`);
   };
 
   return (
@@ -129,8 +139,42 @@ const DoctorPage: React.FC = () => {
                 <Col span={8} key={doctor.id}>
                   <Card
                     hoverable
-                    cover={<img alt={doctor.user?.name || "Doctor Image"} src={doctor.profileImg} style={{ transition: 'transform 0.5s', objectFit: 'cover', width: '100%', height: '250px' }} />}
-                    style={{ marginBottom: '20px', marginTop: '20px', transition: 'transform 0.5s, box-shadow 0.5s' }}
+                    cover={
+                      <div style={{ position: 'relative' }}>
+                        <img 
+                          alt={doctor.user?.name || "Doctor Image"} 
+                          src={doctor.profileImg} 
+                          style={{ 
+                            transition: 'transform 0.5s', 
+                            objectFit: 'cover', 
+                            width: '100%', 
+                            height: '250px' 
+                          }} 
+                        />
+                      </div>
+                    }
+                    style={{ 
+                      marginBottom: '20px', 
+                      marginTop: '20px', 
+                      transition: 'transform 0.5s, box-shadow 0.5s',
+                      overflow: 'hidden'
+                    }}
+                    actions={[
+                      <Button 
+                        key="view" 
+                        type="primary" 
+                        icon={<EyeOutlined />} 
+                        onClick={() => navigateToDoctorProfile(doctor.userId)}
+                      >
+                        View Profile
+                      </Button>,
+                      <Button 
+                        key="contact" 
+                        onClick={(e) => handleMessageClick(doctor.id, e)}
+                      >
+                        Contact
+                      </Button>
+                    ]}
                   >
                     <Card.Meta
                       title={<div className="title">{doctor.user?.name || "Doctor not updated"}</div>}
@@ -141,9 +185,6 @@ const DoctorPage: React.FC = () => {
                         </>
                       }
                     />
-                    <Button type="primary" block onClick={() => handleMessageClick(doctor.id)}>
-                      Contact for support
-                    </Button>
                   </Card>
                 </Col>
               ))}
@@ -154,7 +195,7 @@ const DoctorPage: React.FC = () => {
 
       <Modal
         title="Send Message to Doctor"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleSendMessage}
         onCancel={() => setIsModalVisible(false)}
       >
