@@ -97,7 +97,7 @@ const AppHeader: React.FC = () => {
           <div style={{ display: "flex", gap: "30px", marginLeft: "45px" }}> {/* Tăng khoảng cách giữa các mục */}
             <div 
               style={menuItemStyle("home")}
-              onClick={() => navigate("/home")}
+              onClick={() => navigate("/")}
               onMouseEnter={(e) => e.currentTarget.style.color = primaryBlue}
               onMouseLeave={(e) => e.currentTarget.style.color = selectedKey === "home" ? primaryBlue : "#000"}
             >

@@ -25,7 +25,7 @@ interface Doctor {
 }
 
 const DoctorsSection = ({ doctors, loading, error }: { doctors: Doctor[], loading: boolean, error: string | null }) => {
-  const [doctorsWithNames, setDoctorsWithNames] = useState<Doctor[]>([]); // New state to store doctors with names
+  const [doctorsWithNames, setDoctorsWithNames] = useState<Doctor[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,39 +44,76 @@ const DoctorsSection = ({ doctors, loading, error }: { doctors: Doctor[], loadin
           return doctor;
         }));
 
-        setDoctorsWithNames(updatedDoctors); // Update the doctorsWithNames state with updated data
+        setDoctorsWithNames(updatedDoctors);
       } catch (error) {
         console.error("Error fetching doctor names:", error);
       }
     };
 
     if (doctors.length > 0) {
-      fetchDoctorNames(); // Fetch names only when doctors data is available
+      fetchDoctorNames();
     }
-  }, [doctors]); // Re-run this effect when the doctors list changes
+  }, [doctors]);
+
+  // Styled button like Starbucks but keeping the original colors
+  const buttonStyle = {
+    height: '50px',
+    borderRadius: '30px',
+    border: '1px solid #0050b3',
+    background: '#0050b3',
+    color: '#fff',
+    fontSize: '16px',
+    fontWeight: 600,
+    padding: '0 25px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    marginTop: '20px',
+    fontFamily: 'SoDoSans, sans-serif',
+  };
 
   return (
-    <div style={{ padding: '64px 0', background: '#e6f7ff', color: '#000' }}>
+    <div style={{ padding: '90px 0', background: '#e6f7ff', color: '#000' }}>
       <Row justify="center" align="middle" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
         <Col xs={24} md={10} style={{ paddingRight: '40px' }}>
-          <Title level={2} style={{ color: '#0050b3' }}>Meet Our Expert Doctors</Title>
-          <Paragraph style={{ color: '#333', fontSize: '16px' }}>
-            Our team consists of highly experienced and dedicated professionals ready to provide the best healthcare services.
-          </Paragraph>
-          <Button 
-            type="primary" 
-            size="large" 
-            onClick={() => navigate('/doctor')}
-          >
-            View All Doctors →
-          </Button>
+          {/* Styled text section similar to Starbucks ad but with original colors */}
+          <div style={{ textAlign: 'left', marginBottom: '30px' }}>
+            <Title level={2} style={{ 
+              color: '#0050b3', 
+              fontSize: '36px', 
+              fontWeight: 700, 
+              marginBottom: '24px',
+              fontFamily: 'SoDoSans, sans-serif' 
+            }}>
+              Meet Our Expert Doctors
+            </Title>
+            
+            <Paragraph style={{ 
+              color: '#333', 
+              fontSize: '18px', 
+              lineHeight: '1.6', 
+              marginBottom: '30px',
+              fontFamily: 'SoDoSans, sans-serif'
+            }}>
+              Our team consists of highly experienced and dedicated professionals ready to provide the best healthcare services.
+            </Paragraph>
+            
+            <Button 
+              type="primary" 
+              size="large" 
+              onClick={() => navigate('/doctor')}
+              style={buttonStyle}
+            >
+              View All Doctors
+            </Button>
+          </div>
         </Col>
 
         <Col xs={24} md={14}>
           {loading && <Spin size="large" style={{ display: 'block', textAlign: 'center' }} />}
           {error && <Alert message="Error fetching doctors data" description={error} type="error" showIcon />}
 
-          {/* Swiper will render only once doctorsWithNames are updated */}
           <Swiper
             effect="coverflow"
             grabCursor={true}
