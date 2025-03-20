@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Menu, Row, Col, Space, Typography, Button, Dropdown, Avatar } from "antd";
-import { HomeOutlined, ContactsOutlined, InfoCircleOutlined, UserOutlined, BulbFilled, GiftOutlined } from "@ant-design/icons";
+import { HomeOutlined, ContactsOutlined, InfoCircleOutlined, UserOutlined, BulbFilled, GiftOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const { Header } = Layout;
@@ -39,14 +39,67 @@ const AppHeader: React.FC = () => {
   };
 
   const userMenu = (
-    <Menu>
-      <Menu.Item key="profile" onClick={() => navigate("/profile")}>
+    <Menu
+      style={{
+        padding: "8px 0",
+        borderRadius: "8px",
+        boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+        width: "180px",
+        border: "1px solid #f0f0f0"
+      }}
+    >
+      <div style={{ padding: "8px 16px", borderBottom: "1px solid #f0f0f0", marginBottom: "4px" }}>
+        <Typography.Text strong style={{ fontSize: "14px", color: "#666" }}>
+          Account Options
+        </Typography.Text>
+      </div>
+      
+      <Menu.Item 
+        key="profile" 
+        onClick={() => navigate("/profile")}
+        icon={<UserOutlined style={{ color: primaryBlue }} />}
+        style={{ 
+          padding: "10px 16px",
+          margin: "4px 0",
+          borderRadius: "0",
+          fontSize: "16px",
+          fontFamily: "SoDoSans, sans-serif"
+        }}
+      >
         Profile
       </Menu.Item>
-      <Menu.Item key="security" onClick={() => navigate("/security")}>
+      
+      <Menu.Item 
+        key="security" 
+        onClick={() => navigate("/security")}
+        icon={<InfoCircleOutlined style={{ color: primaryBlue }} />}
+        style={{ 
+          padding: "10px 16px",
+          margin: "4px 0",
+          borderRadius: "0",
+          fontSize: "16px",
+          fontFamily: "SoDoSans, sans-serif"
+        }}
+      >
         Security
       </Menu.Item>
-      <Menu.Item key="logout" danger onClick={handleLogout}>
+      
+      <div style={{ borderTop: "1px solid #f0f0f0", margin: "4px 0" }}></div>
+      
+      <Menu.Item 
+        key="logout" 
+        danger 
+        onClick={handleLogout}
+        icon={<LogoutOutlined />}
+        style={{ 
+          padding: "10px 16px",
+          margin: "4px 0",
+          borderRadius: "0",
+          fontSize: "16px",
+          fontFamily: "SoDoSans, sans-serif",
+          color: "#ff4d4f"
+        }}
+      >
         Logout
       </Menu.Item>
     </Menu>
