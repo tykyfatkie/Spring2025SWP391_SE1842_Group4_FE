@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Form, Input, InputNumber, Button, message, Card, Table, Space, Modal, Popconfirm } from "antd";
+import { Form, Input, InputNumber, Button, message, Card, Table, Space, Modal, Popconfirm, Select } from "antd";
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from "axios";
 
 const PackagesPage = () => {
@@ -20,7 +21,7 @@ const PackagesPage = () => {
       const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       if (response.data && response.data.data) {
         setPackages(response.data.data);
       } else {
@@ -54,8 +55,7 @@ const PackagesPage = () => {
       packageName: record.packageName,
       description: record.description,
       price: record.price,
-      durationMonths: record.durationMonths,
-      trialPeriodDays: record.trialPeriodDays,
+      billingCycle: record.billingCycle,
       maxChildrentAllowed: record.maxChildrentAllowed,
       status: record.status
     });
@@ -80,7 +80,7 @@ const PackagesPage = () => {
       message.success("Package created successfully!");
       form.resetFields();
       setIsModalVisible(false);
-      fetchPackages(); 
+      fetchPackages();
     } catch (error) {
       console.error("Submit error:", error);
       message.error("Failed to create package.");
@@ -91,20 +91,21 @@ const PackagesPage = () => {
 
   const handleEditSubmit = async (values) => {
     if (!currentPackage) return;
-    
+
     setSubmitting(true);
     const token = localStorage.getItem("token");
 
     try {
-      await axios.put(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/edit?packageId=${currentPackage.id}`, values, {
+      await axios.put(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/edit`, values, {
         headers: { Authorization: `Bearer ${token}` },
+        params: { packageId: currentPackage.id }
       });
 
       message.success("Package updated successfully!");
       editForm.resetFields();
       setIsEditModalVisible(false);
       setCurrentPackage(null);
-      fetchPackages(); // Refresh the package list
+      fetchPackages();
     } catch (error) {
       console.error("Edit error:", error);
       message.error("Failed to update package.");
@@ -117,12 +118,13 @@ const PackagesPage = () => {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.delete(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/delete?packageId=${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/delete`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: { packageId: id }
       });
 
       message.success("Package deleted successfully!");
-      fetchPackages(); // Refresh the package list
+      fetchPackages();
     } catch (error) {
       console.error("Delete error:", error);
       message.error("Failed to delete package.");
@@ -149,14 +151,10 @@ const PackagesPage = () => {
       render: (text) => `${text} VND`,
     },
     {
-      title: "Duration (Months)",
-      dataIndex: "durationMonths",
-      key: "durationMonths",
-    },
-    {
-      title: "Trial Period (Days)",
-      dataIndex: "trialPeriodDays",
-      key: "trialPeriodDays",
+      title: "Billing Cycle",
+      dataIndex: "billingCycle",
+      key: "billingCycle",
+      render: (billingCycle) => (billingCycle === 1 ? "Monthly" : "Yearly"), // Cập nhật phần hiển thị
     },
     {
       title: "Max Children",
@@ -168,7 +166,7 @@ const PackagesPage = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <span style={{ 
+        <span style={{
           color: status === 1 ? 'green' : 'gray',
           fontWeight: 'bold'
         }}>
@@ -181,7 +179,12 @@ const PackagesPage = () => {
       key: "actions",
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" onClick={() => showEditModal(record)}>Edit</Button>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+            shape="circle"
+          />
           <Popconfirm
             title="Delete package"
             description="Are you sure you want to delete this package?"
@@ -189,7 +192,12 @@ const PackagesPage = () => {
             okText="Yes"
             cancelText="No"
           >
-            <Button type="link" danger>Delete</Button>
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+              shape="circle"
+            />
           </Popconfirm>
         </Space>
       ),
@@ -198,14 +206,14 @@ const PackagesPage = () => {
 
   return (
     <div style={{ padding: 20 }}>
-      <Card 
-        title="Packages Management" 
+      <Card
+        title="Packages Management"
         extra={<Button type="primary" onClick={showModal}>Create New Package</Button>}
       >
-        <Table 
-          dataSource={packages} 
-          columns={columns} 
-          rowKey="id" 
+        <Table
+          dataSource={packages}
+          columns={columns}
+          rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}
         />
@@ -232,12 +240,11 @@ const PackagesPage = () => {
             <InputNumber placeholder="Price" style={{ width: "100%" }} min={0} />
           </Form.Item>
 
-          <Form.Item name="durationMonths" label="Duration (Months)" rules={[{ required: true, message: "Please enter duration" }]}>
-            <InputNumber placeholder="Duration (Months)" style={{ width: "100%" }} min={1} />
-          </Form.Item>
-
-          <Form.Item name="trialPeriodDays" label="Trial Period (Days)" rules={[{ required: true, message: "Please enter trial period" }]}>
-            <InputNumber placeholder="Trial Period (Days)" style={{ width: "100%" }} min={0} />
+          <Form.Item name="billingCycle" label="Billing Cycle" rules={[{ required: true, message: "Please select billing cycle" }]}>
+            <Select placeholder="Select billing cycle">
+              <Select.Option value={0}>Yearly</Select.Option>
+              <Select.Option value={1}>Monthly</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item name="maxChildrentAllowed" label="Max Children Allowed" rules={[{ required: true, message: "Please enter max children allowed" }]}>
@@ -272,31 +279,26 @@ const PackagesPage = () => {
             <Input.TextArea placeholder="Description" />
           </Form.Item>
 
-          <Form.Item name="price" label="Price ($)" rules={[{ required: true, message: "Please enter price" }]}>
+          <Form.Item name="price" label="Price (VND)" rules={[{ required: true, message: "Please enter price" }]}>
             <InputNumber placeholder="Price" style={{ width: "100%" }} min={0} />
           </Form.Item>
 
-          <Form.Item name="durationMonths" label="Duration (Months)" rules={[{ required: true, message: "Please enter duration" }]}>
-            <InputNumber placeholder="Duration (Months)" style={{ width: "100%" }} min={1} />
-          </Form.Item>
-
-          <Form.Item name="trialPeriodDays" label="Trial Period (Days)" rules={[{ required: true, message: "Please enter trial period" }]}>
-            <InputNumber placeholder="Trial Period (Days)" style={{ width: "100%" }} min={0} />
+          <Form.Item name="billingCycle" label="Billing Cycle" rules={[{ required: true, message: "Please select billing cycle" }]}>
+            <Select placeholder="Select billing cycle">
+              <Select.Option value={0}>Yearly</Select.Option>
+              <Select.Option value={1}>Monthly</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item name="maxChildrentAllowed" label="Max Children Allowed" rules={[{ required: true, message: "Please enter max children allowed" }]}>
             <InputNumber placeholder="Max Children Allowed" style={{ width: "100%" }} min={0} />
           </Form.Item>
 
-          <Form.Item name="status" label="Status">
-            <InputNumber 
-              placeholder="Status" 
-              style={{ width: "100%" }} 
-              min={0} 
-              max={1}
-              formatter={value => (value === 1 ? 'Active' : 'Inactive')}
-              parser={value => (value === 'Active' ? 1 : 0)}
-            />
+          <Form.Item name="status" label="Status" rules={[{ required: true, message: "Please select status" }]}>
+            <Select placeholder="Select status">
+              <Select.Option value={1}>Active</Select.Option>
+              <Select.Option value={0}>Inactive</Select.Option>
+            </Select>
           </Form.Item>
 
           <div style={{ textAlign: "right" }}>

@@ -65,7 +65,7 @@ const CreateChild: React.FC = () => {
     } catch (error: any) {
       console.error('Error saving profile:', error);
       console.log('Server Response:', error.response?.data);
-      message.error(error.response?.data?.message || 'Failed to save profile. Please try again.');
+      message.error(error.response?.data?.message || 'Please subcribe our package to use this feature!');
     } finally {
       setLoading(false);
     }
