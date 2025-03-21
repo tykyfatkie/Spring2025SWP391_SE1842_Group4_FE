@@ -9,8 +9,24 @@ const { Title } = Typography;
 
 const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/request/my-request`;
 
+// Define interface for consultation request
+interface ConsultationRequest {
+  id: string | number;
+  doctorName: string;
+  status: string;
+  date: string;
+  // Add other properties that might be in your response
+}
+
+// Define possible API response structures
+interface ApiResponse {
+  items?: ConsultationRequest[];
+  data?: ConsultationRequest[];
+  // Add other possible structures
+}
+
 const UserConsultationRequests: React.FC = () => {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<ConsultationRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -22,27 +38,36 @@ const UserConsultationRequests: React.FC = () => {
     try {
       const token = localStorage.getItem('token'); 
       if (!token) {
+        message.error('Authentication token missing');
         setLoading(false);
         return;
       }
 
-      const response = await axiosInstance.get(API_BASE_URL, {
+      const response = await axiosInstance.get<ConsultationRequest[] | ApiResponse>(API_BASE_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
+      // Log the response to see its structure
+      console.log('API Response:', response.data);
       
+      // Check the actual structure of your response
       if (Array.isArray(response.data)) {
-        setRequests(response.data); 
-      } else if (response.data && response.data.items) {
-        setRequests(response.data.items); 
+        setRequests(response.data);
+      } else if (response.data && Array.isArray((response.data as ApiResponse).items)) {
+        setRequests((response.data as ApiResponse).items || []);
+      } else if (response.data && Array.isArray((response.data as ApiResponse).data)) {
+        setRequests((response.data as ApiResponse).data || []);
       } else {
-        message.error('You have not sent any consultation yet.');
-        setRequests([]); 
+        console.error('Unexpected response format:', response.data);
+        message.warning('No consultation requests found or unexpected data format');
+        setRequests([]);
       }
     } catch (error: any) {
       console.error('Error fetching consultation requests:', error);
+      message.error(error.response?.data?.message || 'Failed to fetch consultation requests');
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -86,6 +111,7 @@ const UserConsultationRequests: React.FC = () => {
               dataSource={requests}
               rowKey="id"
               pagination={false}
+              locale={{ emptyText: 'No consultation requests found' }}
             />
           )}
         </Content>
