@@ -73,8 +73,8 @@ const ChildManage: React.FC = () => {
         setChildren(response.data.data);
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to fetch children data.");
-      console.error("Error fetching children:", error);
+      message.error(error.response?.data?.message || "You do not have any child yet!");
+      console.error("You do not have any child yet!", error);
     } finally {
       setLoading(false);
     }
@@ -103,8 +103,8 @@ const ChildManage: React.FC = () => {
         setArchivedChildren(response.data.data);
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to fetch archived children data.");
-      console.error("Error fetching archived children:", error);
+      message.error(error.response?.data?.message || "You do not have any hidden child yet!");
+      console.error("You do not have any hidden child yet!", error);
     } finally {
       setArchivedLoading(false);
     }

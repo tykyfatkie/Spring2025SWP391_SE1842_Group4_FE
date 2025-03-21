@@ -130,8 +130,8 @@ const AppFooter = () => {
             }} />
           </Title>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            <Link to="/about" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>About Us</Link>
-            <Link to="/contact" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>Contact</Link>
+            <Link to="/about-us" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>About Us</Link>
+            <Link to="/contact-us" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>Contact</Link>
             <Link to="/privacy" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>Privacy Policy</Link>
             <a href="https://www.who.int/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>
               <GlobalOutlined style={{ marginRight: '8px' }} />

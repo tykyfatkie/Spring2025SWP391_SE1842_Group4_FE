@@ -574,7 +574,7 @@ const ParentProfilePage: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                    {/* <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
                       <Button
                         type="primary"
                         style={{ 
@@ -586,7 +586,7 @@ const ParentProfilePage: React.FC = () => {
                       >
                         Follow
                       </Button>
-                    </div>
+                    </div> */}
                   </div>
                 ))}
                 <div style={{ padding: '16px', textAlign: 'center' }}>

@@ -201,6 +201,8 @@ const DoctorSidebar: React.FC = () => {
           <Link to="/my-doctor/consultation-response">Consultation Response</Link>
         </Menu.Item>
 
+
+{/* 
         <Menu.Item 
           key="consultation-request" 
           icon={<FileTextOutlined />}
@@ -240,7 +242,9 @@ const DoctorSidebar: React.FC = () => {
         >
           <Link to="/my-doctor/settings">Settings</Link>
         </Menu.Item>
-        
+         */}
+
+
         {/* Logout Menu Item placed at the bottom of the menu */}
         <Menu.Item 
           key="logout" 

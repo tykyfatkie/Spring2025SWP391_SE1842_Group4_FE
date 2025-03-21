@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Card, Button, Typography, Layout, Spin, message, Badge } from "antd";
 import { CheckCircleOutlined, CrownOutlined } from "@ant-design/icons";
+import { initiateVnPayPayment } from "../../services/PaymentService";
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
@@ -20,6 +20,7 @@ const PremiumSubscriptionPage: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [submittingPackageId, setSubmittingPackageId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPackages();
@@ -30,19 +31,25 @@ const PremiumSubscriptionPage: React.FC = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/all`, {
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (response.data && response.data.data) {
-        const activePackages = response.data.data.filter((pkg: PackageType) => pkg.status === 1);
+      if (!response.ok) {
+        throw new Error("Failed to fetch packages");
+      }
+
+      const responseData = await response.json();
+
+      if (responseData && responseData.data) {
+        const activePackages = responseData.data.filter((pkg: PackageType) => pkg.status === 1);
         // Sort packages by price (ascending)
         const sortedPackages = [...activePackages].sort((a, b) => a.price - b.price);
         setPackages(sortedPackages);
       }
     } catch (error) {
       console.error("Error fetching packages:", error);
-      message.error("Failed to fetch packages.");
+      message.error("Không thể tải danh sách gói dịch vụ.");
     } finally {
       setLoading(false);
     }
@@ -50,29 +57,34 @@ const PremiumSubscriptionPage: React.FC = () => {
 
   const handleSubscribe = async (packageId: string, price: number) => {
     setSubmitting(true);
-    const token = localStorage.getItem("token");
+    setSubmittingPackageId(packageId);
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_ENDPOINT}/payment/vnpay`,
-        {
-          packageId,
-          amount: price,
-          description: "Subscription to premium package",
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data) {
-        window.location.href = response.data;
+      // Tìm thông tin gói trong danh sách packages
+      const selectedPackage = packages.find(pkg => pkg.id === packageId);
+      if (!selectedPackage) {
+        throw new Error("Không tìm thấy thông tin gói");
       }
-    } catch (error) {
+
+      // Gọi service để tạo yêu cầu thanh toán
+      const paymentUrl = await initiateVnPayPayment({
+        packageId,
+        amount: price,
+        description: `Đăng ký gói ${selectedPackage.packageName} ${selectedPackage.durationMonths} tháng`,
+      });
+
+      // Chuyển hướng đến trang thanh toán
+      if (paymentUrl) {
+        window.location.href = paymentUrl;
+      } else {
+        throw new Error("Không nhận được URL thanh toán");
+      }
+    } catch (error: any) {
       console.error("Payment error:", error);
-      message.error("Failed to initiate payment.");
+      message.error(error.message || "Lỗi khi tạo giao dịch thanh toán.");
     } finally {
       setSubmitting(false);
+      setSubmittingPackageId(null);
     }
   };
 
@@ -97,10 +109,10 @@ const PremiumSubscriptionPage: React.FC = () => {
       <Content>
         <div style={{ padding: 40, maxWidth: 1200, margin: "0 auto", textAlign: "center" }}>
           <Title level={1} style={{ color: "#fff", marginBottom: 8 }}>
-            Price List
+            Danh sách gói dịch vụ
           </Title>
           <Text style={{ color: "#eef2ff", fontSize: 16, display: "block", maxWidth: 800, margin: "0 auto 40px" }}>
-            Unlock exclusive benefits and take full advantage of our system with a Premium plan. Choose the package that best suits your needs.
+            Mở khóa các tính năng độc quyền và tận dụng tối đa hệ thống của chúng tôi với gói Premium. Chọn gói phù hợp nhất với nhu cầu của bạn.
           </Text>
 
           {loading ? (
@@ -110,6 +122,7 @@ const PremiumSubscriptionPage: React.FC = () => {
               {packages.map((plan, index) => {
                 const colorScheme = getPackageColor(index);
                 const packageLabel = getPackageLabel(index);
+                const isLoadingThisPackage = submitting && submittingPackageId === plan.id;
                 
                 return (
                   <Card
@@ -156,7 +169,7 @@ const PremiumSubscriptionPage: React.FC = () => {
                         {new Intl.NumberFormat("vi-VN").format(plan.price)}
                         <span style={{ fontSize: 16, fontWeight: "normal", verticalAlign: "top" }}> VND</span>
                       </Title>
-                      <Text style={{ fontSize: 14, color: "#eef2ff" }}>per {plan.durationMonths} month(s)</Text>
+                      <Text style={{ fontSize: 14, color: "#eef2ff" }}>cho {plan.durationMonths} tháng</Text>
                     </div>
 
                     <div style={{ padding: "24px 20px" }}>
@@ -167,30 +180,31 @@ const PremiumSubscriptionPage: React.FC = () => {
                       <ul style={{ listStyleType: "none", padding: 0, margin: 0, textAlign: "left", height: 200 }}>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Essential features for growth tracking
+                          Các tính năng cơ bản để theo dõi sự phát triển
                         </li>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Track up to {plan.maxChildrentAllowed} children
+                          Theo dõi tối đa {plan.maxChildrentAllowed} trẻ em
                         </li>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          {plan.trialPeriodDays} day free trial
+                          Dùng thử {plan.trialPeriodDays} ngày miễn phí
                         </li>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Personal growth insights
+                          Thông tin phát triển cá nhân
                         </li>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Monthly progress reports
+                          Báo cáo tiến độ hàng tháng
                         </li>
                       </ul>
 
                       <Button
                         type="primary"
                         block
-                        loading={submitting}
+                        loading={isLoadingThisPackage}
+                        disabled={submitting}
                         style={{
                           marginTop: 30,
                           height: 44,
@@ -202,7 +216,7 @@ const PremiumSubscriptionPage: React.FC = () => {
                         }}
                         onClick={() => handleSubscribe(plan.id, plan.price)}
                       >
-                        BUY NOW
+                        ĐĂNG KÝ NGAY
                       </Button>
                     </div>
                   </Card>

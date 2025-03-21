@@ -26,12 +26,13 @@ import ChildManage from "../Pages/ChildManage/ChildManage";
 import MyDoctorProfilePage from "../Pages/MyDoctor/MyDoctor";
 import UpdateDoctorProfile from "../Pages/MyDoctor/UpdateDoctorProfile";
 import PackagesPage from "../Pages/Dashboard/PackagePage";
-import PaymentSuccessPage from "../Pages/PaymentSuccess/PaymentSuccessPage";
+import PaymentSuccessPage from "../Pages/PaymentSuccess/PaymentReturn";
 import BMITrackingPage from "../Pages/Analytics/AnalyticsPage";
 import BMIPage from "../Pages/BMI cal/BMIPage";
 import UserConsultationRequests from "../Pages/UserConsultationRequests/UserConsultationRequestsPage";
 import DoctorConsultationResponse from "../Pages/DoctorConsultationResponse/DoctorConsultationResponse";
 import ChangePasswordPage from "../Pages/Security/ChangePassword";
+import PaymentReturn from "../Pages/PaymentSuccess/PaymentReturn";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -67,6 +68,7 @@ const routes: LayoutRoute[] = [
       { path: "/my-doctor/consultation-response", component: DoctorConsultationResponse, exact: true, role: ["Doctor"] },
       { path: "/my-doctor/consultation-response", component: DoctorConsultationResponse, exact: true, role: ["Doctor"] },
       { path: "/security", component: ProtectedComponent(ChangePasswordPage, ["User", "Doctor"]) },
+      { path: "/payment/return", component: ProtectedComponent(PaymentReturn, ["User"]) },
     ],
   },
   {

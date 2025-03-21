@@ -272,7 +272,7 @@ const Homepage: React.FC = () => {
                   <UserOutlined style={{ color: 'white', fontSize: '20px' }} />
                 </div>
                 <div>
-                  <Text style={{ display: 'block', fontWeight: 600, color: '#1e3a8a' }}>Dr. Nguyễn Minh</Text>
+                  <Text style={{ display: 'block', fontWeight: 600, color: '#1e3a8a' }}>Dr. William Li</Text>
                   <Text style={{ color: '#4b5563', fontSize: '12px' }}>Pediatric Specialist</Text>
                 </div>
               </div>
@@ -460,74 +460,6 @@ const Homepage: React.FC = () => {
                 Explore All Features
               </Button>
             </Col>
-          </Row>
-        </div>
-
-        {/* Testimonials Section */}
-        <div style={{ padding: '80px 0', marginBottom: '60px' }}>
-          <Row justify="center" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-            <Col span={24} style={{ textAlign: 'center', marginBottom: '40px' }}>
-              <div style={{ 
-                display: 'inline-block', 
-                padding: '8px 16px',
-                background: 'rgba(30, 58, 138, 0.1)',
-                borderRadius: '20px',
-                marginBottom: '16px'
-              }}>
-                <span style={{ color: '#1e3a8a', fontWeight: '600', fontSize: '14px' }}>TESTIMONIALS</span>
-              </div>
-              <Title level={2} style={{ color: '#1e3a8a', marginBottom: '16px', fontSize: '36px' }}>
-                What Our Users Say
-              </Title>
-              <Paragraph style={{ color: '#4b5563', fontSize: '18px', maxWidth: '700px', margin: '0 auto' }}>
-                Read what parents and healthcare professionals have to say about our platform
-              </Paragraph>
-            </Col>
-            
-            <Row gutter={[24, 24]} style={{ width: '100%' }}>
-              {testimonials.map((testimonial, index) => (
-                <Col xs={24} md={8} key={index}>
-                  <Card 
-                    style={{ 
-                      height: '100%', 
-                      borderRadius: '16px',
-                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-                      border: 'none',
-                    }} 
-                    bodyStyle={{ padding: '32px' }}
-                  >
-                    <div style={{ marginBottom: '24px', fontSize: '24px', color: '#1e3a8a' }}>
-                      ★★★★★
-                    </div>
-                    <Paragraph style={{ 
-                      color: '#4b5563', 
-                      fontSize: '16px', 
-                      marginBottom: '24px',
-                      lineHeight: '1.6',
-                      fontStyle: 'italic'
-                    }}>
-                      "{testimonial.quote}"
-                    </Paragraph>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <Avatar 
-                        src={testimonial.avatar} 
-                        size={50}
-                        icon={<UserOutlined />}
-                        style={{ marginRight: '16px', background: '#1e3a8a' }}
-                      />
-                      <div>
-                        <Text style={{ display: 'block', fontWeight: 600, color: '#1e3a8a', fontSize: '16px' }}>
-                          {testimonial.name}
-                        </Text>
-                        <Text style={{ color: '#6b7280', fontSize: '14px' }}>
-                          {testimonial.role}
-                        </Text>
-                      </div>
-                    </div>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
           </Row>
         </div>
 

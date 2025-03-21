@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline, Spin, Alert } from 'antd';
 import { UserOutlined, ClockCircleOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
+import Doctor from "../../assets/doctor.png";
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -122,14 +123,15 @@ const DoctorProfilePage: React.FC = () => {
         <Card style={{ marginTop: '24px' }}>
           <Row gutter={24}>
             <Col span={8}>
-              <img 
-                src={doctor.profileImg} 
-                alt={doctor.biography} 
-                style={{ width: '100%', borderRadius: '8px' }}
-                onError={(e) => {
-                  e.currentTarget.src = 'https://via.placeholder.com/300x400?text=Doctor+Image';
-                }}
-              />
+            <img 
+              src={doctor.profileImg} 
+              alt={doctor.biography} 
+              style={{ width: '100%', borderRadius: '8px' }}
+              onError={(e) => {
+                e.target.src = Doctor; 
+              }}
+            />
+
               <Button type="primary" block style={{ marginTop: '16px' }}>
                 Make an appointment
               </Button>
