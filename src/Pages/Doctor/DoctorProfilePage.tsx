@@ -32,7 +32,7 @@ const DoctorPage: React.FC = () => {
   const [doctors, setDoctors] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [messageText, setMessageText] = useState<string>('');
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const [fileList, setFileList] = useState<any[]>([]);
@@ -146,7 +146,7 @@ const DoctorPage: React.FC = () => {
   ];
 
   // Function to check if file type is allowed
-  const isFileTypeAccepted = (file: any) => {
+  const isFileTypeAccepted = (file: any): boolean | string => {
     const isAccepted = acceptedFileTypes.includes(file.type);
     if (!isAccepted) {
       message.error(`File type ${file.type} is not supported. Please upload JPG, PNG, GIF or PDF files.`);
@@ -174,21 +174,30 @@ const DoctorPage: React.FC = () => {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          // Do not set Content-Type header for multipart/form-data
           'Accept': '*/*'
-          // Do not set Content-Type header - let the browser set it with boundary
         },
         body: formData
       });
 
+      const responseText = await response.text();
+      console.log("Raw upload response:", responseText);
+
       if (!response.ok) {
-        const errorText = await response.text();
         console.error("Upload error status:", response.status);
-        console.error("Upload error response:", errorText);
+        console.error("Upload error response:", responseText);
         throw new Error(`Upload failed with status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log("Upload response:", data);
+      // Try to parse the JSON response
+      let data: UploadResponse;
+      try {
+        data = JSON.parse(responseText);
+        console.log("Parsed upload response:", data);
+      } catch (err) {
+        console.error("Failed to parse upload response as JSON:", err);
+        throw new Error(`Invalid JSON response: ${responseText}`);
+      }
       
       if (data && data.url) {
         return data.url;
@@ -224,6 +233,7 @@ const DoctorPage: React.FC = () => {
       setUploadedFileUrls(urls);
       return urls;
     } catch (error: any) {
+      console.error("Error in uploadAllFiles:", error);
       message.error(`Error uploading files: ${error.message}`);
       return urls; // Return any successfully uploaded files
     } finally {
@@ -231,7 +241,14 @@ const DoctorPage: React.FC = () => {
     }
   };
 
-  const handleSendMessage = async () => {
+  interface RequestData {
+    doctorReceiveId: string;
+    title: string;
+    description: string;
+    attachments: string[];
+  }
+
+  const handleSendMessage = async (): Promise<void> => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -258,28 +275,54 @@ const DoctorPage: React.FC = () => {
       }
       
       // Create a request object
-      const requestData = {
+      const requestData: RequestData = {
         doctorReceiveId: selectedDoctorId,
         title: 'Consultation Request',
         description: messageText,
-        attachments: attachmentUrls // Send the array of URLs
+        attachments: attachmentUrls
       };
   
       console.log("Sending request data:", requestData);
+      console.log("JSON payload:", JSON.stringify(requestData));
+  
+      // Log the complete request details for debugging
+      console.log("Complete request details:", {
+        url: `${import.meta.env.VITE_API_ENDPOINT}/request/send`,
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer [TOKEN HIDDEN]',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData, null, 2)
+      });
   
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json' // Send as JSON
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(requestData),
       });
   
+      // Get response text first for debugging
+      const responseText = await response.text();
+      console.log("Raw server response:", responseText);
+  
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Server error response:", errorText);
-        throw new Error(`Failed to send message. Server responded with ${response.status}: ${errorText}`);
+        console.error("Server error response:", responseText);
+        throw new Error(`Failed to send message. Server responded with ${response.status}: ${responseText}`);
+      }
+  
+      // Try to parse JSON if there's a response body
+      let responseData;
+      if (responseText.trim()) {
+        try {
+          responseData = JSON.parse(responseText);
+          console.log("Parsed send message response:", responseData);
+        } catch (err) {
+          console.log("Response is not valid JSON, but request was successful");
+        }
       }
   
       message.success('Message sent successfully!');
@@ -421,7 +464,12 @@ const DoctorPage: React.FC = () => {
             <Upload
               fileList={fileList}
               onChange={handleFileChange}
-              beforeUpload={() => false} // Prevent auto upload - we'll handle it manually
+              beforeUpload={(file) => {
+                // Validate file type
+                const isValid = isFileTypeAccepted(file);
+                // Return false to prevent auto upload
+                return false;
+              }}
               multiple={true}
               accept=".jpg,.jpeg,.png,.gif,.pdf"
               disabled={uploading}
