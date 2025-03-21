@@ -7,60 +7,112 @@ import { useNavigate } from 'react-router-dom';
 const { Content } = Layout;
 const { Title } = Typography;
 
-interface Doctor {
+interface User {
   id: string;
-  certificate: string;
-  licenseNumber: string;
-  biography: string;
-  metadata: string;
-  specialize: string;
-  profileImg: string;
-  status: number;
-  userId: string;
-  user?: {
-    name: string;
-  };
+  name: string;
+  email: string;
+  profileImg?: string;
+  doctor?: {
+    id: string;
+    certificate: string;
+    licenseNumber: string;
+    biography: string;
+    metadata: string;
+    specialize: string;
+    status: number;
+  }
 }
 
 const DoctorPage: React.FC = () => {
   const navigate = useNavigate();
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctors, setDoctors] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [messageText, setMessageText] = useState<string>('');
-  const [doctorId, setDoctorId] = useState<string>('');
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const [fileList, setFileList] = useState<any[]>([]);
+
+  // Doctor role ID constant
+  const DOCTOR_ROLE_ID = '00000000-0000-0000-0000-000000000003';
 
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/all`);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        // Using the users/all API with RoleIds filter
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/all?RoleIds=${DOCTOR_ROLE_ID}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data = await response.json();
-        if (!Array.isArray(data.data)) {
-          throw new Error("Invalid API response: Expected an array");
+        // Get the raw text of the response first to log it
+        const responseText = await response.text();
+        console.log("Raw API Response:", responseText);
+        
+        // Try to parse the JSON
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log("Parsed API Response:", data);
+        } catch (parseError) {
+          throw new Error(`Failed to parse API response as JSON: ${responseText.substring(0, 200)}...`);
         }
-
-        const updatedDoctors = await Promise.all(data.data.map(async (doctor) => {
-          try {
-            const profileResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${doctor.userId}`);
-            if (profileResponse.ok) {
-              const profileData = await profileResponse.json();
-              if (profileData.data && Array.isArray(profileData.data) && profileData.data.length > 0) {
-                doctor.user = { name: profileData.data[0].user?.name || "Doctor not updated" };
-              }
+        
+        // Handle the nested data structure correctly
+        let doctorsData: User[] = [];
+        
+        if (data && typeof data === 'object') {
+          // First check if the response has a 'data' property
+          if (data.data) {
+            // Check if data.data is an array
+            if (Array.isArray(data.data)) {
+              doctorsData = data.data;
+            } 
+            // Check if data.data is an object that contains another 'data' array
+            else if (data.data.data && Array.isArray(data.data.data)) {
+              doctorsData = data.data.data;
             }
-          } catch (profileError) {
-            console.error("Error fetching doctor profile:", profileError);
+            // If data.data is a single object, wrap it in an array
+            else if (typeof data.data === 'object' && !Array.isArray(data.data)) {
+              doctorsData = [data.data];
+            }
+          } 
+          // Check other common response patterns
+          else if (Array.isArray(data)) {
+            doctorsData = data;
+          } else if (data.users && Array.isArray(data.users)) {
+            doctorsData = data.users;
+          } else if (data.doctors && Array.isArray(data.doctors)) {
+            doctorsData = data.doctors;
+          } else if (data.results && Array.isArray(data.results)) {
+            doctorsData = data.results;
+          } else {
+            // Check if data itself is a valid doctor object (single doctor case)
+            if (data.id && data.name) {
+              doctorsData = [data];
+            } else {
+              // Log the keys if it's an object but not in an expected format
+              console.log("Available keys in response:", Object.keys(data));
+              throw new Error(`Could not find doctors array in API response. Available keys: ${Object.keys(data).join(', ')}`);
+            }
           }
-          return doctor;
-        }));
-
-        setDoctors(updatedDoctors);
+        } else {
+          throw new Error(`API response is not a valid object: ${typeof data}`);
+        }
+        
+        console.log("Extracted doctors data:", doctorsData);
+        setDoctors(doctorsData);
+        
       } catch (error: any) {
         console.error("Fetch Error:", error);
         setError(error.message);
@@ -73,46 +125,100 @@ const DoctorPage: React.FC = () => {
   }, []);
 
   const handleMessageClick = (doctorId: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Ngăn chặn sự kiện click từ việc lan truyền
-    setDoctorId(doctorId);
+    event.stopPropagation();
+    setSelectedDoctorId(doctorId);
     setIsModalVisible(true);
+  };
+
+  // These are the allowed file types
+  const acceptedFileTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'application/pdf'
+  ];
+
+  // Function to check if file type is allowed
+  const isFileTypeAccepted = (file: any) => {
+    const isAccepted = acceptedFileTypes.includes(file.type);
+    if (!isAccepted) {
+      message.error(`File type ${file.type} is not supported. Please upload JPG, PNG, GIF or PDF files.`);
+    }
+    return isAccepted || Upload.LIST_IGNORE;
   };
 
   const handleSendMessage = async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      if (!messageText.trim()) {
+        message.error('Please enter a message');
+        return;
+      }
+
       const formData = new FormData();
-      formData.append('doctorReceiveId', doctorId);
+      formData.append('doctorReceiveId', selectedDoctorId);
       formData.append('title', 'Consultation Request');
       formData.append('description', messageText);
 
-      fileList.forEach(file => {
-        formData.append('attachments', file.originFileObj);
-      });
+      // Add each file to the FormData
+      if (fileList.length > 0) {
+        fileList.forEach((file, index) => {
+          // Make sure we have the original file object
+          if (file.originFileObj) {
+            formData.append(`attachments`, file.originFileObj);
+          }
+        });
+      }
+
+      console.log("Sending request to:", `${import.meta.env.VITE_API_ENDPOINT}/request/send`);
+      console.log("Form data entries:", [...formData.entries()].map(entry => `${entry[0]}: ${entry[1]}`));
 
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Remove Content-Type header to let the browser set it with the proper boundary
+          // for multipart/form-data
+        },
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        const errorText = await response.text();
+        console.error("Server error response:", errorText);
+        throw new Error(`Failed to send message. Server responded with ${response.status}: ${errorText}`);
       }
 
       message.success('Message sent successfully!');
       setIsModalVisible(false);
       setMessageText('');
       setFileList([]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
-      message.error('Failed to send message');
+      message.error(`Failed to send message: ${error.message}`);
     }
   };
 
   const handleFileChange = ({ fileList }: any) => {
-    setFileList(fileList);
+    // Filter out files that don't pass validation
+    const validFiles = fileList.filter((file: any) => {
+      // If the file is already uploaded or being uploaded, consider it valid
+      if (file.status === 'done' || file.status === 'uploading') {
+        return true;
+      }
+      
+      // For new files, validate the type
+      return acceptedFileTypes.includes(file.type);
+    });
+    
+    setFileList(validFiles);
   };
 
-  // Hàm chuyển đến trang profile của bác sĩ
   const navigateToDoctorProfile = (userId: string) => {
     console.log("Navigating to doctor profile with userId:", userId);
     navigate(`/doctor/${userId}`);
@@ -134,6 +240,15 @@ const DoctorPage: React.FC = () => {
                 style={{ marginBottom: '20px' }}
               />
             )}
+            {!loading && !error && doctors.length === 0 && (
+              <Alert
+                message="No doctors found"
+                description="No doctors were found matching the criteria."
+                type="info"
+                showIcon
+                style={{ marginBottom: '20px' }}
+              />
+            )}
             <Row gutter={[16, 16]} style={{ flexWrap: 'wrap' }}>
               {!loading && !error && doctors.map((doctor) => (
                 <Col span={8} key={doctor.id}>
@@ -142,8 +257,8 @@ const DoctorPage: React.FC = () => {
                     cover={
                       <div style={{ position: 'relative' }}>
                         <img 
-                          alt={doctor.user?.name || "Doctor Image"} 
-                          src={doctor.profileImg} 
+                          alt={doctor.name || "Doctor Image"} 
+                          src={doctor.profileImg || 'https://via.placeholder.com/300x250'} 
                           style={{ 
                             transition: 'transform 0.5s', 
                             objectFit: 'cover', 
@@ -164,24 +279,24 @@ const DoctorPage: React.FC = () => {
                         key="view" 
                         type="primary" 
                         icon={<EyeOutlined />} 
-                        onClick={() => navigateToDoctorProfile(doctor.userId)}
+                        onClick={() => navigateToDoctorProfile(doctor.id)}
                       >
                         View Profile
                       </Button>,
                       <Button 
                         key="contact" 
-                        onClick={(e) => handleMessageClick(doctor.id, e)}
+                        onClick={(e) => handleMessageClick(doctor.doctor?.id || doctor.id, e)}
                       >
                         Contact
                       </Button>
                     ]}
                   >
                     <Card.Meta
-                      title={<div className="title">{doctor.user?.name || "Doctor not updated"}</div>}
+                      title={<div className="title">{doctor.name || "Doctor"}</div>}
                       description={
                         <>
-                          <p>Specialization: {doctor.specialize}</p>
-                          <p>License: {doctor.licenseNumber}</p>
+                          <p>Specialization: {doctor.doctor?.specialize || "Not specified"}</p>
+                          <p>License: {doctor.doctor?.licenseNumber || "Not available"}</p>
                         </>
                       }
                     />
@@ -213,9 +328,13 @@ const DoctorPage: React.FC = () => {
               fileList={fileList}
               onChange={handleFileChange}
               beforeUpload={() => false} // Prevent auto upload
+              accept=".jpg,.jpeg,.png,.gif,.pdf" // This provides a filter in the file picker dialog
             >
               <Button icon={<UploadOutlined />}>Select File</Button>
             </Upload>
+            <div style={{ marginTop: '8px', fontSize: '12px', color: '#999' }}>
+              Supported file types: JPG, PNG, GIF, PDF
+            </div>
           </Form.Item>
         </Form>
       </Modal>

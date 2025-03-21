@@ -11,8 +11,7 @@ interface PackageType {
   packageName: string;
   price: number;
   durationMonths: number;
-  maxChildrentAllowed: number;
-  trialPeriodDays: number;
+  maxChildrenAllowed: number;
   status: number;
 }
 
@@ -49,7 +48,7 @@ const PremiumSubscriptionPage: React.FC = () => {
       }
     } catch (error) {
       console.error("Error fetching packages:", error);
-      message.error("Không thể tải danh sách gói dịch vụ.");
+      message.error("Unable to load service packages.");
     } finally {
       setLoading(false);
     }
@@ -60,28 +59,28 @@ const PremiumSubscriptionPage: React.FC = () => {
     setSubmittingPackageId(packageId);
 
     try {
-      // Tìm thông tin gói trong danh sách packages
+      // Find package information in the packages list
       const selectedPackage = packages.find(pkg => pkg.id === packageId);
       if (!selectedPackage) {
-        throw new Error("Không tìm thấy thông tin gói");
+        throw new Error("Package information not found");
       }
 
-      // Gọi service để tạo yêu cầu thanh toán
+      // Call service to create payment request
       const paymentUrl = await initiateVnPayPayment({
         packageId,
         amount: price,
-        description: `Đăng ký gói ${selectedPackage.packageName} ${selectedPackage.durationMonths} tháng`,
+        description: `Subscribe to ${selectedPackage.packageName} for ${selectedPackage.durationMonths} months`,
       });
 
-      // Chuyển hướng đến trang thanh toán
+      // Redirect to payment page
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
-        throw new Error("Không nhận được URL thanh toán");
+        throw new Error("Payment URL not received");
       }
     } catch (error: any) {
       console.error("Payment error:", error);
-      message.error(error.message || "Lỗi khi tạo giao dịch thanh toán.");
+      message.error(error.message || "Error creating payment transaction.");
     } finally {
       setSubmitting(false);
       setSubmittingPackageId(null);
@@ -109,10 +108,10 @@ const PremiumSubscriptionPage: React.FC = () => {
       <Content>
         <div style={{ padding: 40, maxWidth: 1200, margin: "0 auto", textAlign: "center" }}>
           <Title level={1} style={{ color: "#fff", marginBottom: 8 }}>
-            Danh sách gói dịch vụ
+            Service Packages
           </Title>
           <Text style={{ color: "#eef2ff", fontSize: 16, display: "block", maxWidth: 800, margin: "0 auto 40px" }}>
-            Mở khóa các tính năng độc quyền và tận dụng tối đa hệ thống của chúng tôi với gói Premium. Chọn gói phù hợp nhất với nhu cầu của bạn.
+            Unlock exclusive features and maximize our system with the Premium package. Choose the package that best suits your needs.
           </Text>
 
           {loading ? (
@@ -169,7 +168,7 @@ const PremiumSubscriptionPage: React.FC = () => {
                         {new Intl.NumberFormat("vi-VN").format(plan.price)}
                         <span style={{ fontSize: 16, fontWeight: "normal", verticalAlign: "top" }}> VND</span>
                       </Title>
-                      <Text style={{ fontSize: 14, color: "#eef2ff" }}>cho {plan.durationMonths} tháng</Text>
+                      <Text style={{ fontSize: 14, color: "#eef2ff" }}>for {plan.durationMonths} months</Text>
                     </div>
 
                     <div style={{ padding: "24px 20px" }}>
@@ -180,23 +179,19 @@ const PremiumSubscriptionPage: React.FC = () => {
                       <ul style={{ listStyleType: "none", padding: 0, margin: 0, textAlign: "left", height: 200 }}>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Các tính năng cơ bản để theo dõi sự phát triển
+                          Basic features to track development
                         </li>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Theo dõi tối đa {plan.maxChildrentAllowed} trẻ em
+                          Track up to {plan.maxChildrenAllowed} children
                         </li>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Dùng thử {plan.trialPeriodDays} ngày miễn phí
+                          Personalized development information
                         </li>
                         <li style={{ padding: "8px 0", fontSize: 14 }}>
                           <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Thông tin phát triển cá nhân
-                        </li>
-                        <li style={{ padding: "8px 0", fontSize: 14 }}>
-                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Báo cáo tiến độ hàng tháng
+                          Monthly progress reports
                         </li>
                       </ul>
 
@@ -216,7 +211,7 @@ const PremiumSubscriptionPage: React.FC = () => {
                         }}
                         onClick={() => handleSubscribe(plan.id, plan.price)}
                       >
-                        ĐĂNG KÝ NGAY
+                        SUBSCRIBE NOW
                       </Button>
                     </div>
                   </Card>
