@@ -1,124 +1,56 @@
+// Modifying DoctorProfilePage.tsx
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, Row, Col, Card, Spin, Alert, Button, Modal, Form, Input, Upload, message } from 'antd';
-import { UploadOutlined, EyeOutlined } from '@ant-design/icons';
+import { useParams } from 'react-router-dom';
+import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline, Spin, Alert } from 'antd';
+import { UserOutlined, ClockCircleOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
-import { useNavigate } from 'react-router-dom';
 
 const { Content } = Layout;
-const { Title } = Typography;
+const { Title, Text, Paragraph } = Typography;
+const { TabPane } = Tabs;
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  profileImg?: string;
-  doctor?: {
-    id: string;
-    certificate: string;
-    licenseNumber: string;
-    biography: string;
-    metadata: string;
-    specialize: string;
-    status: number;
-  }
+interface DoctorProfile {
+  certificate: string;
+  licenseNumber: string;
+  biography: string;
+  metadata: string;
+  specialize: string;
+  profileImg: string;
+  status: number;
+  userId: string;
+  user?: {
+    name: string;
+    userName: string;
+    email: string;
+    phone?: string;
+    address?: string;
+  };
 }
 
-interface UploadResponse {
-  url: string;
-}
-
-const DoctorPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [doctors, setDoctors] = useState<User[]>([]);
+const DoctorProfilePage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [messageText, setMessageText] = useState<string>('');
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
-  const [fileList, setFileList] = useState<any[]>([]);
-  const [uploadedFileUrls, setUploadedFileUrls] = useState<string[]>([]);
-  const [uploading, setUploading] = useState<boolean>(false);
-
-  // Doctor role ID constant
-  const DOCTOR_ROLE_ID = '00000000-0000-0000-0000-000000000003';
 
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const fetchDoctorProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found");
+        if (!id) {
+          throw new Error("Doctor ID is required");
         }
 
-        // Using the users/all API with RoleIds filter
-        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/all?RoleIds=${DOCTOR_ROLE_ID}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        // Get the raw text of the response first to log it
-        const responseText = await response.text();
-        console.log("Raw API Response:", responseText);
-        
-        // Try to parse the JSON
-        let data;
-        try {
-          data = JSON.parse(responseText);
-          console.log("Parsed API Response:", data);
-        } catch (parseError) {
-          throw new Error(`Failed to parse API response as JSON: ${responseText.substring(0, 200)}...`);
+        const result = await response.json();
+        if (!result.data || !Array.isArray(result.data) || result.data.length === 0) {
+          throw new Error("Invalid API response or no doctor found");
         }
-        
-        // Handle the nested data structure correctly
-        let doctorsData: User[] = [];
-        
-        if (data && typeof data === 'object') {
-          // First check if the response has a 'data' property
-          if (data.data) {
-            // Check if data.data is an array
-            if (Array.isArray(data.data)) {
-              doctorsData = data.data;
-            } 
-            // Check if data.data is an object that contains another 'data' array
-            else if (data.data.data && Array.isArray(data.data.data)) {
-              doctorsData = data.data.data;
-            }
-            // If data.data is a single object, wrap it in an array
-            else if (typeof data.data === 'object' && !Array.isArray(data.data)) {
-              doctorsData = [data.data];
-            }
-          } 
-          // Check other common response patterns
-          else if (Array.isArray(data)) {
-            doctorsData = data;
-          } else if (data.users && Array.isArray(data.users)) {
-            doctorsData = data.users;
-          } else if (data.doctors && Array.isArray(data.doctors)) {
-            doctorsData = data.doctors;
-          } else if (data.results && Array.isArray(data.results)) {
-            doctorsData = data.results;
-          } else {
-            // Check if data itself is a valid doctor object (single doctor case)
-            if (data.id && data.name) {
-              doctorsData = [data];
-            } else {
-              // Log the keys if it's an object but not in an expected format
-              console.log("Available keys in response:", Object.keys(data));
-              throw new Error(`Could not find doctors array in API response. Available keys: ${Object.keys(data).join(', ')}`);
-            }
-          }
-        } else {
-          throw new Error(`API response is not a valid object: ${typeof data}`);
-        }
-        
-        console.log("Extracted doctors data:", doctorsData);
-        setDoctors(doctorsData);
-        
+
+        setDoctor(result.data[0]);
       } catch (error: any) {
         console.error("Fetch Error:", error);
         setError(error.message);
@@ -127,381 +59,205 @@ const DoctorPage: React.FC = () => {
       }
     };
 
-    fetchDoctors();
-  }, []);
+    fetchDoctorProfile();
+  }, [id]);
 
-  const handleMessageClick = (doctorId: string, event: React.MouseEvent) => {
-    event.stopPropagation();
-    setSelectedDoctorId(doctorId);
-    setIsModalVisible(true);
-  };
-
-  // These are the allowed file types
-  const acceptedFileTypes = [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/gif',
-    'application/pdf'
-  ];
-
-  // Function to check if file type is allowed
-  const isFileTypeAccepted = (file: any): boolean | string => {
-    const isAccepted = acceptedFileTypes.includes(file.type);
-    if (!isAccepted) {
-      message.error(`File type ${file.type} is not supported. Please upload JPG, PNG, GIF or PDF files.`);
-    }
-    return isAccepted || Upload.LIST_IGNORE;
-  };
-
-  // New function to upload a single file - matches exactly the curl command format
-  const uploadFile = async (file: File): Promise<string> => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("No token found");
-    }
-
-    const formData = new FormData();
-    
-    // Make sure the field name matches exactly what's in the curl command
-    formData.append('file', file);
-    
+  const getMetadata = () => {
     try {
-      console.log("Uploading file:", file.name, "of type:", file.type);
-      
-      // Use fetch with the exact headers from the curl command
-      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/v1/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          // Do not set Content-Type header for multipart/form-data
-          'Accept': '*/*'
-        },
-        body: formData
-      });
-
-      const responseText = await response.text();
-      console.log("Raw upload response:", responseText);
-
-      if (!response.ok) {
-        console.error("Upload error status:", response.status);
-        console.error("Upload error response:", responseText);
-        throw new Error(`Upload failed with status: ${response.status}`);
+      if (doctor?.metadata) {
+        return JSON.parse(doctor.metadata);
       }
-
-      // Try to parse the JSON response
-      let data: UploadResponse;
-      try {
-        data = JSON.parse(responseText);
-        console.log("Parsed upload response:", data);
-      } catch (err) {
-        console.error("Failed to parse upload response as JSON:", err);
-        throw new Error(`Invalid JSON response: ${responseText}`);
-      }
-      
-      if (data && data.url) {
-        return data.url;
-      } else {
-        console.error("Invalid response format, no URL found:", data);
-        throw new Error("Invalid response format from upload API");
-      }
-    } catch (error: any) {
-      console.error("Error uploading file:", error);
-      throw error;
+      return null;
+    } catch (e) {
+      console.error("Error parsing metadata:", e);
+      return null;
     }
   };
 
-  // Upload all files and get their URLs
-  const uploadAllFiles = async (): Promise<string[]> => {
-    if (fileList.length === 0) {
-      return [];
-    }
+  const metadata = getMetadata();
 
-    const urls: string[] = [];
-    
-    try {
-      setUploading(true);
-      
-      // Upload files one by one to better handle errors
-      for (const fileItem of fileList) {
-        if (fileItem.originFileObj) {
-          const url = await uploadFile(fileItem.originFileObj);
-          urls.push(url);
-        }
-      }
-      
-      setUploadedFileUrls(urls);
-      return urls;
-    } catch (error: any) {
-      console.error("Error in uploadAllFiles:", error);
-      message.error(`Error uploading files: ${error.message}`);
-      return urls; // Return any successfully uploaded files
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  interface RequestData {
-    doctorReceiveId: string;
-    title: string;
-    description: string;
-    attachments: string[];
+  if (loading) {
+    return (
+      <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
+        <Content style={{ padding: '0 20px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+            <Spin size="large" />
+          </div>
+        </Content>
+      </Layout>
+    );
   }
 
-  const handleSendMessage = async (): Promise<void> => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No token found");
-      }
-  
-      if (!messageText.trim()) {
-        message.error('Please enter a message');
-        return;
-      }
-  
-      setUploading(true);
-      message.loading('Uploading files...', 0);
-      
-      // First upload all files
-      let attachmentUrls: string[] = [];
-      try {
-        attachmentUrls = await uploadAllFiles();
-        message.destroy(); // Remove the loading message
-      } catch (err) {
-        message.destroy(); // Remove the loading message
-        message.error('Some files failed to upload');
-        // Continue with any successfully uploaded files
-      }
-      
-      // Create a request object
-      const requestData: RequestData = {
-        doctorReceiveId: selectedDoctorId,
-        title: 'Consultation Request',
-        description: messageText,
-        attachments: attachmentUrls
-      };
-  
-      console.log("Sending request data:", requestData);
-      console.log("JSON payload:", JSON.stringify(requestData));
-  
-      // Log the complete request details for debugging
-      console.log("Complete request details:", {
-        url: `${import.meta.env.VITE_API_ENDPOINT}/request/send`,
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer [TOKEN HIDDEN]',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData, null, 2)
-      });
-  
-      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData),
-      });
-  
-      // Get response text first for debugging
-      const responseText = await response.text();
-      console.log("Raw server response:", responseText);
-  
-      if (!response.ok) {
-        console.error("Server error response:", responseText);
-        throw new Error(`Failed to send message. Server responded with ${response.status}: ${responseText}`);
-      }
-  
-      // Try to parse JSON if there's a response body
-      let responseData;
-      if (responseText.trim()) {
-        try {
-          responseData = JSON.parse(responseText);
-          console.log("Parsed send message response:", responseData);
-        } catch (err) {
-          console.log("Response is not valid JSON, but request was successful");
-        }
-      }
-  
-      message.success('Message sent successfully!');
-      setIsModalVisible(false);
-      setMessageText('');
-      setFileList([]);
-      setUploadedFileUrls([]);
-    } catch (error: any) {
-      console.error('Error sending message:', error);
-      message.error(`Failed to send message: ${error.message}`);
-    } finally {
-      setUploading(false);
-    }
-  };
+  if (error || !doctor) {
+    return (
+      <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
+        <Content style={{ padding: '0 20px', maxWidth: '1200px', margin: '0 auto' }}>
+          <Alert
+            message="Lỗi khi lấy thông tin bác sĩ"
+            description={error || "Không tìm thấy thông tin bác sĩ"}
+            type="error"
+            showIcon
+            style={{ marginTop: '24px' }}
+          />
+        </Content>
+      </Layout>
+    );
+  }
 
-  const handleFileChange = ({ fileList }: any) => {
-    // Filter out files that don't pass validation
-    const validFiles = fileList.filter((file: any) => {
-      // If the file is already uploaded or being uploaded, consider it valid
-      if (file.status === 'done' || file.status === 'uploading') {
-        return true;
-      }
-      
-      // For new files, validate the type
-      return acceptedFileTypes.includes(file.type);
-    });
-    
-    setFileList(validFiles);
-  };
+  // Extract degrees, certificates, and research items from metadata if available
+  const degrees = metadata?.years ? [`${metadata.years} năm kinh nghiệm`] : ["Tiến sĩ Y khoa", "Thạc sĩ Y học"];
+  const certificates = [doctor.certificate || "Chứng chỉ chuyên khoa"];
+  const research = ["Nghiên cứu lâm sàng", "Công bố khoa học"];
+  const languages = ["Tiếng Việt", "Tiếng Anh"];
+  const specializations = doctor.specialize ? [doctor.specialize] : ["Đa khoa"];
 
-  const navigateToDoctorProfile = (userId: string) => {
-    console.log("Navigating to doctor profile with userId:", userId);
-    navigate(`/doctor/${userId}`);
-  };
+  // Extract hospital information if available
+  const hospital = metadata?.hospital || "Bệnh viện";
 
   return (
     <Layout style={{ minHeight: '100vh', margin: '-25px' }}>
-      <Content style={{ padding: '0 10px', maxWidth: '1300px', marginLeft: '100px', marginTop: '70px' }}>
-        <Row gutter={16} style={{ display: 'flex' }}>
-          <Col span={18} style={{ display: 'flex', flexDirection: 'column' }}>
-            <Title level={2} style={{ marginBottom: '10px', color: '#0b4778' }}>Doctors</Title>
-            {loading && <Spin size="large" style={{ display: 'block', textAlign: 'center' }} />}
-            {error && (
-              <Alert
-                message="Error fetching doctors"
-                description={error}
-                type="error"
-                showIcon
-                style={{ marginBottom: '20px' }}
+      <Content style={{ 
+        padding: '0 20px', 
+        maxWidth: '1200px', 
+        margin: '0 auto',
+        marginBottom: '50px'
+      }}>
+        <Card style={{ marginTop: '24px' }}>
+          <Row gutter={24}>
+            <Col span={8}>
+              <img 
+                src={doctor.profileImg} 
+                alt={doctor.biography} 
+                style={{ width: '100%', borderRadius: '8px' }}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://via.placeholder.com/300x400?text=Doctor+Image';
+                }}
               />
-            )}
-            {!loading && !error && doctors.length === 0 && (
-              <Alert
-                message="No doctors found"
-                description="No doctors were found matching the criteria."
-                type="info"
-                showIcon
-                style={{ marginBottom: '20px' }}
-              />
-            )}
-            <Row gutter={[16, 16]} style={{ flexWrap: 'wrap' }}>
-              {!loading && !error && doctors.map((doctor) => (
-                <Col span={8} key={doctor.id}>
-                  <Card
-                    hoverable
-                    cover={
-                      <div style={{ position: 'relative' }}>
-                        <img 
-                          alt={doctor.name || "Doctor Image"} 
-                          src={doctor.profileImg || 'https://via.placeholder.com/300x250'} 
-                          style={{ 
-                            transition: 'transform 0.5s', 
-                            objectFit: 'cover', 
-                            width: '100%', 
-                            height: '250px' 
-                          }} 
-                        />
-                      </div>
-                    }
-                    style={{ 
-                      marginBottom: '20px', 
-                      marginTop: '20px', 
-                      transition: 'transform 0.5s, box-shadow 0.5s',
-                      overflow: 'hidden'
-                    }}
-                    actions={[
-                      <Button 
-                        key="view" 
-                        type="primary" 
-                        icon={<EyeOutlined />} 
-                        onClick={() => navigateToDoctorProfile(doctor.id)}
-                      >
-                        View Profile
-                      </Button>,
-                      <Button 
-                        key="contact" 
-                        onClick={(e) => handleMessageClick(doctor.doctor?.id || doctor.id, e)}
-                      >
-                        Contact
-                      </Button>
-                    ]}
-                  >
-                    <Card.Meta
-                      title={<div className="title">{doctor.name || "Doctor"}</div>}
-                      description={
-                        <>
-                          <p>Specialization: {doctor.doctor?.specialize || "Not specified"}</p>
-                          <p>License: {doctor.doctor?.licenseNumber || "Not available"}</p>
-                        </>
-                      }
-                    />
+              <Button type="primary" block style={{ marginTop: '16px' }}>
+                Đặt lịch khám
+              </Button>
+            </Col>
+            <Col span={16}>
+              <Title level={2}>{doctor.user?.name || doctor.biography}</Title>
+              <Rate disabled defaultValue={4.5} style={{ fontSize: '16px' }} />
+              <Text style={{ marginLeft: '8px' }}>(80 đánh giá)</Text>
+              
+              <Row style={{ marginTop: '16px' }}>
+                <Col span={24}>
+                  <Tag color="blue">{doctor.specialize || "Bác sĩ chuyên khoa"}</Tag>
+                  <Tag color="green">{metadata?.years ? `${metadata.years} năm kinh nghiệm` : "Bác sĩ kinh nghiệm"}</Tag>
+                </Col>
+              </Row>
+
+              <Paragraph style={{ marginTop: '16px' }}>
+                <ul>
+                  <li><EnvironmentOutlined /> Phòng khám: {hospital || "Chưa cập nhật"}</li>
+                  <li><PhoneOutlined /> Số điện thoại: {doctor.user?.phone || "Chưa cập nhật"}</li>
+                  <li><MailOutlined /> Email: {doctor.user?.email || "Chưa cập nhật"}</li>
+                  <li><ClockCircleOutlined /> Giờ làm việc: 8:00 - 17:00 (Thứ 2 - Thứ 7)</li>
+                </ul>
+              </Paragraph>
+            </Col>
+          </Row>
+
+          <Tabs defaultActiveKey="1" style={{ marginTop: '24px' }}>
+            <TabPane tab="Thông tin chung" key="1">
+              <Title level={4}>Bằng cấp & Chứng chỉ</Title>
+              <Row gutter={[24, 24]}>
+                <Col span={12}>
+                  <Card title="Học vấn" size="small">
+                    {degrees.map((degree, index) => (
+                      <p key={index}>• {degree}</p>
+                    ))}
                   </Card>
                 </Col>
-              ))}
-            </Row>
-          </Col>
-        </Row>
+                <Col span={12}>
+                  <Card title="Chứng chỉ chuyên môn" size="small">
+                    {certificates.map((cert, index) => (
+                      <p key={index}>• {cert}</p>
+                    ))}
+                  </Card>
+                </Col>
+              </Row>
+
+              <Title level={4} style={{ marginTop: '24px' }}>Chuyên môn</Title>
+              <Row gutter={[24, 24]}>
+                <Col span={12}>
+                  <Card title="Lĩnh vực chuyên sâu" size="small">
+                    {specializations.map((spec, index) => (
+                      <Tag color="blue" key={index} style={{ margin: '4px' }}>
+                        {spec}
+                      </Tag>
+                    ))}
+                  </Card>
+                </Col>
+                <Col span={12}>
+                  <Card title="Ngôn ngữ" size="small">
+                    {languages.map((lang, index) => (
+                      <Tag color="green" key={index} style={{ margin: '4px' }}>
+                        {lang}
+                      </Tag>
+                    ))}
+                  </Card>
+                </Col>
+              </Row>
+
+              <Title level={4} style={{ marginTop: '24px' }}>Nghiên cứu & Công bố</Title>
+              <Card size="small">
+                {research.map((item, index) => (
+                  <p key={index}>• {item}</p>
+                ))}
+              </Card>
+
+              <Title level={4} style={{ marginTop: '24px' }}>Kinh nghiệm làm việc</Title>
+              <Timeline>
+                <Timeline.Item>{metadata?.years ? `${new Date().getFullYear() - parseInt(metadata.years)} - ${new Date().getFullYear()}` : "2018 - nay"}: Bác sĩ tại {hospital || "Bệnh viện"}</Timeline.Item>
+                <Timeline.Item>Kinh nghiệm làm việc chuyên môn {metadata?.years || "nhiều"} năm</Timeline.Item>
+              </Timeline>
+            </TabPane>
+
+            <TabPane tab="Đánh giá" key="2">
+              <Row gutter={[16, 16]}>
+                {[1, 2, 3].map((review) => (
+                  <Col span={24} key={review}>
+                    <Card>
+                      <Row align="middle">
+                        <Avatar icon={<UserOutlined />} />
+                        <div style={{ marginLeft: '12px' }}>
+                          <Text strong>Người dùng ẩn danh</Text>
+                          <br />
+                          <Rate disabled defaultValue={5} style={{ fontSize: '12px' }} />
+                          <Text type="secondary" style={{ marginLeft: '8px' }}>1 tháng trước</Text>
+                        </div>
+                      </Row>
+                      <Paragraph style={{ marginTop: '12px' }}>
+                        Bác sĩ rất tận tâm và chuyên nghiệp. Tôi rất hài lòng với dịch vụ khám chữa bệnh.
+                      </Paragraph>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </TabPane>
+
+            <TabPane tab="Lịch khám" key="3">
+              <Title level={4}>Lịch khám trong tuần</Title>
+              <Row gutter={[16, 16]}>
+                {['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'].map((day) => (
+                  <Col span={8} key={day}>
+                    <Card title={day} size="small">
+                      <p>Sáng: 8:00 - 12:00</p>
+                      <p>Chiều: 13:30 - 17:00</p>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </TabPane>
+          </Tabs>
+        </Card>
       </Content>
-
-      <Modal
-        title="Send Message to Doctor"
-        open={isModalVisible}
-        onOk={handleSendMessage}
-        onCancel={() => setIsModalVisible(false)}
-        confirmLoading={uploading}
-        okText={uploading ? "Uploading..." : "Send Message"}
-      >
-        <Form>
-          <Form.Item label="Message" required>
-            <Input.TextArea
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              placeholder="Enter your message here"
-              rows={4}
-              disabled={uploading}
-            />
-          </Form.Item>
-          <Form.Item label="Upload Image or PDF">
-            <Upload
-              fileList={fileList}
-              onChange={handleFileChange}
-              beforeUpload={(file) => {
-                // Validate file type
-                const isValid = isFileTypeAccepted(file);
-                // Return false to prevent auto upload
-                return false;
-              }}
-              multiple={true}
-              accept=".jpg,.jpeg,.png,.gif,.pdf"
-              disabled={uploading}
-            >
-              <Button icon={<UploadOutlined />} disabled={uploading}>
-                Select File
-              </Button>
-            </Upload>
-            {uploadedFileUrls.length > 0 && (
-              <div style={{ marginTop: '8px' }}>
-                <p>Uploaded files:</p>
-                <ul>
-                  {uploadedFileUrls.map((url, index) => (
-                    <li key={index}>
-                      <a href={url} target="_blank" rel="noopener noreferrer">
-                        {url.split('/').pop()}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div style={{ marginTop: '8px', fontSize: '12px', color: '#999' }}>
-              Supported file types: JPG, PNG, GIF, PDF
-            </div>
-          </Form.Item>
-        </Form>
-      </Modal>
-
       <AppFooter />
     </Layout>
   );
 };
 
-export default DoctorPage;
+export default DoctorProfilePage;

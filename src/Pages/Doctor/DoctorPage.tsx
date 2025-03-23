@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Layout, Typography, Row, Col, Card, Spin, Alert, Button, Modal, Form, Input, Upload, message } from 'antd';
 import { UploadOutlined, EyeOutlined, SendOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
@@ -12,6 +12,7 @@ interface User {
   name: string;
   email: string;
   profileImg?: string;
+  avatar?: string;
   doctor?: {
     id: string;
     certificate: string;
@@ -27,6 +28,9 @@ interface UploadResponse {
   url: string;
 }
 
+// Add a default placeholder image
+const DEFAULT_PLACEHOLDER = '/assets/doctor-placeholder.png'; // Update with your actual placeholder path
+
 const DoctorPage: React.FC = () => {
   const navigate = useNavigate();
   const [doctors, setDoctors] = useState<User[]>([]);
@@ -39,102 +43,132 @@ const DoctorPage: React.FC = () => {
   const [uploadedFileUrls, setUploadedFileUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState<boolean>(false);
   const [sendingMessage, setSendingMessage] = useState<boolean>(false);
+  const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   
   // Doctor role ID constant
   const DOCTOR_ROLE_ID = '00000000-0000-0000-0000-000000000003';
 
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found");
-        }
-
-        // Using the users/all API with RoleIds filter
-        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/all?RoleIds=${DOCTOR_ROLE_ID}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        // Get the raw text of the response first to log it
-        const responseText = await response.text();
-        console.log("Raw API Response:", responseText);
-        
-        // Try to parse the JSON
-        let data;
-        try {
-          data = JSON.parse(responseText);
-          console.log("Parsed API Response:", data);
-        } catch (parseError) {
-          throw new Error(`Failed to parse API response as JSON: ${responseText.substring(0, 200)}...`);
-        }
-        
-        // Handle the nested data structure correctly
-        let doctorsData: User[] = [];
-        
-        if (data && typeof data === 'object') {
-          // First check if the response has a 'data' property
-          if (data.data) {
-            // Check if data.data is an array
-            if (Array.isArray(data.data)) {
-              doctorsData = data.data;
-            } 
-            // Check if data.data is an object that contains another 'data' array
-            else if (data.data.data && Array.isArray(data.data.data)) {
-              doctorsData = data.data.data;
-            }
-            // If data.data is a single object, wrap it in an array
-            else if (typeof data.data === 'object' && !Array.isArray(data.data)) {
-              doctorsData = [data.data];
-            }
-          } 
-          // Check other common response patterns
-          else if (Array.isArray(data)) {
-            doctorsData = data;
-          } else if (data.users && Array.isArray(data.users)) {
-            doctorsData = data.users;
-          } else if (data.doctors && Array.isArray(data.doctors)) {
-            doctorsData = data.doctors;
-          } else if (data.results && Array.isArray(data.results)) {
-            doctorsData = data.results;
-          } else {
-            // Check if data itself is a valid doctor object (single doctor case)
-            if (data.id && data.name) {
-              doctorsData = [data];
-            } else {
-              // Log the keys if it's an object but not in an expected format
-              console.log("Available keys in response:", Object.keys(data));
-              throw new Error(`Could not find doctors array in API response. Available keys: ${Object.keys(data).join(', ')}`);
-            }
-          }
-        } else {
-          throw new Error(`API response is not a valid object: ${typeof data}`);
-        }
-        
-        console.log("Extracted doctors data:", doctorsData);
-        setDoctors(doctorsData);
-        
-      } catch (error: any) {
-        console.error("Fetch Error:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
+  // Memoize the fetch doctors function to prevent unnecessary re-renders
+  const fetchDoctors = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
       }
-    };
 
-    fetchDoctors();
+      // Using the users/all API with RoleIds filter
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/all?RoleIds=${DOCTOR_ROLE_ID}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache', // Prevent caching issues
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Get the response as JSON directly
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        const responseText = await response.text();
+        console.error("Failed to parse API response as JSON:", responseText.substring(0, 200));
+        throw new Error(`Failed to parse API response as JSON`);
+      }
+      
+      // Handle the nested data structure correctly
+      let doctorsData: User[] = [];
+      
+      if (data && typeof data === 'object') {
+        // First check if the response has a 'data' property
+        if (data.data) {
+          // Check if data.data is an array
+          if (Array.isArray(data.data)) {
+            doctorsData = data.data;
+          } 
+          // Check if data.data is an object that contains another 'data' array
+          else if (data.data.data && Array.isArray(data.data.data)) {
+            doctorsData = data.data.data;
+          }
+          // If data.data is a single object, wrap it in an array
+          else if (typeof data.data === 'object' && !Array.isArray(data.data)) {
+            doctorsData = [data.data];
+          }
+        } 
+        // Check other common response patterns
+        else if (Array.isArray(data)) {
+          doctorsData = data;
+        } else if (data.users && Array.isArray(data.users)) {
+          doctorsData = data.users;
+        } else if (data.doctors && Array.isArray(data.doctors)) {
+          doctorsData = data.doctors;
+        } else if (data.results && Array.isArray(data.results)) {
+          doctorsData = data.results;
+        } else {
+          // Check if data itself is a valid doctor object (single doctor case)
+          if (data.id && data.name) {
+            doctorsData = [data];
+          } else {
+            throw new Error(`Could not find doctors array in API response.`);
+          }
+        }
+      } else {
+        throw new Error(`API response is not a valid object: ${typeof data}`);
+      }
+      
+      setDoctors(doctorsData);
+      
+    } catch (error: any) {
+      console.error("Fetch Error:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchDoctors();
+  }, [fetchDoctors]);
 
   const handleMessageClick = (doctorId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     setSelectedDoctorId(doctorId);
     setIsModalVisible(true);
+  };
+
+  // Helper function to validate image URLs
+  const isValidImageUrl = (url?: string): boolean => {
+    if (!url) return false;
+    return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/');
+  };
+
+  // Improved image URL getter with validation
+  const getDoctorImageUrl = (doctor: User): string => {
+    const doctorId = doctor.id;
+    
+    // Check if this image previously had a loading error
+    if (imageLoadErrors[doctorId]) {
+      return DEFAULT_PLACEHOLDER;
+    }
+
+    if (isValidImageUrl(doctor.avatar)) {
+      return doctor.avatar!;
+    } else if (isValidImageUrl(doctor.profileImg)) {
+      return doctor.profileImg!;
+    }
+    
+    // Return default placeholder if no valid image URL
+    return DEFAULT_PLACEHOLDER;
+  };
+
+  // Image error handler to track failed images
+  const handleImageError = (doctorId: string) => {
+    setImageLoadErrors(prev => ({
+      ...prev,
+      [doctorId]: true
+    }));
   };
 
   // These are the allowed file types
@@ -166,8 +200,6 @@ const DoctorPage: React.FC = () => {
     formData.append('file', file);
     
     try {
-      console.log("Uploading file:", file.name, "of type:", file.type);
-      
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/upload`, {
         method: 'POST',
         headers: {
@@ -177,29 +209,17 @@ const DoctorPage: React.FC = () => {
         body: formData
       });
 
-      const responseText = await response.text();
-      console.log("Raw upload response:", responseText);
-
       if (!response.ok) {
-        console.error("Upload error status:", response.status);
-        console.error("Upload error response:", responseText);
+        const responseText = await response.text();
         throw new Error(`Upload failed with status: ${response.status}`);
       }
 
       // Try to parse the JSON response
-      let data: UploadResponse;
-      try {
-        data = JSON.parse(responseText);
-        console.log("Parsed upload response:", data);
-      } catch (err) {
-        console.error("Failed to parse upload response as JSON:", err);
-        throw new Error(`Invalid JSON response: ${responseText}`);
-      }
+      const data: UploadResponse = await response.json();
       
       if (data && data.url) {
         return data.url;
       } else {
-        console.error("Invalid response format, no URL found:", data);
         throw new Error("Invalid response format from upload API");
       }
     } catch (error: any) {
@@ -238,7 +258,6 @@ const DoctorPage: React.FC = () => {
           fileItem.status = 'done';
         } catch (error) {
           fileItem.status = 'error';
-          console.error(`Failed to upload ${fileItem.name}:`, error);
           message.error(`Failed to upload ${fileItem.name}`);
         }
       }
@@ -249,13 +268,8 @@ const DoctorPage: React.FC = () => {
       // Update state with all URLs
       setUploadedFileUrls(allUrls);
       
-      if (newUrls.length > 0) {
-        console.log(`Successfully uploaded ${newUrls.length} file(s)`);
-      }
-      
       return allUrls;
     } catch (error: any) {
-      console.error("Error in uploadPendingFiles:", error);
       message.error(`Error uploading files: ${error.message}`);
       return [...uploadedFileUrls]; // Return existing URLs on error
     } finally {
@@ -263,7 +277,7 @@ const DoctorPage: React.FC = () => {
     }
   };
 
-  // Manual upload function (now just delegates to uploadPendingFiles)
+  // Manual upload function
   const handleUploadFiles = async () => {
     if (fileList.length === 0) {
       message.info('No files selected for upload');
@@ -310,7 +324,6 @@ const DoctorPage: React.FC = () => {
       const allFileUrls = await uploadPendingFiles();
       
       // Create a request object with attachments as a string (JSON.stringify the array)
-      // This is because the API error shows it expects a string, not an array
       const requestData: RequestData = {
         dto: {
           doctorReceiveId: selectedDoctorId,
@@ -319,20 +332,6 @@ const DoctorPage: React.FC = () => {
           attachments: JSON.stringify(allFileUrls) // Convert array to JSON string
         }
       };
-  
-      console.log("Sending request data:", requestData);
-      console.log("JSON payload:", JSON.stringify(requestData));
-  
-      // Log the complete request details for debugging
-      console.log("Complete request details:", {
-        url: `${import.meta.env.VITE_API_ENDPOINT}/request/send`,
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer [TOKEN HIDDEN]',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData, null, 2)
-      });
   
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
         method: 'POST',
@@ -343,24 +342,9 @@ const DoctorPage: React.FC = () => {
         body: JSON.stringify(requestData),
       });
   
-      // Get response text first for debugging
-      const responseText = await response.text();
-      console.log("Raw server response:", responseText);
-  
       if (!response.ok) {
-        console.error("Server error response:", responseText);
-        throw new Error(`Failed to send message. Server responded with ${response.status}: ${responseText}`);
-      }
-  
-      // Try to parse JSON if there's a response body
-      let responseData;
-      if (responseText.trim()) {
-        try {
-          responseData = JSON.parse(responseText);
-          console.log("Parsed send message response:", responseData);
-        } catch (err) {
-          console.log("Response is not valid JSON, but request was successful");
-        }
+        const responseText = await response.text();
+        throw new Error(`Failed to send message. Server responded with ${response.status}`);
       }
   
       message.success({ content: 'Message sent successfully!', key: messageLoadingKey });
@@ -369,7 +353,6 @@ const DoctorPage: React.FC = () => {
       setFileList([]);
       setUploadedFileUrls([]);
     } catch (error: any) {
-      console.error('Error sending message:', error);
       message.error(`Failed to send message: ${error.message}`);
     } finally {
       setSendingMessage(false);
@@ -402,7 +385,6 @@ const DoctorPage: React.FC = () => {
   };
 
   const navigateToDoctorProfile = (userId: string) => {
-    console.log("Navigating to doctor profile with userId:", userId);
     navigate(`/doctor/${userId}`);
   };
 
@@ -440,9 +422,10 @@ const DoctorPage: React.FC = () => {
                       <div style={{ position: 'relative' }}>
                         <img 
                           alt={doctor.name || "Doctor Image"} 
-                          src={doctor.profileImg || 'https://via.placeholder.com/300x250'} 
+                          src={getDoctorImageUrl(doctor)} 
+                          onError={() => handleImageError(doctor.id)}
+                          loading="lazy" // Add lazy loading
                           style={{ 
-                            transition: 'transform 0.5s', 
                             objectFit: 'cover', 
                             width: '100%', 
                             height: '250px' 
@@ -452,8 +435,7 @@ const DoctorPage: React.FC = () => {
                     }
                     style={{ 
                       marginBottom: '20px', 
-                      marginTop: '20px', 
-                      transition: 'transform 0.5s, box-shadow 0.5s',
+                      marginTop: '20px',
                       overflow: 'hidden'
                     }}
                     actions={[
