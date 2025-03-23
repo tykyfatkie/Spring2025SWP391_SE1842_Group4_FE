@@ -494,25 +494,25 @@ const AboutPage: React.FC = () => {
                 }} />
                 
                 {milestones.map((milestone, index) => (
-  <Row key={index} style={{ marginBottom: index === milestones.length - 1 ? 0 : '64px', position: 'relative', zIndex: 2 }}>
-    {/* Left side - for even items (0, 2, 4) */}
-    <Col xs={0} md={11} style={{ 
-      padding: '16px',
-      textAlign: 'right',
-      display: index % 2 === 0 ? 'block' : 'none',
-    }}>
-      {index % 2 === 0 && (
-        <>
-          <Title level={4} style={{ color: '#1e3a8a', marginBottom: '8px', fontSize: '20px' }}>
-            {milestone.title}
-          </Title>
-          
-          <Paragraph style={{ color: '#4b5563', fontSize: '15px', lineHeight: '1.6', margin: 0 }}>
-            {milestone.description}
-          </Paragraph>
-        </>
-      )}
-    </Col>
+        <Row key={index} style={{ marginBottom: index === milestones.length - 1 ? 0 : '64px', position: 'relative', zIndex: 2 }}>
+          {/* Left side - for even items (0, 2, 4) */}
+          <Col xs={0} md={11} style={{ 
+            padding: '16px',
+            textAlign: 'right',
+            display: index % 2 === 0 ? 'block' : 'none',
+          }}>
+            {index % 2 === 0 && (
+              <>
+                <Title level={4} style={{ color: '#1e3a8a', marginBottom: '8px', fontSize: '20px' }}>
+                  {milestone.title}
+                </Title>
+                
+                <Paragraph style={{ color: '#4b5563', fontSize: '15px', lineHeight: '1.6', margin: 0 }}>
+                  {milestone.description}
+                </Paragraph>
+              </>
+            )}
+          </Col>
     
     {/* Center column with dot and year - FIXED VERSION */}
     <Col xs={24} md={2} style={{ 
