@@ -7,7 +7,11 @@ import { CheckCircleOutlined, LineChartOutlined, PlusOutlined } from '@ant-desig
 import moment from 'moment';
 import BMIPDFExport from './BMIPDFExport'; 
 import SingleBMIExport from './SingleBMIExport';
-
+import CollapsibleHeader from './CollapsibleHeader';
+import BMIDetailsCard from './BMIDetailsCard';
+import BMIModalForm from './BMIModalForm';
+import ChildSelectorCard from './ChildSelectorCard';
+import BMIHistoryCard from './BMIHistoryCard';
 
 const { Content } = Layout;
 const { Option } = Select;
@@ -51,6 +55,7 @@ const BMITrackingPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingBMI, setFetchingBMI] = useState<boolean>(false);
   const [bmiModalVisible, setBmiModalVisible] = useState<boolean>(false);
+  const [collapsed, setCollapsed] = useState<boolean>(false); // New state for collapse functionality
   const [form] = Form.useForm();
 
   // Function to get BMI category
@@ -227,465 +232,70 @@ const BMITrackingPage: React.FC = () => {
     }
   };
 
+  // Function to toggle collapsible section
+  const toggleCollapse = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white', marginRight: '25px' }}>
       <Layout>
         <Sidebar />
         <Content style={{ padding: '24px', background: '#f8fafc' }}>
-          {/* Header Section */}
-          <div style={{ 
-            marginBottom: '40px', 
-            background: '#1e3a8a', 
-            padding: '48px 32px', 
-            borderRadius: '20px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
-          }}>
-            {/* Decorative elements */}
-            <div style={{
-              position: 'absolute',
-              width: '300px',
-              height: '300px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.05)',
-              top: '-100px',
-              left: '-100px',
-            }} />
-            <div style={{
-              position: 'absolute',
-              width: '200px',
-              height: '200px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.08)',
-              bottom: '-50px',
-              right: '50px',
-            }} />
-            
-            <div style={{ position: 'relative', zIndex: 2 }}>
-              <div style={{ 
-                display: 'inline-block', 
-                padding: '8px 16px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '20px',
-                marginBottom: '16px'
-              }}>
-                <span style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>BMI MANAGEMENT</span>
-              </div>
-              
-              <Title level={2} style={{ color: 'white', marginBottom: '16px', fontWeight: 700 }}>
-                Track and Manage Your Child's BMI
-              </Title>
-              <Paragraph style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.9)', maxWidth: '700px' }}>
-                Monitor your child's Body Mass Index (BMI) over time. This tracking tool helps you visualize growth patterns
-                and ensure healthy development according to WHO standards.
-              </Paragraph>
-              
-              <Space direction="vertical" size="middle" style={{ width: '100%', marginTop: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <CheckCircleOutlined style={{ color: '#3b82f6', marginRight: '12px' }} />
-                  <Text style={{ color: 'white' }}>Visualize BMI trends over time</Text>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <CheckCircleOutlined style={{ color: '#3b82f6', marginRight: '12px' }} />
-                  <Text style={{ color: 'white' }}>Compare with WHO standard percentiles</Text>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <CheckCircleOutlined style={{ color: '#3b82f6', marginRight: '12px' }} />
-                  <Text style={{ color: 'white' }}>Record new BMI measurements easily</Text>
-                </div>
-              </Space>
-            </div>
-          </div>
+          {/* Collapsible Section */}
+          <CollapsibleHeader 
+            title="Track and Manage Your Child's BMI"
+            subtitle="BMI MANAGEMENT"
+            description="Monitor your child's Body Mass Index (BMI) over time. This tracking tool helps you visualize growth patterns and ensure healthy development according to WHO standards."
+            features={[
+              'Visualize BMI trends over time',
+              'Compare with WHO standard percentiles',
+              'Record new BMI measurements easily'
+            ]}
+          />
 
           <Row gutter={[24, 24]}>
           <Col xs={24} md={8}>
-              <Card 
-                title={
-                  <div style={{ padding: '8px 0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: '50%', 
-                        background: 'rgba(30, 58, 138, 0.1)', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        marginRight: '16px' 
-                      }}>
-                        <LineChartOutlined style={{ fontSize: '20px', color: '#1e3a8a' }} />
-                      </div>
-                      <Title level={4} style={{ margin: 0, color: '#1e3a8a' }}>Select Child</Title>
-                    </div>
-                  </div>
-                }
-                style={{ 
-                  borderRadius: '16px', 
-                  overflow: 'hidden',
-                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-                  border: 'none',
-                  height: '100%'
-                }}
-                headStyle={{ 
-                  borderBottom: '1px solid #f0f0f0',
-                  padding: '16px 24px'
-                }}
-                bodyStyle={{ padding: '24px' }}
-              >
-                {loading ? (
-                  <div style={{ textAlign: 'center', padding: '50px 0' }}>
-                    <Spin size="large" />
-                  </div>
-                ) : (
-                  <>
-                    <Paragraph style={{ marginBottom: '20px', color: '#4b5563' }}>
-                      Select a child to view their BMI history and track their growth over time.
-                    </Paragraph>
-                    <Select
-                      placeholder="Select a child"
-                      style={{ width: '100%', borderRadius: '8px', height: '45px', marginBottom: '20px' }}
-                      onChange={(value) => setSelectedChild(value)}
-                      value={selectedChild}
-                      size="large"
-                    >
-                      {children.map((child) => (
-                        <Option key={child.id} value={child.id}>
-                          {child.name}
-                        </Option>
-                      ))}
-                    </Select>
-                    
-                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                      <Button 
-                        type="primary" 
-                        icon={<PlusOutlined />} 
-                        size="large" 
-                        style={{ width: '100%', height: '45px', borderRadius: '8px' }}
-                        onClick={handleOpenBmiModal}
-                        disabled={!selectedChild}
-                      >
-                        Add New BMI Record
-                      </Button>
-                      
-                      {/* BMI Export options */}
-                      {selectedChild && selectedChildData && (
-                        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                          <BMIPDFExport 
-                            childData={selectedChildData} 
-                            bmiRecords={chartData}
-                          />
-                          
-                          {/* Add the single record export button if there are records */}
-                          {chartData.length > 0 && (
-                            <SingleBMIExport 
-                              childData={selectedChildData}
-                              bmiRecord={chartData[chartData.length - 1]} // Use the most recent record
-                            />
-                          )}
-                        </Space>
-                      )}
-                    </Space>
-                  </>
-                )}
-              </Card>
-            </Col>
+            <ChildSelectorCard
+              loading={loading}
+              children={children}
+              selectedChild={selectedChild}
+              setSelectedChild={setSelectedChild}
+              selectedChildData={selectedChildData}
+              chartData={chartData}
+              handleOpenBmiModal={handleOpenBmiModal}
+            />
+          </Col>
 
-            <Col xs={24} md={16}>
-              {selectedChild && (
-                <Card 
-                  title={
-                    <div style={{ padding: '8px 0' }}>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{ 
-                          width: '40px', 
-                          height: '40px', 
-                          borderRadius: '50%', 
-                          background: 'rgba(30, 58, 138, 0.1)', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center',
-                          marginRight: '16px' 
-                        }}>
-                          <LineChartOutlined style={{ fontSize: '20px', color: '#1e3a8a' }} />
-                        </div>
-                        <Title level={4} style={{ margin: 0, color: '#1e3a8a' }}>BMI History</Title>
-                      </div>
-                    </div>
-                  }
-                  style={{ 
-                    borderRadius: '16px', 
-                    overflow: 'hidden',
-                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-                    border: 'none'
-                  }}
-                  headStyle={{ 
-                    borderBottom: '1px solid #f0f0f0',
-                    padding: '16px 24px'
-                  }}
-                  bodyStyle={{ padding: '24px' }}
-                >
-                  {fetchingBMI ? (
-                    <div style={{ textAlign: 'center', padding: '50px' }}>
-                      <Spin size="large" />
-                    </div>
-                  ) : chartData.length > 0 ? (
-                    <>
-                      <div style={{ 
-                        marginBottom: '20px', 
-                        background: 'rgba(30, 58, 138, 0.05)', 
-                        padding: '16px', 
-                        borderRadius: '12px',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '8px'
-                      }}>
-                        <Text strong style={{ marginRight: '12px', fontSize: '14px' }}>BMI Categories: </Text>
-                        <Tag color="#91caff" style={{ borderRadius: '20px', padding: '0 12px' }}>Underweight (&lt; 18.5)</Tag>
-                        <Tag color="#52c41a" style={{ borderRadius: '20px', padding: '0 12px' }}>Normal (18.5-24.9)</Tag>
-                        <Tag color="#faad14" style={{ borderRadius: '20px', padding: '0 12px' }}>Overweight (25-29.9)</Tag>
-                        <Tag color="#ff4d4f" style={{ borderRadius: '20px', padding: '0 12px' }}>Obese (&ge; 30)</Tag>
-                      </div>
-
-                      <div style={{ 
-                        background: 'white', 
-                        borderRadius: '12px', 
-                        padding: '24px', 
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' 
-                      }}>
-                        <ResponsiveContainer width="100%" height={400}>
-                          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" label={{ value: 'Date', position: 'insideBottom', offset: -5 }} />
-                            <YAxis domain={['auto', 'auto']} label={{ value: 'BMI', angle: -90, position: 'insideLeft' }} />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="bmi" name="BMI" stroke="#1e3a8a" activeDot={{ r: 8 }} strokeWidth={2} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </>
-                  ) : (
-                    <div style={{ 
-                      textAlign: 'center', 
-                      padding: '50px',
-                      background: 'rgba(30, 58, 138, 0.05)',
-                      borderRadius: '12px'
-                    }}>
-                      <Text>No BMI tracking data available for this child.</Text>
-                      <div style={{ marginTop: '20px' }}>
-                        <Button 
-                          type="primary" 
-                          icon={<PlusOutlined />}
-                          onClick={handleOpenBmiModal}
-                        >
-                          Add First BMI Record
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </Card>
-              )}
-            </Col>
+          <Col xs={24} md={16}>
+          <BMIHistoryCard 
+            selectedChild={selectedChild}
+            fetchingBMI={fetchingBMI}
+            chartData={chartData}
+            handleOpenBmiModal={handleOpenBmiModal}
+          />
+        </Col>
           </Row>
 
-          {selectedChild && chartData.length > 0 && (
-            <Row gutter={[24, 24]} style={{ marginTop: '24px' }}>
-              <Col xs={24}>
-                <Card 
-                  title={
-                    <div style={{ padding: '8px 0' }}>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{ 
-                          width: '40px', 
-                          height: '40px', 
-                          borderRadius: '50%', 
-                          background: 'rgba(30, 58, 138, 0.1)', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center',
-                          marginRight: '16px' 
-                        }}>
-                          <CheckCircleOutlined style={{ fontSize: '20px', color: '#1e3a8a' }} />
-                        </div>
-                        <Title level={4} style={{ margin: 0, color: '#1e3a8a' }}>BMI Details</Title>
-                      </div>
-                    </div>
-                  }
-                  style={{ 
-                    borderRadius: '16px', 
-                    overflow: 'hidden',
-                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-                    border: 'none'
-                  }}
-                  headStyle={{ 
-                    borderBottom: '1px solid #f0f0f0',
-                    padding: '16px 24px'
-                  }}
-                  bodyStyle={{ padding: '24px' }}
-                >
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr>
-                        <th style={{ 
-                          textAlign: 'left', 
-                          padding: '12px 16px', 
-                          borderBottom: '1px solid #f0f0f0',
-                          color: '#1e3a8a',
-                          fontWeight: 600
-                        }}>Date</th>
-                        <th style={{ 
-                          textAlign: 'center', 
-                          padding: '12px 16px', 
-                          borderBottom: '1px solid #f0f0f0',
-                          color: '#1e3a8a',
-                          fontWeight: 600
-                        }}>Weight (kg)</th>
-                        <th style={{ 
-                          textAlign: 'center', 
-                          padding: '12px 16px', 
-                          borderBottom: '1px solid #f0f0f0',
-                          color: '#1e3a8a',
-                          fontWeight: 600
-                        }}>Height (cm)</th>
-                        <th style={{ 
-                          textAlign: 'center', 
-                          padding: '12px 16px', 
-                          borderBottom: '1px solid #f0f0f0',
-                          color: '#1e3a8a',
-                          fontWeight: 600
-                        }}>BMI</th>
-                        <th style={{ 
-                          textAlign: 'center', 
-                          padding: '12px 16px', 
-                          borderBottom: '1px solid #f0f0f0',
-                          color: '#1e3a8a',
-                          fontWeight: 600
-                        }}>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {chartData.map((record, index) => {
-                        const category = getBMICategory(record.bmi);
-                        return (
-                          <tr key={index} style={{ background: index % 2 === 0 ? '#f8fafc' : 'white' }}>
-                            <td style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.date}</td>
-                            <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.weight.toFixed(1)}</td>
-                            <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.height.toFixed(1)}</td>
-                            <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>{record.bmi.toFixed(1)}</td>
-                            <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
-                              <Tag color={category.color} style={{ borderRadius: '20px', padding: '0 12px' }}>
-                                {category.label}
-                              </Tag>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </Card>
-              </Col>
-            </Row>
-          )}
+          {/* BMI Details Card - Always display when child is selected, even if there's no data */}
+          <BMIDetailsCard 
+            selectedChild={selectedChild}
+            chartData={chartData}
+            fetchingBMI={fetchingBMI}
+            handleOpenBmiModal={handleOpenBmiModal}
+            getBMICategory={getBMICategory}
+          />
         </Content>
       </Layout>
 
       {/* Modal for adding new BMI record */}
-      <Modal
-        title={
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ 
-              width: '32px', 
-              height: '32px', 
-              borderRadius: '50%', 
-              background: 'rgba(30, 58, 138, 0.1)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              marginRight: '16px' 
-            }}>
-              <PlusOutlined style={{ fontSize: '16px', color: '#1e3a8a' }} />
-            </div>
-            <span>Add New BMI Record</span>
-          </div>
-        }
+      <BMIModalForm
         visible={bmiModalVisible}
         onCancel={() => setBmiModalVisible(false)}
-        onOk={handleSaveBMI}
-        okText="Save Record"
-        okButtonProps={{ style: { background: '#1e3a8a' } }}
-        width={500}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item label="Child's Name">
-            <Input value={selectedChildData?.name} disabled style={{ background: '#f8fafc' }} />
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item label="Gender">
-                <Input value={selectedChildData?.gender === 0 ? "Male" : "Female"} disabled style={{ background: '#f8fafc' }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Age (Months)">
-                <Input 
-                  value={selectedChildData?.doB ? moment().diff(moment(selectedChildData.doB, "YYYY-MM-DD"), "months") : ""} 
-                  disabled 
-                  style={{ background: '#f8fafc' }} 
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-            <Form.Item 
-              name="height" 
-              label="Height (cm)" 
-              rules={[
-                { required: true, message: "Please enter height!" },
-                { 
-                  validator: (_, value) => {
-                    const num = parseFloat(value);
-                    if (isNaN(num) || num < 1 || num > 300) {
-                      return Promise.reject('Height must be between 1-300 cm');
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
-            >
-              <Input type="number" placeholder="Enter height" step="0.1" />
-            </Form.Item>
-            </Col>
-            <Col span={12}>
-            <Form.Item 
-              name="weight" 
-              label="Weight (kg)" 
-              rules={[
-                { required: true, message: "Please enter weight!" },
-                { 
-                  validator: (_, value) => {
-                    const num = parseFloat(value);
-                    if (isNaN(num) || num < 0.1 || num > 300) {
-                      return Promise.reject('Weight must be between 0.1-300 kg');
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
-            >
-              <Input type="number" placeholder="Enter weight" step="0.1" />
-            </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item name="notes" label="Notes">
-            <Input.TextArea placeholder="Additional notes (optional)" rows={4} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onSave={handleSaveBMI}
+        form={form}
+        selectedChildData={selectedChildData}
+      />
     </Layout>
   );
 };

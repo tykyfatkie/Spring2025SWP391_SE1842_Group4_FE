@@ -103,13 +103,6 @@ const Sidebar: React.FC = () => {
           <Link to="/child-analytics">Analytics</Link>
         </Menu.Item>
         
-        <Menu.Item 
-          key="create-profile" 
-          icon={<PlusCircleOutlined />}
-          style={{ margin: '4px 0' }}
-        >
-          <Link to="/child-create">Create Profile</Link>
-        </Menu.Item>
         
         <Menu.Item 
           key="manage-profile" 

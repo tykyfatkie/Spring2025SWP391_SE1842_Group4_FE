@@ -24,11 +24,18 @@ import {
   EyeInvisibleOutlined, 
   EyeOutlined,
   UserOutlined,
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  PlusOutlined,
+  UpOutlined,
+  DownOutlined,
+  LineChartOutlined
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import CollapsibleHeader from "./CollapsibleHeader";
+import ChildProfilesLayout from "./ChildProfilesLayout";
+import EditChildModal from "./EditChildModal";
 
 const { Content } = Layout;
 const { Option } = Select;
@@ -43,6 +50,8 @@ const ChildManage: React.FC = () => {
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [editingChild, setEditingChild] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string>("active");
+  const [headerExpanded, setHeaderExpanded] = useState<boolean>(true);
+  const [collapsed, setCollapsed] = useState<boolean>(false); 
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
@@ -110,6 +119,19 @@ const ChildManage: React.FC = () => {
     }
   };
 
+  // Hàm tính tuổi theo tháng
+  const calculateAgeInMonths = (birthDate: string) => {
+    if (!birthDate || !moment(birthDate, "YYYY-MM-DD", true).isValid()) {
+      return "N/A";
+    }
+    
+    const today = moment();
+    const dob = moment(birthDate);
+    const months = today.diff(dob, 'months');
+    
+    return months;
+  };
+
   const handleEditChild = (child: any) => {
     setEditingChild(child);
     setEditModalVisible(true);
@@ -118,7 +140,6 @@ const ChildManage: React.FC = () => {
       name: child.name,
       dob: moment(child.doB),
       gender: child.gender,
-      // Removed weight, height, and notes from form initialization
     });
   };
 
@@ -306,6 +327,22 @@ const ChildManage: React.FC = () => {
     }
   };
 
+  const navigateToCreateChild = () => {
+    navigate("/child-create");
+  };
+
+  const navigateToBMITracking = (childId: string) => {
+    navigate(`/child-analytics?childId=${childId}`);
+  };
+
+  const toggleHeader = () => {
+    setHeaderExpanded(!headerExpanded);
+  };
+  
+  const toggleCollapse = () => {
+    setCollapsed(!collapsed);
+  };
+
   const activeColumns = [
     {
       title: "Name",
@@ -326,6 +363,14 @@ const ChildManage: React.FC = () => {
         return text && moment(text, "YYYY-MM-DD", true).isValid()
           ? moment(text).format("YYYY/MM/DD")
           : "Invalid Date";
+      },
+    },
+    {
+      title: "Age (Months)",
+      key: "ageMonths",
+      render: (_: any, record: any) => {
+        const months = calculateAgeInMonths(record.doB);
+        return <span>{months} {months === 1 ? "month" : "months"}</span>;
       },
     },
     {
@@ -375,6 +420,21 @@ const ChildManage: React.FC = () => {
               justifyContent: 'center'
             }}
           />
+          {/* BMI View Button */}
+        <Button 
+          icon={<LineChartOutlined />} 
+          onClick={() => navigateToBMITracking(record.id)} 
+          type="primary"
+          title="View BMI"
+          style={{
+            borderRadius: '8px',
+            height: '38px',
+            background: '#1e3a8a',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        />
         </Space>
       ),
     },
@@ -400,6 +460,14 @@ const ChildManage: React.FC = () => {
         return text && moment(text, "YYYY-MM-DD", true).isValid()
           ? moment(text).format("YYYY/MM/DD")
           : "Invalid Date";
+      },
+    },
+    {
+      title: "Age (Months)",
+      key: "ageMonths",
+      render: (_: any, record: any) => {
+        const months = calculateAgeInMonths(record.doB);
+        return <span>{months} {months === 1 ? "month" : "months"}</span>;
       },
     },
     {
@@ -435,6 +503,21 @@ const ChildManage: React.FC = () => {
               justifyContent: 'center'
             }}
           />
+          {/* BMI View Button for archived children too */}
+          <Button 
+            icon={<LineChartOutlined />} 
+            onClick={() => navigateToBMITracking(record.id)} 
+            type="primary"
+            title="View BMI"
+            style={{
+              borderRadius: '8px',
+              height: '38px',
+              background: '#1e3a8a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          />
         </Space>
       ),
     },
@@ -445,328 +528,38 @@ const ChildManage: React.FC = () => {
       <Layout>
         <Sidebar />
         <Content style={{ padding: '24px', background: '#f8fafc' }}>
-          {/* Header Section */}
-          <div style={{ 
-            marginBottom: '40px', 
-            background: '#1e3a8a', 
-            padding: '48px 32px', 
-            borderRadius: '20px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
-          }}>
-            {/* Decorative elements */}
-            <div style={{
-              position: 'absolute',
-              width: '300px',
-              height: '300px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.05)',
-              top: '-100px',
-              left: '-100px',
-            }} />
-            <div style={{
-              position: 'absolute',
-              width: '200px',
-              height: '200px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.08)',
-              bottom: '-50px',
-              right: '50px',
-            }} />
-            
-            <div style={{ position: 'relative', zIndex: 2 }}>
-              <div style={{ 
-                display: 'inline-block', 
-                padding: '8px 16px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '20px',
-                marginBottom: '16px'
-              }}>
-                <span style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>MANAGE PROFILES</span>
-              </div>
-              
-              <Title level={2} style={{ color: 'white', marginBottom: '16px', fontWeight: 700 }}>
-                Manage Child Profiles
-              </Title>
-              <Paragraph style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.9)', maxWidth: '700px' }}>
-                View and manage all your children's profiles. Edit profile information, hide inactive profiles, 
-                or remove profiles you no longer need.
-              </Paragraph>
-              
-              <Space direction="vertical" size="middle" style={{ width: '100%', marginTop: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <CheckCircleOutlined style={{ color: '#3b82f6', marginRight: '12px' }} />
-                  <Text style={{ color: 'white' }}>Edit profile information</Text>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <CheckCircleOutlined style={{ color: '#3b82f6', marginRight: '12px' }} />
-                  <Text style={{ color: 'white' }}>Hide profiles temporarily</Text>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <CheckCircleOutlined style={{ color: '#3b82f6', marginRight: '12px' }} />
-                  <Text style={{ color: 'white' }}>Restore hidden profiles</Text>
-                </div>
-              </Space>
-            </div>
-          </div>
+        <CollapsibleHeader
+          title="Manage Child Profiles"
+          subtitle="MANAGE PROFILES"
+          description="View and manage all your children's profiles. Edit profile information, hide inactive profiles, or remove profiles you no longer need. You can also view BMI tracking for each child."
+          features={[
+            "Edit profile information",
+            "Hide profiles temporarily",
+            "Restore hidden profiles",
+            "Track BMI and growth patterns"
+          ]}
+          defaultCollapsed={false}
+        />
 
-          <Row gutter={[24, 24]}>
-            <Col xs={24} lg={18}>
-              <Card 
-                title={
-                  <div style={{ padding: '8px 0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: '50%', 
-                        background: 'rgba(30, 58, 138, 0.1)', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        marginRight: '16px' 
-                      }}>
-                        <UserOutlined style={{ fontSize: '20px', color: '#1e3a8a' }} />
-                      </div>
-                      <Title level={4} style={{ margin: 0, color: '#1e3a8a' }}>Child Profiles</Title>
-                    </div>
-                  </div>
-                } 
-                style={{ 
-                  borderRadius: '16px', 
-                  overflow: 'hidden',
-                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-                  border: 'none'
-                }}
-                headStyle={{ 
-                  borderBottom: '1px solid #f0f0f0',
-                  padding: '16px 24px'
-                }}
-                bodyStyle={{ padding: '24px' }}
-              >
-                <Tabs 
-                  activeKey={activeTab} 
-                  onChange={handleTabChange}
-                  type="card"
-                  style={{ 
-                    marginBottom: '24px',
-                  }}
-                  tabBarStyle={{
-                    marginBottom: '16px'
-                  }}
-                >
-                  <TabPane 
-                    tab={
-                      <span style={{ padding: '4px 8px', fontWeight: 500 }}>Active Children</span>
-                    } 
-                    key="active"
-                  >
-                    {loading ? (
-                      <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
-                        <Spin size="large" />
-                      </div>
-                    ) : (
-                      <Table 
-                        dataSource={children} 
-                        columns={activeColumns} 
-                        rowKey="id" 
-                        pagination={{ pageSize: 10 }}
-                        style={{
-                          borderRadius: '12px',
-                          overflow: 'hidden'
-                        }} 
-                      />
-                    )}
-                  </TabPane>
-                  <TabPane 
-                    tab={
-                      <span style={{ padding: '4px 8px', fontWeight: 500 }}>Hidden Children</span>
-                    } 
-                    key="archived"
-                  >
-                    {archivedLoading ? (
-                      <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
-                        <Spin size="large" />
-                      </div>
-                    ) : (
-                      <Table 
-                        dataSource={archivedChildren} 
-                        columns={archivedColumns} 
-                        rowKey="id" 
-                        pagination={{ pageSize: 10 }}
-                        style={{
-                          borderRadius: '12px',
-                          overflow: 'hidden'
-                        }} 
-                      />
-                    )}
-                  </TabPane>
-                </Tabs>
-              </Card>
-            </Col>
-            
-            <Col xs={24} lg={6}>
-              <Card 
-                style={{ 
-                  borderRadius: '16px', 
-                  overflow: 'hidden',
-                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-                  border: 'none',
-                  background: 'linear-gradient(to bottom, #f0f7ff, #e6f0fd)'
-                }}
-                bodyStyle={{ padding: '24px' }}
-              >
-                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                  <div style={{ 
-                    width: '60px', 
-                    height: '60px', 
-                    borderRadius: '50%', 
-                    background: 'rgba(30, 58, 138, 0.1)', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    margin: '0 auto 16px' 
-                  }}>
-                    <CheckCircleOutlined style={{ fontSize: '30px', color: '#1e3a8a' }} />
-                  </div>
-                  <Title level={4} style={{ color: '#1e3a8a', marginBottom: '8px' }}>Profile Management</Title>
-                </div>
-                
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ 
-                    padding: '16px',
-                    background: 'white',
-                    borderRadius: '12px',
-                    marginBottom: '16px'
-                  }}>
-                    <Text strong style={{ display: 'block', marginBottom: '8px', color: '#1e3a8a' }}>Keep Profiles Updated</Text>
-                    <Text style={{ color: '#4b5563', fontSize: '14px' }}>
-                      Regularly update your child's measurements to get the most accurate growth analysis.
-                    </Text>
-                  </div>
-                  
-                  <div style={{ 
-                    padding: '16px',
-                    background: 'white',
-                    borderRadius: '12px',
-                    marginBottom: '16px'
-                  }}>
-                    <Text strong style={{ display: 'block', marginBottom: '8px', color: '#1e3a8a' }}>Hide Inactive Profiles</Text>
-                    <Text style={{ color: '#4b5563', fontSize: '14px' }}>
-                      Hide profiles that you don't need right now but might want to access later.
-                    </Text>
-                  </div>
-                  
-                  <div style={{ 
-                    padding: '16px',
-                    background: 'white',
-                    borderRadius: '12px'
-                  }}>
-                    <Text strong style={{ display: 'block', marginBottom: '8px', color: '#1e3a8a' }}>Multiple Profile Support</Text>
-                    <Text style={{ color: '#4b5563', fontSize: '14px' }}>
-                      Manage profiles for all your children in one convenient location.
-                    </Text>
-                  </div>
-                </div>
-              </Card>
-            </Col>
-          </Row>
+    <ChildProfilesLayout
+            activeTab={activeTab}
+            handleTabChange={handleTabChange}
+            loading={loading}
+            archivedLoading={archivedLoading}
+            children={children}
+            archivedChildren={archivedChildren}
+            activeColumns={activeColumns}
+            archivedColumns={archivedColumns}
+            navigateToCreateChild={navigateToCreateChild}
+          />
 
-          <Modal
-            title={
-              <div style={{ padding: '8px 0' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div style={{ 
-                    width: '32px', 
-                    height: '32px', 
-                    borderRadius: '50%', 
-                    background: 'rgba(30, 58, 138, 0.1)', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    marginRight: '12px' 
-                  }}>
-                    <EditOutlined style={{ fontSize: '16px', color: '#1e3a8a' }} />
-                  </div>
-                  <span style={{ fontSize: '18px', fontWeight: 600, color: '#1e3a8a' }}>Edit Child Profile</span>
-                </div>
-              </div>
-            }
-            visible={editModalVisible}
-            onCancel={() => setEditModalVisible(false)}
-            onOk={handleUpdateChild}
-            okText="Update"
-            okButtonProps={{
-              style: {
-                background: '#1e3a8a',
-                borderColor: '#1e3a8a',
-                borderRadius: '8px',
-                height: '40px',
-                padding: '0 24px'
-              }
-            }}
-            cancelButtonProps={{
-              style: {
-                borderRadius: '8px',
-                height: '40px',
-                padding: '0 24px'
-              }
-            }}
-            width={600}
-            bodyStyle={{ padding: '16px 24px' }}
-          >
-            <Form form={form} layout="vertical">
-              <Form.Item
-                name="name"
-                label={<Text strong style={{ fontSize: '15px' }}>Child's Name</Text>}
-                rules={[{ required: true, message: "Please enter child's name" }]}
-              >
-                <Input 
-                  placeholder="Enter child's name" 
-                  style={{ 
-                    borderRadius: '8px', 
-                    height: '42px',
-                    borderColor: '#e5e7eb'
-                  }} 
-                />
-              </Form.Item>
-
-              <Form.Item 
-                name="dob" 
-                label={<Text strong style={{ fontSize: '15px' }}>Date of Birth</Text>} 
-                rules={[{ required: true, message: "Please select date of birth" }]}
-              >
-                <DatePicker 
-                  style={{ 
-                    width: "100%", 
-                    borderRadius: '8px', 
-                    height: '42px',
-                    borderColor: '#e5e7eb'
-                  }} 
-                  format="YYYY-MM-DD" 
-                />
-              </Form.Item>
-
-              <Form.Item 
-                name="gender" 
-                label={<Text strong style={{ fontSize: '15px' }}>Gender</Text>} 
-                rules={[{ required: true, message: "Please select gender" }]}
-              >
-                <Select 
-                  placeholder="Select gender"
-                  style={{ 
-                    borderRadius: '8px'
-                  }}
-                >
-                  <Option value={0}>Male</Option>
-                  <Option value={1}>Female</Option>
-                </Select>
-              </Form.Item>
-
-              {/* Removed the Weight, Height and Notes form items */}
-            </Form>
-          </Modal>
+    <EditChildModal
+      visible={editModalVisible}
+      onCancel={() => setEditModalVisible(false)}
+      onUpdate={handleUpdateChild}
+      form={form}
+      initialValues={editingChild}
+    />
         </Content>
       </Layout>
     </Layout>
