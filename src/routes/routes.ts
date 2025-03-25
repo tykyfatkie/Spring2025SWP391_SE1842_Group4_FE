@@ -33,6 +33,8 @@ import UserConsultationRequests from "../Pages/UserConsultationRequests/UserCons
 import DoctorConsultationResponse from "../Pages/DoctorConsultationResponse/DoctorConsultationResponse";
 import ChangePasswordPage from "../Pages/Security/ChangePassword";
 import PaymentReturn from "../Pages/PaymentSuccess/PaymentReturn";
+import PaymentSuccessful from "../Pages/Payment/PaymentSuccessful";
+import PaymentFailed from "../Pages/Payment/PaymentFailed";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -52,6 +54,8 @@ const routes: LayoutRoute[] = [
       { path: "/contact-us", component: ContactPage, role: ["Guest", "User"] },
       { path: "/package", component: PackagePage, role: ["User"] },
       { path: "/bmi", component: BMIPage, role: ["User"] },
+      { path: "/successful", component: PaymentSuccessful, role: ["User"] },
+      { path: "/failed", component: PaymentFailed, role: ["User"] },
       { path: "/guestbmi", component: GuestBMICalculator, role: ["Guest", "User"] },
       { path: "/dashboard", component: ProtectedComponent(UpdateChildPage, ["Admin"]) },
       { path: "/child-create", component: ProtectedComponent(CreateChild, ["User"]) },

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Typography, Layout, Spin, message, Badge } from "antd";
-import { CheckCircleOutlined, CrownOutlined } from "@ant-design/icons";
+import { Card, Button, Typography, Layout, Spin, message } from "antd";
+import { CheckCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { initiateVnPayPayment } from "../../services/PaymentService";
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 const { Content } = Layout;
 
 interface PackageType {
@@ -42,7 +42,6 @@ const PremiumSubscriptionPage: React.FC = () => {
 
       if (responseData && responseData.data) {
         const activePackages = responseData.data.filter((pkg: PackageType) => pkg.status === 1);
-        // Sort packages by price (ascending)
         const sortedPackages = [...activePackages].sort((a, b) => a.price - b.price);
         setPackages(sortedPackages);
       }
@@ -59,20 +58,17 @@ const PremiumSubscriptionPage: React.FC = () => {
     setSubmittingPackageId(packageId);
 
     try {
-      // Find package information in the packages list
       const selectedPackage = packages.find(pkg => pkg.id === packageId);
       if (!selectedPackage) {
         throw new Error("Package information not found");
       }
 
-      // Call service to create payment request
       const paymentUrl = await initiateVnPayPayment({
         packageId,
         amount: price,
         description: `Subscribe to ${selectedPackage.packageName} for ${selectedPackage.durationMonths} months`,
       });
 
-      // Redirect to payment page
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
@@ -87,112 +83,253 @@ const PremiumSubscriptionPage: React.FC = () => {
     }
   };
 
-  // Define package colors based on tier
-  const getPackageColor = (index: number) => {
-    const colors = [
-      { primary: "#00b8d4", gradient: "linear-gradient(135deg, #00b8d4 0%, #0091ea 100%)" },
-      { primary: "#7b1fa2", gradient: "linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)" },
-      { primary: "#f57c00", gradient: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)" },
-      { primary: "#d32f2f", gradient: "linear-gradient(135deg, #f44336 0%, #d32f2f 100%)" }
-    ];
-    return colors[index % colors.length];
-  };
-
-  const getPackageLabel = (index: number) => {
-    const labels = ["Basic", "Standard", "Premium", "Special"];
-    return labels[index % labels.length];
-  };
+  const packageColors = [
+    {
+      primary: '#1e3a8a',
+      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
+      label: 'Basic'
+    },
+    {
+      primary: '#7e22ce',
+      gradient: 'linear-gradient(135deg, #7e22ce 0%, #a855f7 100%)',
+      label: 'Standard'
+    },
+    {
+      primary: '#d97706',
+      gradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+      label: 'Premium'
+    },
+    {
+      primary: '#dc2626',
+      gradient: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+      label: 'Ultimate'
+    },
+    {
+      primary: '#059669',
+      gradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+      label: 'Enterprise'
+    }
+  ];
 
   return (
-    <Layout style={{ minHeight: "100vh", margin:'-25px', background: "linear-gradient(135deg, #6e45e2 0%, #88d3ce 100%)" }}>
+    <Layout style={{ 
+      minHeight: '110vh', 
+      margin: '-25px', 
+      background: 'white' 
+    }}>
       <Content>
-        <div style={{ padding: 40, maxWidth: 1200, margin: "0 auto", textAlign: "center" }}>
-          <Title level={1} style={{ color: "#fff", marginBottom: 8 }}>
-            Service Packages
-          </Title>
-          <Text style={{ color: "#eef2ff", fontSize: 16, display: "block", maxWidth: 800, margin: "0 auto 40px" }}>
-            Unlock exclusive features and maximize our system with the Premium package. Choose the package that best suits your needs.
-          </Text>
+        {/* Enhanced Hero Section */}
+        <div style={{
+          background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+          padding: '80px 0',
+          color: 'white',
+          textAlign: 'center',
+          borderRadius: '0 0 30px 30px',
+          position: 'relative',
+          overflow: 'hidden',
+          marginBottom: '60px',
+          marginRight: '50px',
+        }}>
+          <div style={{
+            position: 'absolute',
+            width: '300px',
+            height: '300px',
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.05)',
+            top: '-100px',
+            left: '-100px',
+          }} />
+          <div style={{
+            position: 'absolute',
+            width: '200px',
+            height: '200px',
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.08)',
+            bottom: '-50px',
+            right: '50px',
+          }} />
+          
+          <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+            <div style={{ 
+              display: 'inline-block', 
+              padding: '8px 16px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '20px',
+              marginBottom: '16px'
+            }}>
+              <span style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>SUBSCRIPTION PLANS</span>
+            </div>
+            
+            <Title level={1} style={{ 
+              color: 'white', 
+              fontSize: '48px', 
+              marginBottom: '24px', 
+              fontWeight: 700 
+            }}>
+              Choose Your Premium Plan
+            </Title>
+            
+            <Paragraph style={{ 
+              fontSize: '18px', 
+              color: 'rgba(255, 255, 255, 0.9)', 
+              maxWidth: '700px', 
+              margin: '0 auto 32px', 
+              lineHeight: 1.6 
+            }}>
+              Unlock exclusive features and maximize our system's potential. Select the package that best suits your needs and growth objectives with flexible, affordable options.
+            </Paragraph>
+            
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: '16px' 
+            }}>
+              <Button 
+                type="primary" 
+                size="large" 
+                style={{ 
+                  borderRadius: '50px', 
+                  paddingLeft: '28px', 
+                  paddingRight: '28px',
+                  height: '52px',
+                  background: 'white',
+                  color: '#1e3a8a',
+                  border: 'none',
+                  fontWeight: 600,
+                  boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
+                }}
+              >
+                Compare Plans
+              </Button>
+              <Button 
+                size="large"
+                style={{ 
+                  borderRadius: '50px', 
+                  borderColor: 'rgba(255, 255, 255, 0.3)', 
+                  color: 'white',
+                  paddingLeft: '28px', 
+                  paddingRight: '28px',
+                  height: '52px',
+                  background: 'transparent',
+                  fontWeight: 500,
+                }}
+              >
+                Contact Sales
+              </Button>
+            </div>
+          </div>
+        </div>
 
+        {/* Packages Section */}
+        <div style={{ 
+          padding: '0 24px', 
+          maxWidth: 1200, 
+          margin: '0 auto' 
+        }}>
           {loading ? (
             <Spin size="large" style={{ display: "block", margin: "50px auto" }} />
           ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 20 }}>
+            <div style={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              justifyContent: 'center', 
+              gap: '24px' 
+            }}>
               {packages.map((plan, index) => {
-                const colorScheme = getPackageColor(index);
-                const packageLabel = getPackageLabel(index);
+                const colorScheme = packageColors[index % packageColors.length];
                 const isLoadingThisPackage = submitting && submittingPackageId === plan.id;
                 
                 return (
                   <Card
                     key={plan.id}
                     style={{
-                      width: 260,
-                      border: 0,
-                      marginTop: 20,
-                      textAlign: "center",
-                      borderRadius: 16,
-                      overflow: "hidden",
-                      boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-                      background: "#fff",
-                      position: "relative",
+                      width: 320,
+                      borderRadius: '16px',
+                      boxShadow: '0 15px 40px rgba(0,0,0,0.08)',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease',
+                      border: 'none',
+                      position: 'relative'
                     }}
                     bodyStyle={{ padding: 0 }}
+                    hoverable
                   >
-                    <div
-                      style={{
-                        background: colorScheme.gradient,
-                        padding: "30px 20px 50px",
-                        position: "relative",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: 10,
-                          left: -30,
-                          backgroundColor: colorScheme.primary,
-                          color: "#fff",
-                          padding: "5px 30px 5px 30px",
-                          transform: "rotate(-45deg)",
-                          fontWeight: "bold",
-                          zIndex: 1,
-                          borderRadius: "0 0 5px 5px",
-                          boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                          fontSize: 12,
-                        }}
-                      >
-                        {packageLabel}
+                    <div style={{
+                      background: colorScheme.gradient,
+                      padding: '30px 20px 50px',
+                      position: 'relative',
+                      color: 'white'
+                    }}>
+                      <div style={{
+                        position: 'absolute',
+                        top: 10,
+                        left: -30,
+                        backgroundColor: colorScheme.primary,
+                        color: 'white',
+                        padding: '5px 30px',
+                        transform: 'rotate(-45deg)',
+                        fontWeight: 'bold',
+                        zIndex: 1,
+                        borderRadius: '0 0 5px 5px',
+                        fontSize: 12
+                      }}>
+                        {colorScheme.label}
                       </div>
-                      <Title level={1} style={{ color: "#fff", margin: 0, fontWeight: "bold" }}>
+
+                      <Title level={1} style={{ 
+                        color: 'white', 
+                        margin: 0, 
+                        fontWeight: 'bold' 
+                      }}>
                         {new Intl.NumberFormat("vi-VN").format(plan.price)}
-                        <span style={{ fontSize: 16, fontWeight: "normal", verticalAlign: "top" }}> VND</span>
+                        <span style={{ 
+                          fontSize: 16, 
+                          fontWeight: 'normal', 
+                          verticalAlign: 'top' 
+                        }}> VND</span>
                       </Title>
-                      <Text style={{ fontSize: 14, color: "#eef2ff" }}>for {plan.durationMonths} months</Text>
+                      <Text style={{ 
+                        fontSize: 14, 
+                        color: 'rgba(255,255,255,0.8)' 
+                      }}>
+                        for {plan.durationMonths} months
+                      </Text>
                     </div>
 
-                    <div style={{ padding: "24px 20px" }}>
-                      <Title level={4} style={{ marginBottom: 20 }}>
+                    <div style={{ padding: '24px 20px' }}>
+                      <Title level={4} style={{ 
+                        marginBottom: 20, 
+                        color: '#1e3a8a' 
+                      }}>
                         {plan.packageName}
                       </Title>
 
-                      <ul style={{ listStyleType: "none", padding: 0, margin: 0, textAlign: "left", height: 200 }}>
-                        <li style={{ padding: "8px 0", fontSize: 14 }}>
-                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Basic features to track development
-                        </li>
-                        <li style={{ padding: "8px 0", fontSize: 14 }}>
-                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Track up to {plan.maxChildrenAllowed} children
-                        </li>
-                        <li style={{ padding: "8px 0", fontSize: 14 }}>
-                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Personalized development information
-                        </li>
-                        <li style={{ padding: "8px 0", fontSize: 14 }}>
-                          <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                          Monthly progress reports
-                        </li>
+                      <ul style={{ 
+                        listStyleType: 'none', 
+                        padding: 0, 
+                        margin: 0, 
+                        textAlign: 'left', 
+                        height: 200 
+                      }}>
+                        {[
+                          "Basic features to track development",
+                          `Track up to ${plan.maxChildrenAllowed} children`,
+                          "Personalized development information",
+                          "Monthly progress reports"
+                        ].map((feature, idx) => (
+                          <li key={idx} style={{ 
+                            padding: "8px 0", 
+                            fontSize: 14,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <CheckCircleOutlined style={{ 
+                              color: colorScheme.primary, 
+                              marginRight: 8 
+                            }} />
+                            {feature}
+                          </li>
+                        ))}
                       </ul>
 
                       <Button
@@ -202,16 +339,19 @@ const PremiumSubscriptionPage: React.FC = () => {
                         disabled={submitting}
                         style={{
                           marginTop: 30,
-                          height: 44,
+                          height: 52,
                           fontSize: 16,
-                          fontWeight: "bold",
+                          fontWeight: 'bold',
                           background: colorScheme.gradient,
-                          border: "none",
-                          borderRadius: 22,
+                          border: 'none',
+                          borderRadius: 26,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
                         onClick={() => handleSubscribe(plan.id, plan.price)}
                       >
-                        SUBSCRIBE NOW
+                        Subscribe Now <ArrowRightOutlined style={{ marginLeft: 8 }} />
                       </Button>
                     </div>
                   </Card>
@@ -221,6 +361,7 @@ const PremiumSubscriptionPage: React.FC = () => {
           )}
         </div>
       </Content>
+      
     </Layout>
   );
 };

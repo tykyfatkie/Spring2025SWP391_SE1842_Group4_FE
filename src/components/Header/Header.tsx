@@ -8,7 +8,7 @@ const { Header } = Layout;
 const AppHeader: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedKey, setSelectedKey] = useState("home");
+  const [selectedKey, setSelectedKey] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [hover, setHover] = useState(false);
   
@@ -19,12 +19,17 @@ const AppHeader: React.FC = () => {
     const token = localStorage.getItem("token");
     setIsAuthenticated(!!token);
     const path = location.pathname;
-    if (path.includes("/home")) setSelectedKey("home");
-    else if (path.includes("/contact-us")) setSelectedKey("contact");
-    else if (path.includes("/child-create")) setSelectedKey("childs");
-    else if (path.includes("/about-us")) setSelectedKey("about");
-    else if (path.includes("/child-manage")) setSelectedKey("child");
-    else if (path.includes("/packages")) setSelectedKey("package");
+
+    // Reset selectedKey if not in main navigation pages
+    const mainNavPages = ["/home", "/contact-us", "/about-us", "/child-manage"];
+    if (!mainNavPages.some(page => path.includes(page))) {
+      setSelectedKey("");
+    } else {
+      if (path.includes("/home")) setSelectedKey("home");
+      else if (path.includes("/contact-us")) setSelectedKey("contact");
+      else if (path.includes("/about-us")) setSelectedKey("about");
+      else if (path.includes("/child-manage")) setSelectedKey("child");
+    }
   }, [location]);
 
   const handleLogoClick = () => navigate("/home");
@@ -94,21 +99,20 @@ const AppHeader: React.FC = () => {
       <div style={{ borderTop: "1px solid #f0f0f0", margin: "4px 0" }}></div>
       
       <Menu.Item 
-      key="logout" 
-      danger 
-      onClick={handleLogout}
-      icon={<LogoutOutlined />}
-      style={{ 
-        ...menuItemBaseStyle,
-        color: "rgba(255, 0, 0, 0.7)", // Màu chữ đỏ nhạt
-        background: hover ? "rgba(255, 0, 0, 0.1)" : "transparent", // Hover ra màu đỏ nhạt
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-    >
-      Logout
-    </Menu.Item>
-
+        key="logout" 
+        danger 
+        onClick={handleLogout}
+        icon={<LogoutOutlined />}
+        style={{ 
+          ...menuItemBaseStyle,
+          color: "rgba(255, 0, 0, 0.7)", // Màu chữ đỏ nhạt
+          background: hover ? "rgba(255, 0, 0, 0.1)" : "transparent", // Hover ra màu đỏ nhạt
+        }}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        Logout
+      </Menu.Item>
     </Menu>
   );
 
