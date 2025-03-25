@@ -11,8 +11,8 @@ const { Title, Paragraph } = Typography;
 interface Child {
   id: string;
   name: string;
-  doB: string;
-  gender: number;
+  doB: string;  // Date of Birth
+  gender: number;  // Assuming 0 or 1 for gender
   weight: number;
   height: number;
   bmi: number;
@@ -37,6 +37,26 @@ interface ChildSelectorCardProps {
   chartData: ChartData[];
   handleOpenBmiModal: () => void;
 }
+
+// Helper function to calculate age in months
+const calculateAgeInMonths = (dateOfBirth: string): number => {
+  const birthDate = new Date(dateOfBirth);
+  const currentDate = new Date();
+  
+  const years = currentDate.getFullYear() - birthDate.getFullYear();
+  const months = currentDate.getMonth() - birthDate.getMonth();
+  
+  return years * 12 + months;
+};
+
+// Helper function to get gender label
+const getGenderLabel = (genderCode: number): string => {
+  switch(genderCode) {
+    case 0: return 'Female';
+    case 1: return 'Male';
+    default: return 'Unknown';
+  }
+};
 
 const ChildSelectorCard: React.FC<ChildSelectorCardProps> = ({
   loading,
@@ -109,10 +129,20 @@ const ChildSelectorCard: React.FC<ChildSelectorCardProps> = ({
             onChange={(value) => setSelectedChild(value)}
             value={selectedChild}
             size="large"
+            optionLabelProp="label"
           >
             {children.map((child) => (
-              <Option key={child.id} value={child.id}>
-                {child.name}
+              <Option 
+                key={child.id} 
+                value={child.id}
+                label={child.name}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{child.name}</span>
+                  <span style={{ color: '#888' }}>
+                    {calculateAgeInMonths(child.doB)} months | {getGenderLabel(child.gender)}
+                  </span>
+                </div>
               </Option>
             ))}
           </Select>
