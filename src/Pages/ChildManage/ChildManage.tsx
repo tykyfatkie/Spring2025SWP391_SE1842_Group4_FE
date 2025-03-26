@@ -40,7 +40,6 @@ import EditChildModal from "./EditChildModal";
 const { Content } = Layout;
 const { Option } = Select;
 const { TabPane } = Tabs;
-const { Title, Paragraph, Text } = Typography;
 
 const ChildManage: React.FC = () => {
   const [children, setChildren] = useState<any[]>([]);

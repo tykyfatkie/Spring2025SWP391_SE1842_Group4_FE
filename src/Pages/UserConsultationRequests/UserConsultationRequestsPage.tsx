@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Typography, Table, Spin, message } from 'antd';
 import axiosInstance from '../../utils/axiosInstance';
-import Footer from '../../components/Footer/Footer';
 import Sidebar from "../../components/Sidebar/Sidebar";
 
 const { Content } = Layout;

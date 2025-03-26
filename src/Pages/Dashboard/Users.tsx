@@ -12,7 +12,7 @@ const UsersPage = () => {
   const [isChildrenLoading, setIsChildrenLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [] = useState(10);
   const [filterStatus, setFilterStatus] = useState(3);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -44,7 +44,7 @@ const UsersPage = () => {
     }
   };
 
-  const fetchChildrenByParentId = async (parentId) => {
+  const fetchChildrenByParentId = async (parentId : any) => {
     setIsChildrenLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -68,7 +68,7 @@ const UsersPage = () => {
     setChildren([]);
   };
 
-  const handleViewUser = async (user) => {
+  const handleViewUser = async (user : any) => {
     setSelectedUser(user);
     setIsModalVisible(true);
     setIsChildrenLoading(true); // Đảm bảo hiển thị loading
@@ -79,7 +79,7 @@ const UsersPage = () => {
     }
   };
 
-  const handleDeactivateUser = async (userId) => {
+  const handleDeactivateUser = async (userId : any) => {
     try {
       const token = localStorage.getItem("token");
 
@@ -104,13 +104,13 @@ const UsersPage = () => {
       } else {
         message.error("Failed to deactivate user");
       }
-    } catch (error) {
+    } catch (error : any) {
       console.error("Deactivate error:", error);
       message.error("Failed to deactivate user: " + (error.response?.data?.message || error.message));
     }
   };
 
-  const getStatusTag = (status) => {
+  const getStatusTag = (status : any) => {
     switch (status) {
       case 0:
         return <Tag color="green">Active</Tag>;
@@ -176,7 +176,7 @@ const UsersPage = () => {
               title: "Status",
               dataIndex: "status",
               key: "status",
-              render: (status) => getStatusTag(status),
+              render: (status : any) => getStatusTag(status),
             },
             {
               title: "Actions",

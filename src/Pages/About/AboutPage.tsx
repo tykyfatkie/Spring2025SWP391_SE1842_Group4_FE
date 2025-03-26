@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Typography, Row, Col, Card, Space, Divider, Avatar, Button, Tag } from 'antd';
+import { Layout, Typography, Row, Col, Card, Space, Avatar, Button, Tag } from 'antd';
 import AppFooter from '../../components/Footer/Footer';
 import { 
   TeamOutlined, 
@@ -9,12 +9,7 @@ import {
   TrophyOutlined,
   CheckCircleOutlined,
   UserOutlined,
-  EnvironmentOutlined,
-  ClockCircleOutlined,
-  BarChartOutlined,
-  BulbOutlined,
-  ThunderboltOutlined
-} from '@ant-design/icons';
+  BulbOutlined} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
 const { Content } = Layout;

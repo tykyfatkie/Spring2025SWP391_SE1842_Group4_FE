@@ -10,14 +10,7 @@ import {
   Tag, 
   Progress, 
   Rate,
-  Modal,
-  Form,
-  Input,
-  DatePicker,
-  Select,
-  InputNumber,
-  message
-} from 'antd';
+  Form} from 'antd';
 import { 
   UserOutlined, 
   CrownOutlined, 
@@ -34,11 +27,10 @@ import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
-const { Option } = Select;
 
 const ParentProfilePage: React.FC = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [form] = Form.useForm();
+  const [] = useState(false);
+  const [] = Form.useForm();
   const [userData, setUserData] = useState<any>(null);
   const [childData, setChildData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -60,7 +52,6 @@ const ParentProfilePage: React.FC = () => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
           if (response.status === 401) {
             return;
           }
@@ -114,7 +105,7 @@ const ParentProfilePage: React.FC = () => {
         if (!Array.isArray(data.data)) {
           throw new Error('Invalid API response: Expected an array');
         }
-        const updatedDoctors = await Promise.all(data.data.map(async (doctor) => {
+        const updatedDoctors = await Promise.all(data.data.map(async (doctor: { userId: any; user: { name: any; }; }) => {
           try {
             const profileResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${doctor.userId}`);
             if (profileResponse.ok) {

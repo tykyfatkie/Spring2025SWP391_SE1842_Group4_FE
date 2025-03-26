@@ -10,7 +10,6 @@ import GuestBMICalculator from "../Pages/BMI cal/GuestBMICalculator";
 import ForgotPasswordPage from "../Pages/ForgotPassword/ForgotPasswordPage";
 import UpdateChildPage from "../Pages/UpdateChild/UpdateChildPage";
 import CreateChild from "../Pages/CreateChild/CreateChild";
-import AnalyticsPage from "../Pages/Analytics/AnalyticsPage";
 import DoctorPage from "../Pages/Doctor/DoctorPage";
 import DoctorProfilePage from "../Pages/Doctor/DoctorProfilePage";
 import ParentProfilePage from "../Pages/Parent/ParentProfilePage";

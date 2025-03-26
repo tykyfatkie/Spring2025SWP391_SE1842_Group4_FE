@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Result, Spin, Button, Typography, Layout, Card } from 'antd';
+import { Spin, Button, Typography, Layout, Card } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from '@ant-design/icons';
 import { verifyVnPayReturn } from '../../services/PaymentService'; 
 

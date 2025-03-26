@@ -49,7 +49,7 @@ const PackagesPage = () => {
     form.resetFields();
   };
 
-  const showEditModal = (record) => {
+  const showEditModal = (record : any) => {
     setCurrentPackage(record);
     editForm.setFieldsValue({
       packageName: record.packageName,
@@ -68,7 +68,7 @@ const PackagesPage = () => {
     editForm.resetFields();
   };
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values : any) => {
     setSubmitting(true);
     const token = localStorage.getItem("token");
 
@@ -89,7 +89,7 @@ const PackagesPage = () => {
     }
   };
 
-  const handleEditSubmit = async (values) => {
+  const handleEditSubmit = async (values : any) => {
     if (!currentPackage) return;
 
     setSubmitting(true);
@@ -114,7 +114,7 @@ const PackagesPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id : any) => {
     const token = localStorage.getItem("token");
 
     try {
@@ -148,13 +148,13 @@ const PackagesPage = () => {
       title: "Price (Vietnam Dong)",
       dataIndex: "price",
       key: "price",
-      render: (text) => `${text} VND`,
+      render: (text : any) => `${text} VND`,
     },
     {
       title: "Billing Cycle",
       dataIndex: "billingCycle",
       key: "billingCycle",
-      render: (billingCycle) => (billingCycle === 1 ? "Monthly" : "Yearly"), // Cập nhật phần hiển thị
+      render: (billingCycle : any) => (billingCycle === 1 ? "Monthly" : "Yearly"), // Cập nhật phần hiển thị
     },
     {
       title: "Max Children",
@@ -165,7 +165,7 @@ const PackagesPage = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => (
+      render: (status : any) => (
         <span style={{
           color: status === 1 ? 'green' : 'gray',
           fontWeight: 'bold'
@@ -177,7 +177,7 @@ const PackagesPage = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (_, record) => (
+      render: (_: any, record : any) => (
         <Space size="middle">
           <Button
             type="primary"

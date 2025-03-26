@@ -1,8 +1,8 @@
-import { Card, Switch, Select, Form, Input } from "antd";
+import { Card } from "antd";
 import { useState } from "react";
 
 const SettingPage = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [] = useState(false);
   return (
     <Card title="Setting" style={{ maxWidth: 500 }}>
 

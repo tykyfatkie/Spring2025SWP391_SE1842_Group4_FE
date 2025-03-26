@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Button, message, Spin, Typography, Input, Card, Space, Tag } from "antd";
 import { SearchOutlined, InfoCircleOutlined } from "@ant-design/icons";
@@ -56,7 +56,7 @@ const ChildrenList = () => {
         setChildren(response.data.data || []);
         setFilteredChildren(response.data.data || []);
       }
-    } catch (error) {
+    } catch (error : any) {
       console.error("Error fetching children:", error);
       
       if (error.response?.status === 401) {
@@ -84,7 +84,7 @@ const ChildrenList = () => {
     setFilteredChildren(result);
   };
 
-  const viewChildDetails = (childId) => {
+  const viewChildDetails = (childId : any) => {
     navigate(`/children/${childId}`);
   };
 
@@ -103,24 +103,24 @@ const ChildrenList = () => {
       title: "Ngày sinh",
       dataIndex: "dateOfBirth",
       key: "dateOfBirth",
-      render: (text) => text ? moment(text).format("DD/MM/YYYY") : "N/A",
+      render: (text : any) => text ? moment(text).format("DD/MM/YYYY") : "N/A",
     },
     {
       title: "Phụ huynh",
       dataIndex: "parentName",
       key: "parentName",
-      render: (text) => text || "N/A"
+      render: (text : any) => text || "N/A"
     },
     {
       title: "Nhóm máu",
       dataIndex: "bloodType",
       key: "bloodType",
-      render: (text) => text || "N/A",
+      render: (text : any) => text || "N/A",
     },
     {
       title: "Hành động",
       key: "actions",
-      render: (_, record) => (
+      render: (_ : any, record : any) => (
         <Button 
           icon={<InfoCircleOutlined />} 
           onClick={() => viewChildDetails(record.id)} 

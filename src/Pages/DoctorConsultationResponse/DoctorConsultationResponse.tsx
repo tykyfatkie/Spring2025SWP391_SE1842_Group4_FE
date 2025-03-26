@@ -121,7 +121,7 @@ const DoctorConsultationResponse: React.FC = () => {
     {
       title: 'Action',
       key: 'action',
-      render: (_, record) => (
+      render: (_: any, record: { id: string; }) => (
         <Button type="primary" onClick={() => handleResponse(record.id)}>
           Respond
         </Button>

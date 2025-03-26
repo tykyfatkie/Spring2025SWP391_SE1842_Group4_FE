@@ -11,13 +11,13 @@ const DoctorsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
   const [filterStatus, setFilterStatus] = useState(0); // Mặc định hiển thị Active
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [isDoctorDetailModalVisible, setIsDoctorDetailModalVisible] = useState(false);
-  const [form] = Form.useForm();
-  const [submitting, setSubmitting] = useState(false);
+  const [, setIsModalVisible] = useState(false);
+  const [, setSelectedDoctor] = useState(null);
+  const [, setIsDoctorDetailModalVisible] = useState(false);
+  const [] = Form.useForm();
+  const [] = useState(false);
 
   // DOCTOR_ROLE_ID - giả định đây là ID vai trò của bác sĩ trong hệ thống
   // (Có thể cần điều chỉnh dựa trên hệ thống thực tế của bạn)
@@ -67,14 +67,14 @@ const DoctorsPage = () => {
     setIsModalVisible(true);
   };
 
-  const handleViewDoctor = (doctor) => {
+  const handleViewDoctor = (doctor : any) => {
     setSelectedDoctor(doctor);
     // Fetch thêm thông tin chi tiết nếu cần
     // fetchDoctorDetails(doctor.id);
     setIsDoctorDetailModalVisible(true);
   };
 
-  const handleDeactivateDoctor = async (doctorId) => {
+  const handleDeactivateDoctor = async (doctorId : any) => {
     try {
       const token = localStorage.getItem("token");
       console.log("Sending deactivation request for doctor:", doctorId);
@@ -96,7 +96,7 @@ const DoctorsPage = () => {
       } else {
         message.error("Failed to deactivate doctor");
       }
-    } catch (error) {
+    } catch (error : any) {
       console.error("Deactivate error:", error);
       message.error("Failed to deactivate doctor: " + (error.response?.data?.message || error.message));
     }
@@ -210,7 +210,7 @@ const DoctorsPage = () => {
 };
 
 // getStatusTag helper function
-const getStatusTag = (status) => {
+const getStatusTag = (status : any) => {
   switch (status) {
     case 0:
       return <Tag color="green">Active</Tag>;

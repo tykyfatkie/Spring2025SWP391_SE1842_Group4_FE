@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Card, Select, Spin, message, Typography, Tag, Row, Col, Space, Button, Modal, Form, Input } from 'antd';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Layout, message, Row, Col, Modal, Form } from 'antd';
 import axios from 'axios';
 import Sidebar from '../../components/Sidebar/Sidebar';
-import { CheckCircleOutlined, LineChartOutlined, PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import BMIPDFExport from './BMIPDFExport'; 
 import SingleBMIExport from './SingleBMIExport';
 import CollapsibleHeader from './CollapsibleHeader';
 import BMIDetailsCard from './BMIDetailsCard';
@@ -14,8 +11,6 @@ import ChildSelectorCard from './ChildSelectorCard';
 import BMIHistoryCard from './BMIHistoryCard';
 
 const { Content } = Layout;
-const { Option } = Select;
-const { Title, Text, Paragraph } = Typography;
 
 interface Child {
   id: string;
@@ -140,7 +135,7 @@ const BMITrackingPage: React.FC = () => {
           weight: record.weight,
           height: record.height,
           percentile: record.bmiPercentile
-        })).sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()));
+        })).sort((a: { dateTime: string | number | Date; }, b: { dateTime: string | number | Date; }) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()));
       } else {
         throw new Error("Invalid BMI data format received");
       }

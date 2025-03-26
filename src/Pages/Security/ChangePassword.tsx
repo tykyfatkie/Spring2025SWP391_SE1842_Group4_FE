@@ -3,6 +3,7 @@ import { Layout, Typography, Button, Card, Form, Input, message, Space, Divider 
 import { LockOutlined, KeyOutlined, CheckCircleOutlined, ArrowRightOutlined, UserOutlined } from '@ant-design/icons';
 import AppFooter from '../../components/Footer/Footer';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -12,7 +13,7 @@ const ChangePasswordPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const handleChangePassword = async (values) => {
+  const handleChangePassword = async (values: { currentPassword: any; newPassword: any; }) => {
     setSubmitting(true);
     const token = localStorage.getItem("token");
 
@@ -36,7 +37,7 @@ const ChangePasswordPage = () => {
 
       message.success("Password changed successfully!");
       form.resetFields();
-    } catch (error) {
+    } catch (error : any) {
       message.error(error.response?.data?.message || "Failed to change password.");
     } finally {
       setSubmitting(false);

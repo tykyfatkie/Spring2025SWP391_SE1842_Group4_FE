@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, Button, Card, Row, Col, Space, Statistic, Input, Divider, Avatar, Tag } from 'antd';
+import { Layout, Typography, Button, Card, Row, Col, Space, Statistic, Input } from 'antd';
 import AppFooter from '../../components/Footer/Footer';
-import { SmileOutlined, HeartOutlined, StarOutlined, UserOutlined, CheckCircleOutlined, ArrowRightOutlined, PhoneOutlined, EnvironmentOutlined, MailOutlined, CalendarOutlined } from '@ant-design/icons';
+import { SmileOutlined, HeartOutlined, StarOutlined, UserOutlined, CheckCircleOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import DoctorsSection from '../../components/Doctor section/DoctorsSection ';
 import { useNavigate } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
-const { Search } = Input;
 
 interface Doctor {
   id: string;
@@ -29,7 +28,7 @@ const Homepage: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -97,26 +96,6 @@ const Homepage: React.FC = () => {
     { title: "Positive Reviews", value: "10,000+", icon: <StarOutlined /> }
   ];
 
-  const testimonials = [
-    {
-      name: "Nguyễn Thị Mai",
-      role: "Parent of 2",
-      avatar: "../../../src/assets/avatar1.jpg",
-      quote: "This platform has made tracking my children's growth so much easier. The expert advice has been invaluable for our family."
-    },
-    {
-      name: "Dr. Trần Văn Hùng",
-      role: "Pediatrician",
-      avatar: "../../../src/assets/avatar2.jpg",
-      quote: "As a healthcare professional, I appreciate the scientific approach and accuracy of the growth tracking tools provided by this platform."
-    },
-    {
-      name: "Phạm Thị Hương",
-      role: "New Parent",
-      avatar: "../../../src/assets/avatar3.jpg",
-      quote: "The community support and expert guidance have helped me navigate the challenges of being a first-time parent."
-    }
-  ];
 
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white' }}>
