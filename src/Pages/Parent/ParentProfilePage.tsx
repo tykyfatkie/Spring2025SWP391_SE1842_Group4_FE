@@ -9,8 +9,7 @@ import {
   Button, 
   Tag, 
   Progress, 
-  Rate,
-  Form} from 'antd';
+  Rate} from 'antd';
 import { 
   UserOutlined, 
   CrownOutlined, 
@@ -29,8 +28,6 @@ const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
 const ParentProfilePage: React.FC = () => {
-  const [] = useState(false);
-  const [] = Form.useForm();
   const [userData, setUserData] = useState<any>(null);
   const [childData, setChildData] = useState<any>(null);
   const [loading, setLoading] = useState(true);

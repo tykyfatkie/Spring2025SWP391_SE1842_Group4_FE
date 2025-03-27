@@ -19,7 +19,9 @@ interface ChildData {
   name: string;
   doB: string;
   gender: number;
-  createdAt: string;
+  createdAt?: string;
+  weight?: number;
+  height?: number;
 }
 
 interface BMIPDFExportProps {

@@ -1,22 +1,44 @@
 import { useEffect, useState } from "react";
 import { Table, Avatar, Tag, Space, Typography, message, Spin, Input, Button, Modal } from "antd";
-import { UserOutlined, SearchOutlined, EyeOutlined, FileOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { UserOutlined, SearchOutlined, EyeOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
+import type { TableProps } from "antd";
 
 const { Text } = Typography;
 
-const UsersPage = () => {
-  const [users, setUsers] = useState([]);
-  const [children, setChildren] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isChildrenLoading, setIsChildrenLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [page, setPage] = useState(1);
-  const [] = useState(10);
-  const [filterStatus, setFilterStatus] = useState(3);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+// ============ ĐỊNH NGHĨA KIỂU DỮ LIỆU ============
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  status: number;
+  // Thêm các trường khác nếu API trả về thêm
+}
 
+interface Child {
+  id: string;
+  name: string;
+  doB?: string; // Ngày sinh (optional)
+  gender?: string; // Giới tính (optional)
+}
+
+type UserStatus = 0 | 1 | 2 | 4; // Các trạng thái người dùng theo API
+
+// ============ COMPONENT CHÍNH ============
+const UsersPage = () => {
+  // ============ STATE ============
+  const [users, setUsers] = useState<User[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isChildrenLoading, setIsChildrenLoading] = useState<boolean>(false);
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [filterStatus, setFilterStatus] = useState<number>(3);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
+  // ============ API CALLS ============
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -39,12 +61,13 @@ const UsersPage = () => {
       setUsers(response.data.data.data || []);
     } catch (error) {
       message.error("Failed to fetch users");
+      console.error("Users fetch error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchChildrenByParentId = async (parentId : any) => {
+  const fetchChildrenByParentId = async (parentId: string) => {
     setIsChildrenLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -55,23 +78,26 @@ const UsersPage = () => {
       setChildren(response.data.data || []);
     } catch (error) {
       message.error("No children found for this parent!");
+      console.error("Children fetch error:", error);
     } finally {
       setIsChildrenLoading(false);
     }
   };
 
+  // ============ SIDE EFFECTS ============
   useEffect(() => {
     fetchUsers();
   }, [page, filterStatus]);
 
+  // ============ HANDLERS ============
   const resetChildrenData = () => {
     setChildren([]);
   };
 
-  const handleViewUser = async (user : any) => {
+  const handleViewUser = async (user: User) => {
     setSelectedUser(user);
     setIsModalVisible(true);
-    setIsChildrenLoading(true); // Đảm bảo hiển thị loading
+    setIsChildrenLoading(true);
     try {
       await fetchChildrenByParentId(user.id);
     } catch (error) {
@@ -79,16 +105,12 @@ const UsersPage = () => {
     }
   };
 
-  const handleDeactivateUser = async (userId : any) => {
+  const handleDeactivateUser = async (userId: string) => {
     try {
       const token = localStorage.getItem("token");
-
-      // Kiểm tra thông tin status từ backend
-      console.log("Sending deactivation request for user:", userId);
-
       const response = await axios.patch(
         `${import.meta.env.VITE_API_ENDPOINT}/users/status/${userId}`,
-        { status: 0 }, // Thử với status: 0 nếu API hiểu ngược lại
+        { status: 0 },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -96,21 +118,20 @@ const UsersPage = () => {
         }
       );
 
-      console.log("API Response:", response.data);
-
-      if (response.data && response.data.success) {
+      if (response.data?.success) {
         message.success("User deactivated successfully");
-        fetchUsers(); // Làm mới danh sách user
+        fetchUsers();
       } else {
         message.error("Failed to deactivate user");
       }
-    } catch (error : any) {
+    } catch (error: any) {
       console.error("Deactivate error:", error);
       message.error("Failed to deactivate user: " + (error.response?.data?.message || error.message));
     }
   };
 
-  const getStatusTag = (status : any) => {
+  // ============ HELPER FUNCTIONS ============
+  const getStatusTag = (status: UserStatus) => {
     switch (status) {
       case 0:
         return <Tag color="green">Active</Tag>;
@@ -125,6 +146,85 @@ const UsersPage = () => {
     }
   };
 
+  // ============ TABLE COLUMNS CONFIG ============
+  const userColumns: TableProps<User>['columns'] = [
+    {
+      title: "Avatar",
+      dataIndex: "avatar",
+      key: "avatar",
+      render: (avatar?: string) => avatar ? <Avatar src={avatar} /> : <Avatar icon={<UserOutlined />} />,
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      render: (text: string, record: User) => (
+        <Text strong style={{ cursor: "pointer" }} onClick={() => handleViewUser(record)}>
+          {text}
+        </Text>
+      ),
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: UserStatus) => getStatusTag(status),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      align: "right",
+      render: (_: any, record: User) => (
+        <Space>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => handleViewUser(record)}
+            type="primary"
+            shape="circle"
+          />
+          {(record.status === 0 || record.status === 1 || record.status === 4) && (
+            <Button
+              icon={<ExclamationCircleOutlined />}
+              type="default"
+              danger
+              onClick={() => handleDeactivateUser(record.id)}
+              shape="circle"
+            />
+          )}
+        </Space>
+      ),
+    },
+  ];
+
+  const childColumns: TableProps<Child>['columns'] = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Date of birth",
+      dataIndex: "doB",
+      key: "doB",
+      render: (doB?: string) => {
+        if (!doB) return <span>N/A</span>;
+        const date = new Date(doB);
+        return <span>{date.toLocaleDateString()}</span>;
+      },
+    },
+    {
+      title: "Gender",
+      dataIndex: "gender",
+      key: "gender",
+    },
+  ];
+
+  // ============ RENDER ============
   return (
     <div>
       <div style={{ marginBottom: 16, display: "flex", justifyContent: "right", gap: "10px" }}>
@@ -150,59 +250,7 @@ const UsersPage = () => {
         <Spin size="large" style={{ display: "block", margin: "50px auto" }} />
       ) : (
         <Table
-          columns={[
-            {
-              title: "Avatar",
-              dataIndex: "avatar",
-              key: "avatar",
-              render: (avatar) => avatar ? <Avatar src={avatar} /> : <Avatar icon={<UserOutlined />} />,
-            },
-            {
-              title: "Name",
-              dataIndex: "name",
-              key: "name",
-              render: (text, record) => (
-                <Text strong style={{ cursor: "pointer" }} onClick={() => handleViewUser(record)}>
-                  {text}
-                </Text>
-              ),
-            },
-            {
-              title: "Email",
-              dataIndex: "email",
-              key: "email",
-            },
-            {
-              title: "Status",
-              dataIndex: "status",
-              key: "status",
-              render: (status : any) => getStatusTag(status),
-            },
-            {
-              title: "Actions",
-              key: "actions",
-              align: "right",
-              render: (_, record) => (
-                <Space>
-                  <Button
-                    icon={<EyeOutlined />}
-                    onClick={() => handleViewUser(record)}
-                    type="primary"
-                    shape="circle"
-                  />
-                  {record.status === 0 && (
-                    <Button
-                      icon={<ExclamationCircleOutlined />}
-                      type="default"
-                      danger
-                      onClick={() => handleDeactivateUser(record.id)}
-                      shape="circle"
-                    />
-                  )}
-                </Space>
-              ),
-            },
-          ]}
+          columns={userColumns}
           dataSource={users}
           rowKey="id"
           pagination={{
@@ -215,13 +263,13 @@ const UsersPage = () => {
       )}
 
       <Modal
-        title={`Children of ${selectedUser?.name}`}
+        title={`Children of ${selectedUser?.name || 'User'}`}
         open={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);
-          resetChildrenData(); // Reset children khi đóng modal
+          resetChildrenData();
         }}
-        afterClose={resetChildrenData} // Đảm bảo reset sau khi modal đóng hoàn toàn
+        afterClose={resetChildrenData}
         footer={null}
         width={800}
       >
@@ -229,32 +277,7 @@ const UsersPage = () => {
           <Spin size="large" style={{ display: "block", margin: "50px auto" }} />
         ) : (
           <Table
-            columns={[
-              {
-                title: "Name",
-                dataIndex: "name",
-                key: "name",
-              },
-              {
-                title: "Date of birth", // Tiêu đề cột
-                dataIndex: "doB", // Trường dữ liệu
-                key: "doB",
-                render: (doB) => {
-                  // Định dạng ngày tháng năm thành DD/MM/YYYY
-                  const date = new Date(doB);
-                  const day = String(date.getDate()).padStart(2, '0'); // Đảm bảo 2 chữ số cho ngày
-                  const month = String(date.getMonth() + 1).padStart(2, '0'); // Đảm bảo 2 chữ số cho tháng
-                  const year = date.getFullYear(); // Năm
-                  const formattedDate = `${day}/${month}/${year}`; // Định dạng DD/MM/YYYY
-                  return <span>{formattedDate}</span>;
-                },
-              },
-              {
-                title: "Gender",
-                dataIndex: "gender",
-                key: "gender",
-              },
-            ]}
+            columns={childColumns}
             dataSource={children}
             rowKey="id"
             pagination={false}

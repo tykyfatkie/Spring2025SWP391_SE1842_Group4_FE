@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, Button, Card, Row, Col, Space, Statistic, Input } from 'antd';
+import { Layout, Typography, Button, Card, Row, Col, Space, Statistic } from 'antd';
 import AppFooter from '../../components/Footer/Footer';
 import { SmileOutlined, HeartOutlined, StarOutlined, UserOutlined, CheckCircleOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import DoctorsSection from '../../components/Doctor section/DoctorsSection ';
@@ -472,7 +472,7 @@ const Homepage: React.FC = () => {
           }} />
           
           <Row justify="center" align="middle" style={{ maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 2 }}>
-            <Col xs={24} md={16} style={{ textAlign: 'center', marginBottom: { xs: '32px', md: '0' } }}>
+            <Col xs={24} md={16} style={{ textAlign: 'center' }}>
               <Title level={2} style={{ color: 'white', marginBottom: '16px', fontSize: '36px', fontWeight: 700 }}>
                 Ready to Start Tracking Your Child's Growth?
               </Title>

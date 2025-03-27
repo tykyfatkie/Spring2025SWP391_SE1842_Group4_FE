@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Typography, Avatar, Divider } from 'antd';
 import {
-  UserOutlined,
   LineChartOutlined,
   AppstoreOutlined,
-  BarChartOutlined,
-  PlusCircleOutlined,
   TeamOutlined,
-  CalculatorOutlined,
   MessageOutlined,
 } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';

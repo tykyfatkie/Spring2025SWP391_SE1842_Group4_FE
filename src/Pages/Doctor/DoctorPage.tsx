@@ -72,10 +72,10 @@ const DoctorPage: React.FC = () => {
       let data;
       try {
         data = await response.json();
-      } catch (parseError) {
+      } catch (parseError: any) {
         const responseText = await response.text();
         console.error("Failed to parse API response as JSON:", responseText.substring(0, 200));
-        throw new Error(`Failed to parse API response as JSON`);
+        throw new Error(`Failed to parse API response as JSON: ${parseError.message}`);
       }
       
       // Handle the nested data structure correctly
@@ -211,7 +211,7 @@ const DoctorPage: React.FC = () => {
 
       if (!response.ok) {
         const responseText = await response.text();
-        throw new Error(`Upload failed with status: ${response.status}`);
+        throw new Error(`Upload failed with status: ${response.status}. Response: ${responseText.substring(0, 500)}`);
       }
 
       // Try to parse the JSON response
@@ -256,9 +256,10 @@ const DoctorPage: React.FC = () => {
           // Update file item with URL and status
           fileItem.url = url;
           fileItem.status = 'done';
-        } catch (error) {
-          fileItem.status = 'error';
-          message.error(`Failed to upload ${fileItem.name}`);
+        } catch (error: any) {
+          console.error("Fetch Error:", error);
+          const errorText = error instanceof Error ? error.message : String(error);
+          setError(errorText);
         }
       }
       
@@ -344,7 +345,8 @@ const DoctorPage: React.FC = () => {
   
       if (!response.ok) {
         const responseText = await response.text();
-        throw new Error(`Failed to send message. Server responded with ${response.status}`);
+        console.error("Failed to parse API response as JSON:", responseText.substring(0, 200));
+        throw new Error(`Failed to parse API response: ${responseText}`);
       }
   
       message.success({ content: 'Message sent successfully!', key: messageLoadingKey });

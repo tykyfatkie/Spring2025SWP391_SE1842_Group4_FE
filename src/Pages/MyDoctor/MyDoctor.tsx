@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Typography, Row, Col, Card, Avatar, Tag, Spin, Alert, Button, Tabs, Rate } from 'antd';
-import { UserOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Layout, Typography, Row, Col, Card, Tag, Spin, Alert, Button, Tabs, Rate } from 'antd';
+import { EnvironmentOutlined, PhoneOutlined, MailOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
 
