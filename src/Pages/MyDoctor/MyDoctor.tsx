@@ -75,7 +75,6 @@ const MyDoctorProfilePage: React.FC = () => {
       }
       return null;
     } catch (e) {
-      console.error("Error parsing metadata:", e);
       return null;
     }
   };

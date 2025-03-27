@@ -10,7 +10,6 @@ const ContactPage: React.FC = () => {
   const [form] = Form.useForm();
 
   const onFinish = (values: any) => {
-    console.log('Contact form values:', values);
     message.success('Message sent successfully! We will get back to you soon.');
     form.resetFields();
   };
@@ -272,7 +271,7 @@ const ContactPage: React.FC = () => {
                       <Form.Item
                         name="email"
                         label="Email"
-                        rules={[
+                        rules={[ 
                           { required: true, message: 'Please enter your email' },
                           { type: 'email', message: 'Please enter a valid email' }
                         ]}

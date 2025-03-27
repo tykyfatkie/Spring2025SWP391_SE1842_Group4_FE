@@ -104,7 +104,6 @@ const BMITrackingPage: React.FC = () => {
         throw new Error("Invalid data format received");
       }
     } catch (error: any) {
-      console.error("Error fetching children:", error);
       message.error(error.response?.data?.message || "Failed to load children data");
     } finally {
       setLoading(false);
@@ -140,7 +139,6 @@ const BMITrackingPage: React.FC = () => {
         throw new Error("Invalid BMI data format received");
       }
     } catch (error: any) {
-      console.error("Error fetching BMI data:", error);
       message.error(error.response?.data?.message || "Failed to load BMI tracking data");
       setChartData([]);
     } finally {
@@ -224,7 +222,6 @@ const BMITrackingPage: React.FC = () => {
       }
     } catch (error: any) {
       message.error(error.response?.data?.message || "Failed to save BMI record.");
-      console.error("Error saving BMI record:", error);
     }
   };
 

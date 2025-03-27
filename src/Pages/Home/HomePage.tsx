@@ -48,7 +48,6 @@ const Homepage: React.FC = () => {
         const selectedDoctors = shuffledDoctors.slice(0, 5);
         setDoctors(selectedDoctors);
       } catch (error: any) {
-        console.error("Fetch Error:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -247,264 +246,58 @@ const Homepage: React.FC = () => {
                 "Scientifically proven to help parents make informed decisions about their child's health."
               </Text>
               <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px' }}>
-                  <UserOutlined style={{ color: 'white', fontSize: '20px' }} />
-                </div>
-                <div>
-                  <Text style={{ display: 'block', fontWeight: 600, color: '#1e3a8a' }}>Dr. William Li</Text>
-                  <Text style={{ color: '#4b5563', fontSize: '12px' }}>Pediatric Specialist</Text>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'gray' }} />
+                <div style={{ marginLeft: '12px' }}>
+                  <Text style={{ fontSize: '14px', fontWeight: 600 }}>Dr. John Doe</Text>
+                  <Text style={{ fontSize: '12px', color: 'gray' }}>Pediatrician</Text>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Statistics Section */}
-        <Row justify="center" style={{ padding: '60px 0', background: '#f8fafc', marginBottom: '60px', borderRadius: '30px', marginRight: '60px' }}>
-          <Col span={24} style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <Title level={2} style={{ color: '#1e3a8a', marginBottom: '16px' }}>Trusted by Thousands</Title>
-            <Paragraph style={{ color: '#4b5563', fontSize: '18px', maxWidth: '600px', margin: '0 auto' }}>
-              Join our growing community of parents and healthcare professionals
-            </Paragraph>
-          </Col>
-          
-          {statistics.map((stat, index) => (
-            <Col xs={24} sm={12} md={6} key={index} style={{ padding: '16px', textAlign: 'center' }}>
-              <div style={{ 
-                padding: '24px', 
-                background: 'white', 
-                borderRadius: '16px',
-                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.03)',
-                height: '100%',
-              }}>
-                <div style={{ 
-                  width: '70px', 
-                  height: '70px', 
-                  borderRadius: '50%', 
-                  background: 'rgba(30, 58, 138, 0.1)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  margin: '0 auto 16px' 
-                }}>
-                  {React.cloneElement(stat.icon, { style: { fontSize: '32px', color: '#1e3a8a' } })}
+        {/* Features Section */}
+        <Row gutter={[16, 24]} style={{ padding: '48px 12px' }}>
+          {features.map((feature, index) => (
+            <Col key={index} xs={24} sm={12} md={6}>
+              <Card
+                bordered={false}
+                style={{ borderRadius: '20px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
+                bodyStyle={{ textAlign: 'center' }}
+              >
+                <div style={{ marginBottom: '16px' }}>
+                  {feature.icon}
                 </div>
-                <Statistic 
-                  value={stat.value} 
-                  valueStyle={{ color: '#1e3a8a', fontSize: '28px', fontWeight: 700 }} 
-                />
-                <Text style={{ color: '#4b5563', fontSize: '16px' }}>{stat.title}</Text>
-              </div>
+                <Title level={4}>{feature.title}</Title>
+                <Paragraph>{feature.description}</Paragraph>
+              </Card>
             </Col>
           ))}
         </Row>
-
+        {/* Statistics Section */}
+        <Row gutter={[16, 24]} justify="center" style={{ padding: '48px 12px', backgroundColor: '#f0f2f5' }}>
+          {statistics.map((stat, index) => (
+            <Col key={index} xs={24} sm={12} md={6}>
+              <Card
+                bordered={false}
+                style={{
+                  borderRadius: '20px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                  textAlign: 'center',
+                }}
+              >
+                <Statistic
+                  title={stat.title}
+                  value={stat.value}
+                  valueStyle={{ fontSize: '32px', fontWeight: 600 }}
+                  prefix={stat.icon}
+                />
+              </Card>
+            </Col>
+          ))}
+        </Row>
         {/* Doctors Section */}
-        <div style={{ marginBottom: '60px', padding: '0 24px', marginLeft:'-25px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <div style={{ 
-              display: 'inline-block', 
-              padding: '8px 16px',
-              background: 'rgba(30, 58, 138, 0.1)',
-              borderRadius: '20px',
-              marginBottom: '16px'
-            }}>
-              <span style={{ color: '#1e3a8a', fontWeight: '600', fontSize: '14px' }}>EXPERT TEAM</span>
-            </div>
-            <Title level={2} style={{ color: '#1e3a8a', marginBottom: '16px', fontSize: '36px' }}>Meet Our Specialists</Title>
-            <Paragraph style={{ color: '#4b5563', fontSize: '18px', maxWidth: '700px', margin: '0 auto' }}>
-              Our team of certified healthcare professionals is dedicated to providing the best care for your child
-            </Paragraph>
-          </div>
-          <DoctorsSection doctors={doctors} loading={loading} error={error} />
-        </div>
-
-        {/* Enhanced Features Section */}
-        <div style={{ 
-          padding: '120px 0', 
-          background: 'linear-gradient(to bottom, #f0f7ff, #e6f0fd)',
-          marginBottom: '60px',
-          borderRadius: '30px',
-        }}>
-          <Row justify="center" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-            <Col span={24} style={{ textAlign: 'center', marginBottom: 60 }}>
-              <div style={{ 
-                display: 'inline-block', 
-                padding: '8px 16px',
-                background: 'rgba(30, 58, 138, 0.1)',
-                borderRadius: '20px',
-                marginBottom: '16px'
-              }}>
-                <span style={{ color: '#1e3a8a', fontWeight: '600', fontSize: '14px' }}>WHY CHOOSE US</span>
-              </div>
-              <Title level={2} style={{ 
-                color: '#1e3a8a', 
-                fontSize: '36px', 
-                marginTop: 0,
-                marginBottom: '24px'
-              }}>
-                Key Features
-              </Title>
-              <Paragraph style={{ 
-                color: '#4b5563', 
-                fontSize: '18px', 
-                maxWidth: '700px', 
-                margin: '0 auto' 
-              }}>
-                Our platform provides the essential tools to help you monitor and support your child's growth journey.
-              </Paragraph>
-            </Col>
-            
-            {features.map((feature, index) => (
-              <Col xs={24} sm={12} lg={6} key={index} style={{ padding: '16px' }}>
-                <Card 
-                  hoverable 
-                  style={{ 
-                    height: '100%', 
-                    textAlign: 'center', 
-                    borderRadius: '16px',
-                    border: 'none',
-                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-                    transition: 'all 0.3s ease',
-                    overflow: 'hidden',
-                    position: 'relative'
-                  }} 
-                  bodyStyle={{ padding: '32px 24px' }}
-                >
-                  <div style={{ 
-                    position: 'absolute', 
-                    top: 0, 
-                    left: 0, 
-                    right: 0, 
-                    height: '6px', 
-                    background: '#1e3a8a',
-                    opacity: 0.7 
-                  }}/>
-                  
-                  <div style={{ 
-                    marginBottom: '28px',
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '50%',
-                    background: 'rgba(30, 58, 138, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 28px'
-                  }}>
-                    {React.cloneElement(feature.icon, { style: { fontSize: '40px', color: '#1e3a8a' } })}
-                  </div>
-                  
-                  <Title level={3} style={{ fontSize: '22px', marginBottom: '16px', color: '#1e3a8a', fontWeight: 600 }}>
-                    {feature.title}
-                  </Title>
-                  
-                  <Paragraph style={{ color: '#4b5563', fontSize: '16px', lineHeight: '1.6' }}>
-                    {feature.description}
-                  </Paragraph>
-                  
-                  <div style={{ marginTop: '24px' }}>
-                    <Button 
-                      type="link" 
-                      style={{ 
-                        color: '#1e3a8a', 
-                        fontWeight: 500, 
-                        padding: 0,
-                        fontSize: '16px'
-                      }}
-                    >
-                      Learn More →
-                    </Button>
-                  </div>
-                </Card>
-              </Col>
-            ))}
-            
-            <Col span={24} style={{ textAlign: 'center', marginTop: '48px' }}>
-              <Button
-                type="primary"
-                size="large"
-                style={{
-                  height: '52px',
-                  padding: '0 32px',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  borderRadius: '8px',
-                  background: '#1e3a8a',
-                  border: 'none',
-                  boxShadow: '0 8px 20px rgba(30, 58, 138, 0.25)',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                Explore All Features
-              </Button>
-            </Col>
-          </Row>
-        </div>
-
-        {/* CTA Section */}
-        <div style={{ 
-          padding: '80px 24px', 
-          background: '#1e3a8a', 
-          borderRadius: '30px',
-          margin: '0 24px 60px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          {/* Decorative elements */}
-          <div style={{
-            position: 'absolute',
-            width: '300px',
-            height: '300px',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.05)',
-            top: '-100px',
-            right: '-100px',
-          }} />
-          <div style={{
-            position: 'absolute',
-            width: '200px',
-            height: '200px',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.05)',
-            bottom: '-50px',
-            left: '100px',
-          }} />
-          
-          <Row justify="center" align="middle" style={{ maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 2 }}>
-            <Col xs={24} md={16} style={{ textAlign: 'center' }}>
-              <Title level={2} style={{ color: 'white', marginBottom: '16px', fontSize: '36px', fontWeight: 700 }}>
-                Ready to Start Tracking Your Child's Growth?
-              </Title>
-              <Paragraph style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '18px', marginBottom: '0' }}>
-                Join thousands of parents who trust our platform for accurate growth tracking and expert advice.
-              </Paragraph>
-            </Col>
-            <Col xs={24} md={8} style={{ textAlign: 'center' }}>
-              <Button 
-                type="primary" 
-                size="large" 
-                onClick={() => navigate("/register")}
-                style={{
-                  height: '52px',
-                  padding: '0 32px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  borderRadius: '8px',
-                  background: 'white',
-                  color: '#1e3a8a',
-                  border: 'none',
-                  boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
-                }}
-              >
-                Register Now <ArrowRightOutlined style={{ marginLeft: '8px' }} />
-              </Button>
-            </Col>
-          </Row>
-        </div>
+        <DoctorsSection doctors={doctors} loading={loading} error={error} />
       </Content>
-
-      {/* Footer */}
       <AppFooter />
     </Layout>
   );

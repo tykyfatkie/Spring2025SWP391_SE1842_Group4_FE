@@ -122,7 +122,7 @@ const ChangePasswordPage = () => {
               background: '#1e3a8a',
               opacity: 0.7 
             }}/>
-            
+
             <div style={{ marginBottom: '32px', textAlign: 'center' }}>
               <div style={{ 
                 width: '80px',

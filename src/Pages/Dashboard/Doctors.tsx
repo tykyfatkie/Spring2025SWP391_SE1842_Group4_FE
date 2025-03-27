@@ -55,7 +55,6 @@ const DoctorsPage = () => {
 
       setDoctors(response.data?.data?.data || []);
     } catch (error) {
-      console.error("Fetch doctors error:", error);
       message.error("Failed to fetch doctors");
     } finally {
       setLoading(false);
@@ -93,7 +92,6 @@ const DoctorsPage = () => {
         message.error("Failed to deactivate doctor");
       }
     } catch (error: any) {
-      console.error("Deactivate error:", error);
       message.error("Failed to deactivate doctor: " + (error.response?.data?.message || error.message));
     }
   };

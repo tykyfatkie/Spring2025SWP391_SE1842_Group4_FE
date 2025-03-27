@@ -63,7 +63,6 @@ const ChildManage: React.FC = () => {
       }
     } catch (error: any) {
       message.error(error.response?.data?.message || "You do not have any child yet!");
-      console.error("You do not have any child yet!", error);
     } finally {
       setLoading(false);
     }
@@ -93,7 +92,6 @@ const ChildManage: React.FC = () => {
       }
     } catch (error: any) {
       message.error(error.response?.data?.message || "You do not have any hidden child yet!");
-      console.error("You do not have any hidden child yet!", error);
     } finally {
       setArchivedLoading(false);
     }
@@ -160,7 +158,6 @@ const ChildManage: React.FC = () => {
       }
     } catch (error: any) {
       message.error(error.response?.data?.message || "Failed to update child.");
-      console.error("Error updating child:", error);
     }
   };
 
@@ -200,14 +197,12 @@ const ChildManage: React.FC = () => {
             }
           } catch (error: any) {
             message.error(error.response?.data?.message || "Failed to delete child.");
-            console.error("Error deleting child:", error);
           } finally {
             setLoading(false);
           }
         },
       });
     } catch (error: any) {
-      console.error("Error in delete child flow:", error);
     }
   };
 
@@ -245,13 +240,11 @@ const ChildManage: React.FC = () => {
               children.find(child => child.id === childId),
             ]);
           } catch (error: any) {
-            console.error("Error hiding child:", error);
             message.error(error.response?.data?.message || "Failed to hide child record.");
           }
         },
       });
     } catch (error: any) {
-      console.error("Error in hide child flow:", error);
     }
   };
   
@@ -291,12 +284,10 @@ const ChildManage: React.FC = () => {
               archivedChildren.find(child => child.id === childId),
             ]);
           } catch (error: any) {
-            console.error("Error unhiding child:", error);
           }
         },
       });
     } catch (error: any) {
-      console.error("Error in unhide child flow:", error);
     }
   };
   

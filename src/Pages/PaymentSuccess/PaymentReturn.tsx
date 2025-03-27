@@ -54,7 +54,6 @@ const PaymentReturn: React.FC = () => {
           setMessage(response.message || 'Thanh toán thất bại.');
         }
       } catch (error: any) {
-        console.error('Lỗi xử lý thanh toán:', error);
         setStatus('error');
         setMessage(error.message || 'Đã xảy ra lỗi khi xử lý thanh toán.');
       }

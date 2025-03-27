@@ -58,7 +58,6 @@ const ParentProfilePage: React.FC = () => {
         const data = await response.json();
         setUserData(data.data);
       } catch (error) {
-        console.error('Error fetching user profile:', error);
       } finally {
         setLoading(false);
       }
@@ -88,7 +87,6 @@ const ParentProfilePage: React.FC = () => {
           setChildData(null);
         }
       } catch (error) {
-        console.error('Error fetching child data:', error);
       }
     };
 
@@ -112,14 +110,12 @@ const ParentProfilePage: React.FC = () => {
               }
             }
           } catch (profileError) {
-            console.error("Error fetching doctor profile:", profileError);
           }
           return doctor;
         }));
 
         setDoctors(updatedDoctors);
       } catch (error) {
-        console.error('Error fetching doctors:', error);
       }
     };
 
@@ -562,19 +558,6 @@ const ParentProfilePage: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    {/* <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-                      <Button
-                        type="primary"
-                        style={{ 
-                          background: '#1e3a8a',
-                          border: 'none',
-                          borderRadius: '8px',
-                          fontWeight: 500
-                        }}
-                      >
-                        Follow
-                      </Button>
-                    </div> */}
                   </div>
                 ))}
                 <div style={{ padding: '16px', textAlign: 'center' }}>
