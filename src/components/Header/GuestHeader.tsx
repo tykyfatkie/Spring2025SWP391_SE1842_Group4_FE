@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Row, Col, Space, Typography, Button } from 'antd';
 import { 
     ContactsOutlined,
-    CrownOutlined,
     HomeOutlined, 
     InfoCircleOutlined,
     LoginOutlined,

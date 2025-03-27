@@ -24,7 +24,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import Footer from '../../components/Footer/Footer';
 
 const { Content } = Layout;
-const { Title, Paragraph, Text } = Typography;
+const { Title, Text } = Typography;
 
 const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/users`;
 

@@ -3,6 +3,16 @@ import { Form, Input, InputNumber, Button, message, Card, Table, Space, Modal, P
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from "axios";
 
+interface Package {
+  id: string;
+  packageName: string;
+  description: string;
+  price: number;
+  billingCycle: number;
+  maxChildrentAllowed: number;
+  status: number;
+}
+
 const PackagesPage = () => {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -11,7 +21,7 @@ const PackagesPage = () => {
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [currentPackage, setCurrentPackage] = useState(null);
+  const [currentPackage, setCurrentPackage] = useState<Package | null>(null);
 
   const fetchPackages = async () => {
     setLoading(true);
@@ -98,7 +108,7 @@ const PackagesPage = () => {
     try {
       await axios.put(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/edit`, values, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { packageId: currentPackage.id }
+        params: { packageId: currentPackage?.id }
       });
 
       message.success("Package updated successfully!");

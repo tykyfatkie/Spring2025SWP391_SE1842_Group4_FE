@@ -15,24 +15,21 @@ const LoginPage: React.FC = () => {
 
   // Handle Google OAuth callback
   useEffect(() => {
-    // Check if this is a callback from Google OAuth
     const query = new URLSearchParams(location.search);
     const token = query.get('token');
     const userId = query.get('userId');
     
     if (token && userId) {
-      // Store token and user ID
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
-
+  
       try {
         const userData: any = jwtDecode(token);
         const userRole = userData.role;
         localStorage.setItem("role", userRole);
-
+  
         message.success("Google login successful!");
-
-        // Redirect based on role
+  
         setTimeout(() => {
           if (userRole === "Admin") {
             navigate("/my-admin");
@@ -43,14 +40,23 @@ const LoginPage: React.FC = () => {
           }
         }, 1500);
       } catch (error) {
-        message.error("Error processing login information.");
+        let errorMessage = "Error processing login information.";
+        
+        // Check if the error is an instance of AxiosError
+        if (axios.isAxiosError(error)) {
+          // Safely check the response and data
+          if (error.response && error.response.data) {
+            errorMessage = error.response.data.message || errorMessage;
+          }
+        } else if (error instanceof Error) {
+          // Fallback to the error message from the Error instance
+          errorMessage = error.message;
+        }
+      
+        message.error(errorMessage);
       }
     }
   }, [location, navigate]);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +96,10 @@ const LoginPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleGoogleLogin = () => {

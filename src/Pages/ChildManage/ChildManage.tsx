@@ -1,33 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { 
-  Table, 
   Button, 
   Modal, 
   message, 
-  Spin, 
   Space, 
   Layout, 
   Form, 
-  Input, 
-  DatePicker, 
-  Select, 
-  Tabs,
-  Card,
-  Typography,
-  Row,
-  Col
 } from "antd";
 import { 
   EditOutlined, 
   DeleteOutlined, 
   EyeInvisibleOutlined, 
   EyeOutlined,
-  UserOutlined,
-  CheckCircleOutlined,
-  PlusOutlined,
-  UpOutlined,
-  DownOutlined,
   LineChartOutlined
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -38,8 +23,6 @@ import ChildProfilesLayout from "./ChildProfilesLayout";
 import EditChildModal from "./EditChildModal";
 
 const { Content } = Layout;
-const { Option } = Select;
-const { TabPane } = Tabs;
 
 const ChildManage: React.FC = () => {
   const [children, setChildren] = useState<any[]>([]);
@@ -49,8 +32,6 @@ const ChildManage: React.FC = () => {
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [editingChild, setEditingChild] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string>("active");
-  const [headerExpanded, setHeaderExpanded] = useState<boolean>(true);
-  const [collapsed, setCollapsed] = useState<boolean>(false); 
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
@@ -334,13 +315,6 @@ const ChildManage: React.FC = () => {
     navigate(`/child-analytics?childId=${childId}`);
   };
 
-  const toggleHeader = () => {
-    setHeaderExpanded(!headerExpanded);
-  };
-  
-  const toggleCollapse = () => {
-    setCollapsed(!collapsed);
-  };
 
   const activeColumns = [
     {

@@ -209,14 +209,15 @@ const BMITrackingPage: React.FC = () => {
           okText: 'Yes, Export',
           cancelText: 'No, Thanks',
           onOk: () => {
-            // Need to get the latest record after the fetch
-            const latestRecord = chartData[chartData.length - 1];
-            if (latestRecord && selectedChildData) {
-              const singleExport = new SingleBMIExport({
+            if (selectedChildData && chartData.length > 0) {
+              const latestRecord = chartData[chartData.length - 1];
+              const exporter = new SingleBMIExport({
                 childData: selectedChildData,
                 bmiRecord: latestRecord
               });
-              singleExport.generatePDF();
+              exporter.generatePDF();
+            } else {
+              message.warning('No data available to export');
             }
           }
         });

@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Typography, Avatar, Space, Divider } from 'antd';
 import { 
   UserOutlined, 
-  LineChartOutlined,
   MessageOutlined,
-  CalendarOutlined,
-  FileTextOutlined,
   HomeOutlined,
-  SettingOutlined,
   LogoutOutlined
 } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';

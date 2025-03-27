@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Typography, Table, Spin, Button, message, Modal, Input } from 'antd';
 import axiosInstance from '../../utils/axiosInstance';
-import Sidebar from "../../components/Sidebar/Sidebar";
-import { UserOutlined } from '@ant-design/icons';
 import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
 
 const { Content } = Layout;

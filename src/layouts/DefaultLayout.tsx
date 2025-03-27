@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Layout, Menu, Switch, theme, ConfigProvider } from "antd";
-import { DashboardOutlined, UserOutlined, SettingOutlined, BulbOutlined, CrownOutlined } from "@ant-design/icons";
+import { UserOutlined,  BulbOutlined, CrownOutlined } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoutButton from "../components/LogoutButton/LogoutButton";
 
