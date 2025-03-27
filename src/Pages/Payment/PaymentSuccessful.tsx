@@ -24,7 +24,6 @@ const PaymentSuccessful: React.FC = () => {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Decorative elements like Home page */}
         <div style={{
           position: 'absolute',
           width: '300px',

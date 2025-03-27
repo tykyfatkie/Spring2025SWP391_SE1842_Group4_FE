@@ -48,9 +48,6 @@ const UserConsultationRequests: React.FC = () => {
         },
       });
 
-      // Log the response to see its structure
-      console.log('API Response:', response.data);
-      
       // Check the actual structure of your response
       if (Array.isArray(response.data)) {
         setRequests(response.data);

@@ -28,9 +28,6 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   handleOpenBmiModal,
   getBMICategory
 }) => {
-  // Remove the condition that returns null when selectedChild is not set
-  // Instead, we'll show an empty state message in the card
-
   return (
     <Row gutter={[24, 24]} style={{ marginTop: '24px' }}>
       <Col xs={24}>
@@ -67,7 +64,6 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
           bodyStyle={{ padding: '24px' }}
         >
           {!selectedChild ? (
-            // Show this message when no child is selected
             <div style={{ 
               display: 'flex',
               flexDirection: 'column',

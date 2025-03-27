@@ -196,7 +196,6 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
       
       message.success('BMI report downloaded successfully!');
     } catch (error) {
-      console.error("Error generating PDF:", error);
       message.error('Unable to create BMI report. Error: ' + (error instanceof Error ? error.message : String(error)));
     } finally {
       setIsLoading(false);

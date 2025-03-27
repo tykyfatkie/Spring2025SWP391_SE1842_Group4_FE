@@ -74,7 +74,6 @@ const DoctorPage: React.FC = () => {
         data = await response.json();
       } catch (parseError: any) {
         const responseText = await response.text();
-        console.error("Failed to parse API response as JSON:", responseText.substring(0, 200));
         throw new Error(`Failed to parse API response as JSON: ${parseError.message}`);
       }
       
@@ -121,7 +120,6 @@ const DoctorPage: React.FC = () => {
       setDoctors(doctorsData);
       
     } catch (error: any) {
-      console.error("Fetch Error:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -223,7 +221,6 @@ const DoctorPage: React.FC = () => {
         throw new Error("Invalid response format from upload API");
       }
     } catch (error: any) {
-      console.error("Error uploading file:", error);
       throw error;
     }
   };
@@ -257,7 +254,6 @@ const DoctorPage: React.FC = () => {
           fileItem.url = url;
           fileItem.status = 'done';
         } catch (error: any) {
-          console.error("Fetch Error:", error);
           const errorText = error instanceof Error ? error.message : String(error);
           setError(errorText);
         }
@@ -345,7 +341,6 @@ const DoctorPage: React.FC = () => {
   
       if (!response.ok) {
         const responseText = await response.text();
-        console.error("Failed to parse API response as JSON:", responseText.substring(0, 200));
         throw new Error(`Failed to parse API response: ${responseText}`);
       }
   
@@ -485,92 +480,49 @@ const DoctorPage: React.FC = () => {
           <Button 
             key="upload" 
             onClick={handleUploadFiles} 
-            loading={uploading}
-            disabled={fileList.length === 0 || sendingMessage}
-            style={{ marginRight: 8 }}
+            loading={uploading} 
+            icon={<UploadOutlined />}
           >
             Upload Files
           </Button>,
-          <Button 
-            key="send" 
-            type="primary" 
+          <Button
+            key="send"
+            type="primary"
             icon={<SendOutlined />}
-            onClick={handleSendMessage} 
             loading={sendingMessage}
-            disabled={!messageText.trim() || uploading}
+            onClick={handleSendMessage}
           >
             Send Message
-          </Button>,
+          </Button>
         ]}
       >
-        <Form layout="vertical">
-          <Form.Item 
-            label="Message" 
-            required
+        <Form
+          layout="vertical"
+          onFinish={handleSendMessage}
+        >
+          <Form.Item
+            label="Message"
+            name="message"
             rules={[{ required: true, message: 'Please enter your message' }]}
           >
             <Input.TextArea
+              rows={4}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              placeholder="Enter your message here"
-              rows={4}
-              disabled={uploading || sendingMessage}
             />
           </Form.Item>
-          <Form.Item label="Upload Files (Optional)">
+          
+          <Form.Item
+            label="Attachment(s)"
+          >
             <Upload
               fileList={fileList}
               onChange={handleFileChange}
               beforeUpload={handleBeforeUpload}
-              multiple={true}
-              accept=".jpg,.jpeg,.png,.gif,.pdf"
-              disabled={uploading || sendingMessage}
-              showUploadList={{
-                showRemoveIcon: true,
-                removeIcon: (file) => (
-                  <Button 
-                    type="text" 
-                    size="small" 
-                    danger
-                    disabled={uploading || sendingMessage}
-                    onClick={() => {
-                      // Remove file from state
-                      const newFileList = fileList.filter(item => item.uid !== file.uid);
-                      setFileList(newFileList);
-                      
-                      // Also remove from uploaded URLs if it exists there
-                      if (file.url) {
-                        const newUrls = uploadedFileUrls.filter(url => url !== file.url);
-                        setUploadedFileUrls(newUrls);
-                      }
-                    }}
-                  >
-                    Remove
-                  </Button>
-                )
-              }}
+              multiple
             >
-              <Button icon={<UploadOutlined />} disabled={uploading || sendingMessage}>
-                Select Files
-              </Button>
+              <Button icon={<UploadOutlined />}>Select Files</Button>
             </Upload>
-            <div style={{ marginTop: '8px', fontSize: '12px', color: '#999' }}>
-              Supported file types: JPG, PNG, GIF, PDF
-            </div>
-            {uploadedFileUrls.length > 0 && (
-              <div style={{ marginTop: '16px' }}>
-                <p>Uploaded files:</p>
-                <ul>
-                  {uploadedFileUrls.map((url, index) => (
-                    <li key={index}>
-                      <a href={url} target="_blank" rel="noopener noreferrer">
-                        {url.split('/').pop()}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </Form.Item>
         </Form>
       </Modal>

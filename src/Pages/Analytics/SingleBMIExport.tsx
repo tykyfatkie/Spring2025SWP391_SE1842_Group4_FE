@@ -221,7 +221,6 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
       
       message.success('Latest BMI report downloaded successfully!');
     } catch (error) {
-      console.error("Error generating PDF:", error);
       message.error('Unable to create BMI report. Error: ' + (error instanceof Error ? error.message : String(error)));
     } finally {
       setIsLoading(false);

@@ -42,16 +42,12 @@ const ManageUserProfile: React.FC = () => {
     setProfileLoading(true);
     try {
       const response = await axiosInstance.get(`${API_BASE_URL}/profile`);
-      
-      console.log("Full API Response:", response);
   
       if (!response.data || !response.data.data) {
         throw new Error("API response is missing 'data' key");
       }
   
       const { name, phone, address } = response.data.data;
-  
-      console.log("Setting form fields:", { name, phone, address });
   
       form.setFieldsValue({ 
         name: name || "", 
@@ -60,7 +56,6 @@ const ManageUserProfile: React.FC = () => {
       });
   
     } catch (error) {
-      console.error("Error fetching profile:", error);
     } finally {
       setProfileLoading(false);
     }
@@ -76,7 +71,6 @@ const ManageUserProfile: React.FC = () => {
       }, 500);  
     } catch (error: any) {
       message.error('Failed to update profile. Please try again.');
-      console.error('Error updating profile:', error);
     } finally {
       setLoading(false);
     }

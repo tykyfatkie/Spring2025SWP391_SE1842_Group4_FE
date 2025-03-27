@@ -61,7 +61,6 @@ const UsersPage = () => {
       setUsers(response.data.data.data || []);
     } catch (error) {
       message.error("Failed to fetch users");
-      console.error("Users fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -78,7 +77,6 @@ const UsersPage = () => {
       setChildren(response.data.data || []);
     } catch (error) {
       message.error("No children found for this parent!");
-      console.error("Children fetch error:", error);
     } finally {
       setIsChildrenLoading(false);
     }
@@ -101,7 +99,7 @@ const UsersPage = () => {
     try {
       await fetchChildrenByParentId(user.id);
     } catch (error) {
-      console.error("Error fetching children:", error);
+      message.error("Error fetching children");
     }
   };
 
@@ -125,7 +123,6 @@ const UsersPage = () => {
         message.error("Failed to deactivate user");
       }
     } catch (error: any) {
-      console.error("Deactivate error:", error);
       message.error("Failed to deactivate user: " + (error.response?.data?.message || error.message));
     }
   };

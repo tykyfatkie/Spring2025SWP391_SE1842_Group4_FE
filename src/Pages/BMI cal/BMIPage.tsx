@@ -46,7 +46,6 @@ const BMIPage: React.FC = () => {
       }
     } catch (error: any) {
       message.error(error.response?.data?.message || "Failed to fetch children data.");
-      console.error("Error fetching children:", error);
     } finally {
       setLoading(false);
     }
@@ -97,7 +96,6 @@ const BMIPage: React.FC = () => {
       }
     } catch (error: any) {
       message.error(error.response?.data?.message || "Failed to save BMI record.");
-      console.error("Error saving BMI record:", error);
     }
   };
 

@@ -58,8 +58,6 @@ const ChildrenList = () => {
         setFilteredChildren(data);
       }
     } catch (error: any) {
-      console.error("Error fetching children:", error);
-      
       if (error.response?.status === 401) {
         message.error("Session expired. Please login again.");
         localStorage.clear();

@@ -52,7 +52,6 @@ const DoctorProfilePage: React.FC = () => {
 
         setDoctor(result.data[0]);
       } catch (error: any) {
-        console.error("Fetch Error:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -69,7 +68,6 @@ const DoctorProfilePage: React.FC = () => {
       }
       return null;
     } catch (e) {
-      console.error("Error parsing metadata:", e);
       return null;
     }
   };

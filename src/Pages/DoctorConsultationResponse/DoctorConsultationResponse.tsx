@@ -30,7 +30,7 @@ const DoctorConsultationResponse: React.FC = () => {
         return;
       }
 
-      const requestId = localStorage.getItem('requestId'); 
+      const requestId = localStorage.getItem('requestId');
       const response = await axiosInstance.get(`${API_BASE_URL}/request-${requestId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -45,7 +45,6 @@ const DoctorConsultationResponse: React.FC = () => {
       }
     } catch (error: any) {
       message.error('You have not received any consultation requests yet!');
-      console.error('You have not received any consultation requests yet!', error);
     } finally {
       setLoading(false);
     }
@@ -85,11 +84,10 @@ const DoctorConsultationResponse: React.FC = () => {
         message.success('Response sent successfully!');
         setResponseModalVisible(false);
         setResponseContent('');
-        fetchConsultationRequests(); 
+        fetchConsultationRequests();
       }
     } catch (error: any) {
       message.error('Failed to send response');
-      console.error('Error sending response:', error);
     } finally {
       setLoadingResponse(false);
     }

@@ -57,7 +57,6 @@ export const UpdateChildPage: React.FC = () => {
         }
       } catch (error: any) {
         message.error('Failed to fetch child data. Please try again.');
-        console.error('Error fetching child data:', error);
       } finally {
         setFetchLoading(false);
       }

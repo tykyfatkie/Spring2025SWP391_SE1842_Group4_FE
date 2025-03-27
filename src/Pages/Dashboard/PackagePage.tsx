@@ -35,11 +35,9 @@ const PackagesPage = () => {
       if (response.data && response.data.data) {
         setPackages(response.data.data);
       } else {
-        console.error("Unexpected response format:", response.data);
         message.error("Unexpected data format from server.");
       }
     } catch (error) {
-      console.error("Fetch error:", error);
       message.error("Failed to fetch packages.");
     } finally {
       setLoading(false);
@@ -92,7 +90,6 @@ const PackagesPage = () => {
       setIsModalVisible(false);
       fetchPackages();
     } catch (error) {
-      console.error("Submit error:", error);
       message.error("Failed to create package.");
     } finally {
       setSubmitting(false);
@@ -117,7 +114,6 @@ const PackagesPage = () => {
       setCurrentPackage(null);
       fetchPackages();
     } catch (error) {
-      console.error("Edit error:", error);
       message.error("Failed to update package.");
     } finally {
       setSubmitting(false);
@@ -136,7 +132,6 @@ const PackagesPage = () => {
       message.success("Package deleted successfully!");
       fetchPackages();
     } catch (error) {
-      console.error("Delete error:", error);
       message.error("Failed to delete package.");
     }
   };

@@ -52,8 +52,6 @@ const CreateChild: React.FC = () => {
         gender: Number(values.gender),
       };
   
-      console.log('Submitting data:', formattedValues);
-  
       const response = await axios.post(
         `${import.meta.env.VITE_API_ENDPOINT}/children/create`,
         formattedValues,
@@ -69,8 +67,7 @@ const CreateChild: React.FC = () => {
       resetForm();
     } catch (error: any) {
       console.error('Error saving profile:', error);
-      console.log('Server Response:', error.response?.data);
-      message.error(error.response?.data?.message || 'Please subcribe our package to use this feature!');
+      message.error(error.response?.data?.message || 'Please subscribe to our package to use this feature!');
     } finally {
       setLoading(false);
     }
@@ -196,8 +193,7 @@ const CreateChild: React.FC = () => {
                   <Form.Item 
                     name="name" 
                     label={<Text strong style={{ fontSize: '16px' }}>Child's Name</Text>} 
-                    rules={[{ required: true, message: 'Please enter the child\'s name' }]}
-                  > 
+                    rules={[{ required: true, message: 'Please enter the child\'s name' }]}>
                     <Input 
                       placeholder="Enter child's name" 
                       style={{ 
@@ -211,19 +207,16 @@ const CreateChild: React.FC = () => {
                   <Form.Item 
                     name="DoB" 
                     label={<Text strong style={{ fontSize: '16px' }}>Date of Birth</Text>} 
-                    rules={[
-                      {
-                        required: true, 
-                        message: 'Please select date of birth',
-                      }, 
-                      {
-                        validator: (_, value) =>
-                          value && value.isAfter(moment(), 'day')
-                            ? Promise.reject(new Error('Date of birth cannot be in the future'))
-                            : Promise.resolve(),
-                      }
-                    ]}
-                  > 
+                    rules={[{
+                      required: true, 
+                      message: 'Please select date of birth',
+                    }, 
+                    {
+                      validator: (_, value) =>
+                        value && value.isAfter(moment(), 'day')
+                          ? Promise.reject(new Error('Date of birth cannot be in the future'))
+                          : Promise.resolve(),
+                    }]}>
                     <DatePicker 
                       style={{ 
                         width: '100%', 
@@ -240,8 +233,7 @@ const CreateChild: React.FC = () => {
                   <Form.Item 
                     name="gender" 
                     label={<Text strong style={{ fontSize: '16px' }}>Gender</Text>} 
-                    rules={[{ required: true, message: 'Please select gender' }]}
-                  > 
+                    rules={[{ required: true, message: 'Please select gender' }]}>
                     <Select 
                       placeholder="Select gender"
                       style={{ 
