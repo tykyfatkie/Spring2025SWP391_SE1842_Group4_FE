@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Layout, Menu, Switch, theme, ConfigProvider } from "antd";
-import { UserOutlined,  BulbOutlined, CrownOutlined } from "@ant-design/icons";
+import { UserOutlined,  BulbOutlined, CrownOutlined, DollarOutlined } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoutButton from "../components/LogoutButton/LogoutButton";
 
@@ -41,6 +41,9 @@ const DefaultLayout: React.FC = () => {
             selectedKeys={[location.pathname]}
             onClick={(e) => navigate(e.key)}
           >
+            <Menu.Item key="/my-admin/revenue" icon={<DollarOutlined />}>
+              Revenue
+            </Menu.Item>
             <Menu.Item key="/my-admin/users" icon={<UserOutlined />}>
               Users
             </Menu.Item>
@@ -53,6 +56,7 @@ const DefaultLayout: React.FC = () => {
             <Menu.Item key="/my-admin/packages" icon={<CrownOutlined />}>
               Package
             </Menu.Item>
+
             </Menu>
               <div style={{ padding: "16px" }}>
             <LogoutButton />

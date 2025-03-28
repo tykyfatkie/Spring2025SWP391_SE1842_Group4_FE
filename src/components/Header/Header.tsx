@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Menu, Row, Col, Space, Typography, Button, Dropdown, Avatar } from "antd";
-import { HomeOutlined, ContactsOutlined, InfoCircleOutlined, UserOutlined, BulbFilled, GiftOutlined, LogoutOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined, UserOutlined, GiftOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const { Header } = Layout;
 
@@ -11,6 +12,7 @@ const AppHeader: React.FC = () => {
   const [selectedKey, setSelectedKey] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [hover, setHover] = useState(false);
+  const [userName, setUserName] = useState<string>("");
   
   // Màu xanh dương chính
   const primaryBlue = "#0066CC";
@@ -32,6 +34,30 @@ const AppHeader: React.FC = () => {
     }
   }, [location]);
 
+
+
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const fetchProfile = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/users/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          accept: "*/*",
+        },
+      });
+      setUserName(response.data.data.userName);
+    } catch (error) {
+      console.error("Failed to load user profile:", error);
+    }
+  };
+
+  fetchProfile();
+}, []);
+
+
   const handleLogoClick = () => navigate("/home");
 
   const handleLogout = () => {
@@ -44,7 +70,6 @@ const AppHeader: React.FC = () => {
     navigate("/login");
   };
 
-  // Common menu item style
   const menuItemBaseStyle = {
     padding: "10px 16px",
     margin: "4px 0",
@@ -105,8 +130,8 @@ const AppHeader: React.FC = () => {
         icon={<LogoutOutlined />}
         style={{ 
           ...menuItemBaseStyle,
-          color: "rgba(255, 0, 0, 0.7)", // Màu chữ đỏ nhạt
-          background: hover ? "rgba(255, 0, 0, 0.1)" : "transparent", // Hover ra màu đỏ nhạt
+          color: "rgba(255, 0, 0, 0.7)", 
+          background: hover ? "rgba(255, 0, 0, 0.1)" : "transparent",
         }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
@@ -116,7 +141,6 @@ const AppHeader: React.FC = () => {
     </Menu>
   );
 
-  // CSS cho menu item
   const menuItemStyle = (key: string) => ({
     cursor: "pointer", 
     color: selectedKey === key ? primaryBlue : "#000",
@@ -136,7 +160,6 @@ const AppHeader: React.FC = () => {
 
   return (
     <>
-      {/* Custom CSS for menu hover effects */}
       <style>
         {`
           .menu-item-hover:hover {
@@ -167,7 +190,6 @@ const AppHeader: React.FC = () => {
         fontFamily: "SoDoSans, sans-serif", 
       }}>
         <Row justify="space-between" align="middle" style={{ height: "100%" }}>
-          {/* Logo */}
           <Col style={{ display: "flex", alignItems: "center" }}>
             <div onClick={handleLogoClick} style={{ cursor: "pointer", marginRight: "10px" }}>
               <img 
@@ -177,7 +199,6 @@ const AppHeader: React.FC = () => {
               />
             </div>
             
-            {/* Navigation Menu - Sát logo */}
             <div style={{ display: "flex", gap: "30px", marginLeft: "45px" }}> 
               <div 
                 style={menuItemStyle("home")}
@@ -239,7 +260,10 @@ const AppHeader: React.FC = () => {
                   >
                     Packages
                   </Button>
-                  
+                  <span style={{ fontSize: "16px", fontWeight: 500 }}>
+                    Welcome back,{" "}
+                    <span style={{ color: "#1e90ff" }}>{userName}</span>
+                  </span>          
                   <Dropdown overlay={userMenu} trigger={["click"]}>
                     <Avatar 
                       icon={<UserOutlined />} 

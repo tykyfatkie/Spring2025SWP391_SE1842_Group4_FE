@@ -34,6 +34,7 @@ import ChangePasswordPage from "../Pages/Security/ChangePassword";
 import PaymentReturn from "../Pages/PaymentSuccess/PaymentReturn";
 import PaymentSuccessful from "../Pages/Payment/PaymentSuccessful";
 import PaymentFailed from "../Pages/Payment/PaymentFailed";
+import RevenuePage from "../Pages/Dashboard/Revenue";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -82,6 +83,7 @@ const routes: LayoutRoute[] = [
       { path: "/my-admin/doctors", component: ProtectedComponent(DoctorsPage, ["Admin"]) },
       { path: "/my-admin/settings", component: ProtectedComponent(Settings, ["Admin"]) },
       { path: "/my-admin/packages", component: ProtectedComponent(PackagesPage, ["Admin"]) },
+      { path: "/my-admin/revenue", component: ProtectedComponent(PackagesPage, ["Admin"]) },
     ],
   },
 ];
