@@ -1,31 +1,30 @@
 import { useEffect, useState } from "react";
 import { Table, Avatar, Tag, Space, Typography, message, Spin, Input, Button, Modal } from "antd";
-import { UserOutlined, SearchOutlined, EyeOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { UserOutlined, SearchOutlined, EyeOutlined, ExclamationCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 import type { TableProps } from "antd";
 
 const { Text } = Typography;
 
-// ============ ĐỊNH NGHĨA KIỂU DỮ LIỆU ============
+// ============ TYPE DEFINITIONS ============
 interface User {
   id: string;
   name: string;
   email: string;
   avatar?: string;
   status: number;
-  // Thêm các trường khác nếu API trả về thêm
 }
 
 interface Child {
   id: string;
   name: string;
-  doB?: string; // Ngày sinh (optional)
-  gender?: string; // Giới tính (optional)
+  doB?: string;
+  gender?: string;
 }
 
-type UserStatus = 0 | 1 | 2 | 4; // Các trạng thái người dùng theo API
+type UserStatus = 0 | 1 | 2 | 4;
 
-// ============ COMPONENT CHÍNH ============
+// ============ MAIN COMPONENT ============
 const UsersPage = () => {
   // ============ STATE ============
   const [users, setUsers] = useState<User[]>([]);
@@ -103,12 +102,12 @@ const UsersPage = () => {
     }
   };
 
-  const handleDeactivateUser = async (userId: string) => {
+  const handleUserStatusChange = async (userId: string, status: number) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.patch(
-        `${import.meta.env.VITE_API_ENDPOINT}/users/status/${userId}`,
-        { status: 0 },
+      await axios.patch(
+        `${import.meta.env.VITE_API_ENDPOINT}/users/status/${userId}?status=${status}`,
+        null,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -116,14 +115,9 @@ const UsersPage = () => {
         }
       );
 
-      if (response.data?.success) {
-        message.success("User deactivated successfully");
-        fetchUsers();
-      } else {
-        message.error("Failed to deactivate user");
-      }
-    } catch (error: any) {
-      message.error("Failed to deactivate user: " + (error.response?.data?.message || error.message));
+      fetchUsers();
+    } catch (error) {
+      // Silent error handling
     }
   };
 
@@ -184,12 +178,20 @@ const UsersPage = () => {
             type="primary"
             shape="circle"
           />
-          {(record.status === 0 || record.status === 1 || record.status === 4) && (
+          {record.status === 0 && (
             <Button
               icon={<ExclamationCircleOutlined />}
               type="default"
               danger
-              onClick={() => handleDeactivateUser(record.id)}
+              onClick={() => handleUserStatusChange(record.id, 1)}
+              shape="circle"
+            />
+          )}
+          {record.status === 1 && (
+            <Button
+              icon={<CheckCircleOutlined />}
+              type="default"
+              onClick={() => handleUserStatusChange(record.id, 0)}
               shape="circle"
             />
           )}
@@ -218,7 +220,13 @@ const UsersPage = () => {
       title: "Gender",
       dataIndex: "gender",
       key: "gender",
-    },
+      render: (gender?: number) => {
+        if (gender === 0) return 'Boy';
+        return 'Girl';
+      },
+    }
+    
+    
   ];
 
   // ============ RENDER ============
