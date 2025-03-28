@@ -46,7 +46,7 @@ const PremiumSubscriptionPage: React.FC = () => {
         setPackages(sortedPackages);
       }
     } catch (error) {
-      message.error("Unable to load service packages.");
+      
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ const PremiumSubscriptionPage: React.FC = () => {
         throw new Error("Payment URL not received");
       }
     } catch (error: any) {
-      message.error(error.message || "Error creating payment transaction.");
+      
     } finally {
       setSubmitting(false);
       setSubmittingPackageId(null);
