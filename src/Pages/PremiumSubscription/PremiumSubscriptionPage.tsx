@@ -35,7 +35,7 @@ const PremiumSubscriptionPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch packages");
+        
       }
 
       const responseData = await response.json();
@@ -59,7 +59,7 @@ const PremiumSubscriptionPage: React.FC = () => {
     try {
       const selectedPackage = packages.find(pkg => pkg.id === packageId);
       if (!selectedPackage) {
-        throw new Error("Package information not found");
+       
       }
 
       const paymentUrl = await initiateVnPayPayment({
@@ -71,7 +71,7 @@ const PremiumSubscriptionPage: React.FC = () => {
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
-        throw new Error("Payment URL not received");
+
       }
     } catch (error: any) {
       
