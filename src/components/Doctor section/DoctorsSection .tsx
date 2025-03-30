@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Row, Col, Typography, Card, Spin, Alert, Button } from 'antd';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectCoverflow, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';

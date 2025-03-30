@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Typography, Table, Spin, message } from 'antd';
+import { Layout, Typography, Table, Spin } from 'antd';
 import axiosInstance from '../../utils/axiosInstance';
 import Sidebar from "../../components/Sidebar/Sidebar";
 

@@ -3,7 +3,6 @@ import { Layout, message, Row, Col, Modal, Form } from 'antd';
 import axios from 'axios';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import moment from 'moment';
-import SingleBMIExport from './SingleBMIExport';
 import CollapsibleHeader from './CollapsibleHeader';
 import BMIDetailsCard from './BMIDetailsCard';
 import BMIModalForm from './BMIModalForm';
@@ -202,11 +201,14 @@ const BMITrackingPage: React.FC = () => {
           onOk: () => {
             if (selectedChildData && chartData.length > 0) {
               const latestRecord = chartData[chartData.length - 1];
-              const exporter = new SingleBMIExport({
-                childData: selectedChildData,
-                bmiRecord: latestRecord
+              import('./SingleBMIExport').then(module => {
+                const { generatePDF } = module.default.prototype;
+                generatePDF.call({
+                  childData: selectedChildData,
+                  bmiRecord: latestRecord
+                });
+              }).catch(() => {
               });
-              exporter.generatePDF();
             } else {
               message.warning('No data available to export');
             }

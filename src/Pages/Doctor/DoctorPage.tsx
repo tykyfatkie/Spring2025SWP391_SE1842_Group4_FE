@@ -271,15 +271,6 @@ const DoctorPage: React.FC = () => {
     }
   };
 
-  interface RequestData {
-    dto: {
-      doctorReceiveId: string;
-      title: string;
-      description: string;
-      attachments: string;
-    }
-  }
-
   const handleSendMessage = async (): Promise<void> => {
     try {
       const token = localStorage.getItem("token");

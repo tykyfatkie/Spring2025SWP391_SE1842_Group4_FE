@@ -1,5 +1,5 @@
-import { Layout, Row, Col, Typography, Space, Input, Button, Divider, Form } from 'antd';
-import { FacebookOutlined, TwitterOutlined, InstagramOutlined, YoutubeOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, SendOutlined, GlobalOutlined } from '@ant-design/icons';
+import { Layout, Row, Col, Typography, Space, Button, Divider } from 'antd';
+import { FacebookOutlined, TwitterOutlined, InstagramOutlined, YoutubeOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 
 const { Footer } = Layout;
@@ -9,7 +9,7 @@ const AppFooter = () => {
   return (
     <Footer
       style={{
-        background: '#1e3a8a', // Màu xanh dương đậm giống hero section
+        background: '#1e3a8a', 
         color: 'white',
         padding: '80px 50px 40px',
         borderTopLeftRadius: '80px',
@@ -181,11 +181,16 @@ const AppFooter = () => {
       <Divider style={{ borderColor: 'rgba(255, 255, 255, 0.1)', margin: '40px 0 20px' }} />
       
       <Row justify="space-between" align="middle">
-        <Col xs={24} md={12} style={{ textAlign: 'center', marginBottom: { xs: 16, md: 0 } }}>
-          <Text style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-            Children Growth Tracking System © {new Date().getFullYear()} - Created by Group 4-SE1842
-          </Text>
-        </Col>
+      <Col 
+        xs={24} 
+        md={12} 
+        style={{ textAlign: 'center' }}
+        className="footer-copyright"
+      >
+        <Text style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+          Children Growth Tracking System © {new Date().getFullYear()} - Created by Group 4-SE1842
+        </Text>
+      </Col>
       </Row>
     </Footer>
   );

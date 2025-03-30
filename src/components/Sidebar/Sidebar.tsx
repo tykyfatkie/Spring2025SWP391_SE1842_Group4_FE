@@ -9,7 +9,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 
 const { Sider } = Layout;
-const { Text, Title } = Typography;
+const { Title } = Typography;
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
