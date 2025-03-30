@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Form, Input, InputNumber, Button, message, Card, Table, Space, Modal, Popconfirm, Select } from "antd";
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import axios from "axios";
 
 interface Package {
@@ -146,7 +146,28 @@ const PackagesPage = () => {
     }
   };
 
-  // Define table columns
+  const handleHide = async (id: string) => {
+    const token = localStorage.getItem("token");
+  
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_API_ENDPOINT}/user-packages/edit`,
+        {
+          packageId: id,
+          status: 3 
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+  
+      message.success("Package hidden successfully!");
+      fetchPackages();
+    } catch (error) {
+      message.error("Failed to hide package.");
+    }
+  };
+
   const columns = [
     {
       title: "Package Name",
@@ -169,7 +190,7 @@ const PackagesPage = () => {
       title: "Billing Cycle",
       dataIndex: "billingCycle",
       key: "billingCycle",
-      render: (billingCycle : any) => (billingCycle === 1 ? "Monthly" : "Yearly"), // Cập nhật phần hiển thị
+      render: (billingCycle : any) => (billingCycle === 1 ? "Monthly" : "Yearly"), 
     },
     {
       title: "Max Children",
@@ -180,14 +201,27 @@ const PackagesPage = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status : any) => (
-        <span style={{
-          color: status === 1 ? 'green' : 'gray',
-          fontWeight: 'bold'
-        }}>
-          {status === 1 ? 'Active' : 'Inactive'}
-        </span>
-      )
+      render: (status : any) => {
+        let color = 'gray';
+        let text = 'Inactive';
+        
+        if (status === 1) {
+          color = 'green';
+          text = 'Active';
+        } else if (status === 3) {
+          color = 'orange';
+          text = 'Hidden';
+        }
+        
+        return (
+          <span style={{
+            color: color,
+            fontWeight: 'bold'
+          }}>
+            {text}
+          </span>
+        )
+      }
     },
     {
       title: "Actions",
@@ -199,6 +233,15 @@ const PackagesPage = () => {
             icon={<EditOutlined />}
             onClick={() => showEditModal(record)}
             shape="circle"
+          />
+          <Button
+            type="primary"
+            style={{ backgroundColor: '#faad14' }}
+            icon={<EyeInvisibleOutlined />}
+            onClick={() => handleHide(record.id)}
+            shape="circle"
+            disabled={record.status === 3}
+            title="Hide Package"
           />
           <Popconfirm
             title="Delete package"
@@ -313,6 +356,7 @@ const PackagesPage = () => {
             <Select placeholder="Select status">
               <Select.Option value={1}>Active</Select.Option>
               <Select.Option value={0}>Inactive</Select.Option>
+              <Select.Option value={3}>Hidden</Select.Option>
             </Select>
           </Form.Item>
 

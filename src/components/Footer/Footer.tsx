@@ -131,8 +131,7 @@ const AppFooter = () => {
           </Title>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <Link to="/about-us" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>About Us</Link>
-            <Link to="/contact-us" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>Contact</Link>
-            <Link to="/privacy" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>Privacy Policy</Link>
+            <Link to="/contact-us" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>Contact</Link>     
             <a href="https://www.who.int/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', fontSize: '16px', transition: 'color 0.3s' }}>
               <GlobalOutlined style={{ marginRight: '8px' }} />
               World Health Organization
@@ -165,70 +164,18 @@ const AppFooter = () => {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <PhoneOutlined style={{ color: '#3b82f6', marginRight: '12px', fontSize: '16px', marginTop: '4px' }} />
-              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>+84 123 456 789</Text>
+              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>+84 (123) 456 7890</Text>
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <MailOutlined style={{ color: '#3b82f6', marginRight: '12px', fontSize: '16px', marginTop: '4px' }} />
-              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>info@childgrowth.com</Text>
+              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>support@childgrowth.com</Text>
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <EnvironmentOutlined style={{ color: '#3b82f6', marginRight: '12px', fontSize: '16px', marginTop: '4px' }} />
-              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Km10, Nguyen Trai Street, Ha Dong District, Hanoi, Vietnam</Text>
+              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>123 Growth Street, Health City, HC 12345</Text>
             </div>
           </Space>
-        </Col>
-
-        <Col xs={24} sm={12} md={6} lg={6}>
-          <Title 
-            level={4} 
-            style={{ 
-              color: 'white', 
-              marginBottom: '24px', 
-              fontWeight: 600, 
-              position: 'relative',
-              paddingBottom: '12px',
-            }}
-          >
-            Newsletter
-            <div style={{ 
-              position: 'absolute', 
-              bottom: 0, 
-              left: 0, 
-              width: '40px', 
-              height: '3px', 
-              background: '#3b82f6', 
-              borderRadius: '2px' 
-            }} />
-          </Title>
-          <Paragraph style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '24px' }}>
-            Subscribe to our newsletter for the latest updates and insights on child health and development.
-          </Paragraph>
-          <Form>
-            <Space.Compact style={{ width: '100%' }}>
-              <Input 
-                placeholder="Your email address" 
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.1)', 
-                  borderColor: 'rgba(255, 255, 255, 0.2)',
-                  borderRight: 'none',
-                  color: 'white',
-                  height: '44px',
-                  borderRadius: '8px 0 0 8px',
-                }} 
-              />
-              <Button 
-                type="primary" 
-                icon={<SendOutlined />} 
-                style={{ 
-                  background: '#3b82f6', 
-                  border: 'none',
-                  height: '44px',
-                  borderRadius: '0 8px 8px 0',
-                }}
-              />
-            </Space.Compact>
-          </Form>
-        </Col>
+        </Col>       
       </Row>
       
       <Divider style={{ borderColor: 'rgba(255, 255, 255, 0.1)', margin: '40px 0 20px' }} />
@@ -238,13 +185,6 @@ const AppFooter = () => {
           <Text style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
             Children Growth Tracking System © {new Date().getFullYear()} - Created by Group 4-SE1842
           </Text>
-        </Col>
-        <Col xs={24} md={12} style={{ textAlign: { xs: 'center', md: 'right' } }}>
-          <Space split={<Divider type="vertical" style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />}>
-            <Link to="/terms" style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>Terms</Link>
-            <Link to="/privacy" style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>Privacy</Link>
-            <Link to="/cookies" style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>Cookies</Link>
-          </Space>
         </Col>
       </Row>
     </Footer>

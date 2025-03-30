@@ -13,23 +13,30 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle Google OAuth callback
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const token = query.get('token');
-    const userId = query.get('userId');
-    
-    if (token && userId) {
+
+useEffect(() => {
+  const query = new URLSearchParams(location.search);
+  const token = query.get('token');
+  const userId = query.get('userId');
+  const returnedState = query.get('state');
+  const storedState = localStorage.getItem('oauth_state');
+  
+
+  console.log("Callback params:", { token, userId, returnedState });
+  if (token && userId) {
+    if (returnedState && storedState && returnedState === storedState) {
+      localStorage.removeItem('oauth_state'); 
+      
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
-  
+    
       try {
         const userData: any = jwtDecode(token);
         const userRole = userData.role;
         localStorage.setItem("role", userRole);
-  
+    
         message.success("Google login successful!");
-  
+    
         setTimeout(() => {
           if (userRole === "Admin") {
             navigate("/my-admin");
@@ -40,23 +47,17 @@ const LoginPage: React.FC = () => {
           }
         }, 1500);
       } catch (error) {
-        let errorMessage = "Error processing login information.";
-        
-        // Check if the error is an instance of AxiosError
-        if (axios.isAxiosError(error)) {
-          // Safely check the response and data
-          if (error.response && error.response.data) {
-            errorMessage = error.response.data.message || errorMessage;
-          }
-        } else if (error instanceof Error) {
-          // Fallback to the error message from the Error instance
-          errorMessage = error.message;
-        }
-      
-        message.error(errorMessage);
+        console.error("JWT decode error:", error);
+        message.error("Error processing login information.");
       }
+    } else {
+      console.error("OAuth state mismatch or missing");
+      message.error("Authentication failed: Invalid state parameter");
     }
-  }, [location, navigate]);
+  } else if (query.has('error')) {
+    message.error(`Authentication error: ${query.get('error')}`);
+  }
+}, [location, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +72,6 @@ const LoginPage: React.FC = () => {
       if (response.status === 200) {
         const { accessToken, userId } = response.data.data;
         
-        // Store token and user ID
         localStorage.setItem("token", accessToken);
         localStorage.setItem("userId", userId);
 
@@ -103,17 +103,15 @@ const LoginPage: React.FC = () => {
   };
 
   const handleGoogleLogin = () => {
-    // Generate a random state for CSRF protection
     const state = Math.random().toString(36).substring(2);
     localStorage.setItem('oauth_state', state);
     
-    // Get the redirect URL from your environment variables or use a default
-    const redirectUri = `${window.location.origin}/login`; // Assuming your login page will handle the callback
+    const redirectUri = encodeURIComponent(`${window.location.origin}/login`); 
     
-    // Construct the Google login URL
-    const googleLoginUrl = `${import.meta.env.VITE_API_ENDPOINT}/api/v1/auth/google/login?redirect=${encodeURIComponent(redirectUri)}&state=${state}`;
+    console.log("Redirect URI:", redirectUri);
     
-    // Redirect to Google login
+    const googleLoginUrl = `${import.meta.env.VITE_API_ENDPOINT}/auth/google/login?redirect=${redirectUri}&state=${state}`;
+    
     window.location.href = googleLoginUrl;
   };
 

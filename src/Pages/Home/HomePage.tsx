@@ -99,7 +99,7 @@ const Homepage: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white' }}>
       <Content>
-        {/* Hero Section with Split Layout */}
+
         <div
           style={{
             display: 'flex',
@@ -114,7 +114,7 @@ const Homepage: React.FC = () => {
             marginRight: '50px',
           }}
         >
-          {/* Left Content Section */}
+
           <div
             style={{
               width: '50%',
@@ -122,13 +122,13 @@ const Homepage: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '0 48px',
-              background: '#1e3a8a', // Màu xanh dương đậm
+              background: '#1e3a8a', 
               color: 'white',
               position: 'relative',
               overflow: 'hidden',
             }}
           >
-            {/* Decorative elements */}
+
             <div style={{
               position: 'absolute',
               width: '300px',
@@ -180,49 +180,11 @@ const Homepage: React.FC = () => {
                   <CheckCircleOutlined style={{ color: '#3b82f6', marginRight: '12px' }} />
                   <Text style={{ color: 'white' }}>Development milestone tracking</Text>
                 </div>
-              </Space>
-              
-              <Space size="middle">
-                <Button 
-                  type="primary" 
-                  size="large" 
-                  style={{ 
-                    borderRadius: '50px', 
-                    paddingLeft: '28px', 
-                    paddingRight: '28px',
-                    height: '52px',
-                    background: 'white',
-                    color: '#1e3a8a',
-                    border: 'none',
-                    fontWeight: 600,
-                    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                  onClick={() => navigate("/login")}
-                >
-                  Get Started <ArrowRightOutlined style={{ marginLeft: '8px' }} />
-                </Button>
-                <Button 
-                  size="large"
-                  style={{ 
-                    borderRadius: '50px', 
-                    borderColor: 'rgba(255, 255, 255, 0.3)', 
-                    color: 'white',
-                    paddingLeft: '28px', 
-                    paddingRight: '28px',
-                    height: '52px',
-                    background: 'transparent',
-                    fontWeight: 500,
-                  }}
-                >
-                  Learn More
-                </Button>
-              </Space>
+              </Space>           
             </div>
           </div>
 
-          {/* Right Image Section */}
+
           <div
             style={{
               width: '50%',
@@ -255,7 +217,7 @@ const Homepage: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* Features Section */}
+
         <Row gutter={[16, 24]} style={{ padding: '48px 12px' }}>
           {features.map((feature, index) => (
             <Col key={index} xs={24} sm={12} md={6}>
@@ -273,7 +235,7 @@ const Homepage: React.FC = () => {
             </Col>
           ))}
         </Row>
-        {/* Statistics Section */}
+
         <Row gutter={[16, 24]} justify="center" style={{ padding: '48px 12px', backgroundColor: '#f0f2f5' }}>
           {statistics.map((stat, index) => (
             <Col key={index} xs={24} sm={12} md={6}>
@@ -295,7 +257,7 @@ const Homepage: React.FC = () => {
             </Col>
           ))}
         </Row>
-        {/* Doctors Section */}
+
         <DoctorsSection doctors={doctors} loading={loading} error={error} />
       </Content>
       <AppFooter />

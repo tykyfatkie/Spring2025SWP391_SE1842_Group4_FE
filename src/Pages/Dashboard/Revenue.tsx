@@ -4,10 +4,21 @@ import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import axios from "axios";
 import type { TableProps } from "antd";
 
+interface Owner {
+  id: string;
+  name: string;
+}
+
+interface Package {
+  id: string;
+  packageName: string;
+}
 
 interface RevenueItem {
   packageId: string;
   ownerId: string;
+  packages: Package; // Nested object for package details
+  owner: Owner;     // Nested object for owner details
   totalPackages: number;
   activePackages: number;
   expiredPackages: number;
@@ -55,7 +66,7 @@ const RevenuePage = () => {
   };
   
   const handleSearch = () => {
-    // Since we're using API data directly, you might want to implement a client-side filter
+    // For client-side filtering
     fetchRevenues();
   };
 
@@ -70,14 +81,14 @@ const RevenuePage = () => {
 
   const revenueColumns: TableProps<RevenueItem>['columns'] = [
     {
-      title: "Package ID",
-      dataIndex: "packageId",
-      key: "packageId",
+      title: "Package Name",
+      key: "packageName",
+      render: (_, record) => record.packages?.packageName || record.packageId || 'N/A',
     },
     {
-      title: "Owner ID",
-      dataIndex: "ownerId",
-      key: "ownerId",
+      title: "Owner Name",
+      key: "ownerName",
+      render: (_, record) => record.owner?.name || record.ownerId || 'N/A',
     },
     {
       title: "Total Revenue",
@@ -85,7 +96,7 @@ const RevenuePage = () => {
       key: "totalRevenuePerPackage",
       render: (value: number) => 
         value !== undefined && value !== null 
-          ? `${value} VND` 
+          ? `${value.toLocaleString()} VND` 
           : '0 VND',
     },
     {
@@ -112,14 +123,15 @@ const RevenuePage = () => {
           title="Total Revenue Across All Packages"
           value={revenueData?.totalRevenueAllPackages || 0}
           suffix="VND"
-          precision={2}
+          precision={0}
           valueStyle={{ color: '#3f8600', fontWeight: 'bold', fontSize: '24px' }}
+          formatter={(value) => `${value.toLocaleString()}`}
         />
       </Card>
 
       <div style={{ marginBottom: 16, display: "flex", justifyContent: "right", gap: "10px" }}>
         <Input
-          placeholder="Search revenues..."
+          placeholder="Search by package or owner name..."
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           allowClear
@@ -147,18 +159,20 @@ const RevenuePage = () => {
       )}
 
       <Modal
-        title={`Revenue Details for Package ${selectedRevenue?.packageId || 'N/A'}`}
-        visible={isModalVisible}
+        title={`Revenue Details for ${selectedRevenue?.packages?.packageName || selectedRevenue?.packageId || 'N/A'}`}
+        open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
         width={800}
       >
         {selectedRevenue ? (
           <div>
+            <p><strong>Package Name:</strong> {selectedRevenue.packages?.packageName || 'N/A'}</p>
             <p><strong>Package ID:</strong> {selectedRevenue.packageId}</p>
+            <p><strong>Owner Name:</strong> {selectedRevenue.owner?.name || 'N/A'}</p>
             <p><strong>Owner ID:</strong> {selectedRevenue.ownerId}</p>
             <p><strong>Total Revenue:</strong> {selectedRevenue.totalRevenuePerPackage !== undefined ? 
-              `${selectedRevenue.totalRevenuePerPackage} VND` : '0 VND'}</p>
+              `${selectedRevenue.totalRevenuePerPackage.toLocaleString()} VND` : '0 VND'}</p>
             <p><strong>Total Packages:</strong> {selectedRevenue.totalPackages}</p>
             <p><strong>Active Packages:</strong> {selectedRevenue.activePackages}</p>
             <p><strong>Expired Packages:</strong> {selectedRevenue.expiredPackages}</p>
