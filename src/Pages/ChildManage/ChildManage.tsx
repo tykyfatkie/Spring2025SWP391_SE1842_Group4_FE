@@ -62,7 +62,6 @@ const ChildManage: React.FC = () => {
         setChildren(response.data.data);
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "You do not have any child yet!");
     } finally {
       setLoading(false);
     }
@@ -91,7 +90,6 @@ const ChildManage: React.FC = () => {
         setArchivedChildren(response.data.data);
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "You do not have any hidden child yet!");
     } finally {
       setArchivedLoading(false);
     }
@@ -130,14 +128,13 @@ const ChildManage: React.FC = () => {
         return;
       }
 
-      // Preserve the existing weight, height, and notes values when updating
       const formattedValues = {
         name: values.name?.trim(),
         dob: values.dob ? moment(values.dob).format("YYYY-MM-DD") : undefined,
         gender: values.gender,
-        weight: editingChild.weight, // Preserve existing weight
-        height: editingChild.height, // Preserve existing height
-        notes: editingChild.notes || "", // Preserve existing notes
+        weight: editingChild.weight, 
+        height: editingChild.height, 
+        notes: editingChild.notes || "", 
       };
 
       const response = await axios.put(
@@ -157,7 +154,6 @@ const ChildManage: React.FC = () => {
         setEditModalVisible(false);
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to update child.");
     }
   };
 
@@ -196,7 +192,6 @@ const ChildManage: React.FC = () => {
               }
             }
           } catch (error: any) {
-            message.error(error.response?.data?.message || "Failed to delete child.");
           } finally {
             setLoading(false);
           }
@@ -240,7 +235,6 @@ const ChildManage: React.FC = () => {
               children.find(child => child.id === childId),
             ]);
           } catch (error: any) {
-            message.error(error.response?.data?.message || "Failed to hide child record.");
           }
         },
       });
@@ -467,7 +461,6 @@ const ChildManage: React.FC = () => {
               justifyContent: 'center'
             }}
           />
-          {/* BMI View Button for archived children too */}
           <Button 
             icon={<LineChartOutlined />} 
             onClick={() => navigateToBMITracking(record.id)} 

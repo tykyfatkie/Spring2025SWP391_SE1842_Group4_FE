@@ -15,6 +15,7 @@ import {
 } from 'antd';
 import moment from 'moment';
 import axios from 'axios'; 
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar.tsx';
 import { CheckCircleOutlined, UserOutlined } from '@ant-design/icons';
 
@@ -25,6 +26,7 @@ const { Title, Paragraph, Text } = Typography;
 const CreateChild: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem('token');
 
@@ -65,6 +67,8 @@ const CreateChild: React.FC = () => {
   
       message.success('Child profile created successfully!');
       resetForm();
+      // Redirect to child-manage page
+      navigate('/child-manage');
     } catch (error: any) {
       console.error('Error saving profile:', error);
       message.error(error.response?.data?.message || 'Please subscribe to our package to use this feature!');
@@ -76,10 +80,6 @@ const CreateChild: React.FC = () => {
   const resetForm = () => {
     form.resetFields();
   };
-
-  function day(): string | number | import("dayjs").Dayjs | Date | null | undefined {
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white' }}>
@@ -211,16 +211,9 @@ const CreateChild: React.FC = () => {
                   <Form.Item 
                     name="DoB" 
                     label={<Text strong style={{ fontSize: '16px' }}>Date of Birth</Text>} 
-                    rules={[{
-                      required: true, 
-                      message: 'Please select date of birth',
-                    }, 
-                    {
-                      validator: (_, value) =>
-                        value && value.isAfter(moment(), 'day')
-                          ? Promise.reject(new Error('Date of birth cannot be in the future'))
-                          : Promise.resolve(),
-                    }]}>
+                    rules={[
+                      { required: true, message: 'Please select date of birth' }
+                    ]}>
                     <DatePicker 
                       style={{ 
                         width: '100%', 
@@ -230,7 +223,7 @@ const CreateChild: React.FC = () => {
                       }} 
                       format="YYYY-MM-DD" 
                       placeholder="YYYY-MM-DD"
-                      disabledDate={(current) => current && current.isAfter(day(), 'day')}
+                      disabledDate={current => current && current > moment().endOf('day')}
                     /> 
                   </Form.Item>
                   
