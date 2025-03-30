@@ -98,23 +98,33 @@ const PackagesPage = () => {
 
   const handleEditSubmit = async (values : any) => {
     if (!currentPackage) return;
-
+  
     setSubmitting(true);
     const token = localStorage.getItem("token");
-
+  
     try {
-      await axios.put(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/edit`, values, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { packageId: currentPackage?.id }
-      });
-
+      await axios.put(
+        `${import.meta.env.VITE_API_ENDPOINT}/user-packages/edit`, 
+        {
+          packageId: currentPackage.id,  
+          packageName: values.packageName,
+          description: values.description,
+          price: values.price,
+          billingCycle: values.billingCycle,
+          maxChildrentAllowed: values.maxChildrentAllowed,
+          status: values.status
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+  
       message.success("Package updated successfully!");
       editForm.resetFields();
       setIsEditModalVisible(false);
       setCurrentPackage(null);
       fetchPackages();
-    } catch (error) {
-      message.error("Failed to update package.");
+    } catch (error : any) {
     } finally {
       setSubmitting(false);
     }
