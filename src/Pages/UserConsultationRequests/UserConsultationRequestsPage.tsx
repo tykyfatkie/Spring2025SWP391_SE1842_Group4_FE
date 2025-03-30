@@ -8,20 +8,18 @@ const { Title } = Typography;
 
 const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/request/my-request`;
 
-// Define interface for consultation request
 interface ConsultationRequest {
   id: string | number;
   doctorName: string;
   status: string;
   date: string;
-  // Add other properties that might be in your response
 }
 
-// Define possible API response structures
+
 interface ApiResponse {
   items?: ConsultationRequest[];
   data?: ConsultationRequest[];
-  // Add other possible structures
+
 }
 
 const UserConsultationRequests: React.FC = () => {
@@ -48,7 +46,6 @@ const UserConsultationRequests: React.FC = () => {
         },
       });
 
-      // Check the actual structure of your response
       if (Array.isArray(response.data)) {
         setRequests(response.data);
       } else if (response.data && Array.isArray((response.data as ApiResponse).items)) {
@@ -56,13 +53,10 @@ const UserConsultationRequests: React.FC = () => {
       } else if (response.data && Array.isArray((response.data as ApiResponse).data)) {
         setRequests((response.data as ApiResponse).data || []);
       } else {
-        console.error('Unexpected response format:', response.data);
-        message.warning('No consultation requests found or unexpected data format');
+        message.warning('No consultation requests found');
         setRequests([]);
       }
     } catch (error: any) {
-      console.error('Error fetching consultation requests:', error);
-      message.error(error.response?.data?.message || 'Failed to fetch consultation requests');
       setRequests([]);
     } finally {
       setLoading(false);

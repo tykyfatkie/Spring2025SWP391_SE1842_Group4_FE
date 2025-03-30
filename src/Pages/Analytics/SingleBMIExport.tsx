@@ -24,13 +24,12 @@ interface ChildData {
 
 interface SingleBMIExportProps {
   childData: ChildData;
-  bmiRecord: BMIRecord; // Single record instead of an array
+  bmiRecord: BMIRecord; 
 }
 
 const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Function to get BMI category
   const getBMICategory = (bmi: number) => {
     if (bmi < 18.5) return { label: 'Underweight', color: '#91caff' };
     if (bmi < 25) return { label: 'Normal', color: '#52c41a' };
@@ -70,30 +69,29 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
     setIsLoading(true);
     
     try {
-      // Create new PDF document
+
       const doc = new jsPDF('portrait', 'mm', 'a4');
       
-      // Add header
       doc.setFontSize(18);
-      doc.setTextColor(30, 58, 138); // Dark blue color
+      doc.setTextColor(30, 58, 138); 
       doc.text('BMI Assessment Report', 105, 20, { align: 'center' });
       
-      // Add date and time
+
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 28, { align: 'center' });
       
-      // Add decorative line
+
       doc.setDrawColor(30, 58, 138);
       doc.setLineWidth(0.5);
       doc.line(20, 32, 190, 32);
       
-      // Add child information
+
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       
-      // Create a section for child info
-      doc.setFillColor(248, 250, 252); // Light blue background
+
+      doc.setFillColor(248, 250, 252); 
       doc.rect(20, 40, 170, 35, 'F');
       
       doc.setFontSize(14);
@@ -103,13 +101,12 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       
-      // Calculate age
       const age = calculateAge(childData.doB);
       const ageText = age.years > 0 
         ? `${age.years} years, ${age.months} months` 
         : `${age.months} months`;
       
-      // Child details
+
       doc.text(`Name: ${childData.name}`, 30, 56);
       doc.text(`Date of Birth: ${formatDate(childData.doB)}`, 30, 64);
       doc.text(`Age: ${ageText}`, 30, 72);
@@ -126,16 +123,16 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
       doc.setTextColor(30, 58, 138);
       doc.text('BMI Assessment', 105, 95, { align: 'center' });
       
-      // BMI details
+
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       
       const bmiCategory = getBMICategory(bmiRecord.bmi);
       
-      // BMI data in a cleaner format
+
       doc.text(`Date of Assessment: ${formatDate(bmiRecord.date)}`, 30, 110);
       
-      // Create a table for measurements
+
       autoTable(doc, {
         startY: 120,
         head: [['Measurement', 'Value']],
@@ -164,12 +161,12 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
         margin: { left: 30, right: 30 }
       });
       
-      // Add BMI Categories reference
+
       doc.setFontSize(12);
       doc.setTextColor(30, 58, 138);
       doc.text('BMI Categories Reference', 105, 195, { align: 'center' });
       
-      // Add category table
+
       autoTable(doc, {
         startY: 200,
         head: [['Category', 'BMI Range']],
@@ -190,7 +187,7 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
         margin: { left: 50, right: 50 }
       });
       
-      // Add notes and recommendations
+
       doc.setFontSize(12);
       doc.setTextColor(30, 58, 138);
       doc.text('Notes', 30, 250);
@@ -204,7 +201,7 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
         '• Regular monitoring of BMI helps track growth patterns and development.'
       ], 30, 260);
       
-      // Add footer
+
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.text(
@@ -214,7 +211,7 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
         { align: 'center', maxWidth: 150 }
       );
       
-      // Save PDF with child's name and date
+
       const dateStr = formatDate(bmiRecord.date).replace(/\//g, '-');
       const fileName = `${childData.name.replace(/\s+/g, '_')}_BMI_Report_${dateStr}.pdf`;
       doc.save(fileName);

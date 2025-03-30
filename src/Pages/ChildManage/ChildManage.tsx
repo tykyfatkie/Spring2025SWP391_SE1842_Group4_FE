@@ -102,8 +102,8 @@ const ChildManage: React.FC = () => {
     }
     
     const today = moment();
-    const dob = moment(birthDate);
-    const months = today.diff(dob, 'months');
+    const doB = moment(birthDate);
+    const months = today.diff(doB, 'months');
     
     return months;
   };
@@ -114,7 +114,7 @@ const ChildManage: React.FC = () => {
 
     form.setFieldsValue({
       name: child.name,
-      dob: moment(child.doB),
+      doB: moment(child.doB),
       gender: child.gender,
     });
   };
@@ -130,7 +130,7 @@ const ChildManage: React.FC = () => {
 
       const formattedValues = {
         name: values.name?.trim(),
-        dob: values.dob ? moment(values.dob).format("YYYY-MM-DD") : undefined,
+        doB: values.doB ? moment(values.doB).format("YYYY-MM-DD") : undefined,
         gender: values.gender,
         weight: editingChild.weight, 
         height: editingChild.height, 

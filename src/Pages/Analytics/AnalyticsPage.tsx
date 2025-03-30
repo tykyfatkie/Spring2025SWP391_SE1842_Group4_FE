@@ -50,7 +50,7 @@ const BMITrackingPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingBMI, setFetchingBMI] = useState<boolean>(false);
   const [bmiModalVisible, setBmiModalVisible] = useState<boolean>(false);
-  const [collapsed, setCollapsed] = useState<boolean>(false); // New state for collapse functionality
+  const [] = useState<boolean>(false); 
   const [form] = Form.useForm();
 
   // Function to get BMI category
@@ -78,7 +78,6 @@ const BMITrackingPage: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        message.error("Authentication token missing. Please login again.");
         return;
       }
       
@@ -104,7 +103,6 @@ const BMITrackingPage: React.FC = () => {
         throw new Error("Invalid data format received");
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to load children data");
     } finally {
       setLoading(false);
     }
@@ -115,7 +113,6 @@ const BMITrackingPage: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        message.error("Authentication token missing. Please login again.");
         return;
       }
       
@@ -139,7 +136,6 @@ const BMITrackingPage: React.FC = () => {
         throw new Error("Invalid BMI data format received");
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to load BMI tracking data");
       setChartData([]);
     } finally {
       setFetchingBMI(false);
@@ -166,7 +162,6 @@ const BMITrackingPage: React.FC = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
         return;
       }
 
@@ -197,10 +192,8 @@ const BMITrackingPage: React.FC = () => {
         message.success("BMI record saved successfully!");
         setBmiModalVisible(false);
         
-        // Fetch updated BMI data after saving
         await fetchBMIData(selectedChild);
         
-        // Optionally, show prompt to export the newly added record
         Modal.confirm({
           title: 'BMI Record Saved',
           content: 'Would you like to export this BMI record as a PDF?',
@@ -221,14 +214,10 @@ const BMITrackingPage: React.FC = () => {
         });
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to save BMI record.");
     }
   };
 
   // Function to toggle collapsible section
-  const toggleCollapse = () => {
-    setCollapsed(!collapsed);
-  };
 
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white', marginRight: '25px' }}>

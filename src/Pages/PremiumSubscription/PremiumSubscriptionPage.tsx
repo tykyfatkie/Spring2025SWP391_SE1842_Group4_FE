@@ -82,34 +82,39 @@ const PremiumSubscriptionPage: React.FC = () => {
   };
   
   const getBillingCycleText = (billingCycle: number) => {
-    return billingCycle === 0 ? "monthly" : "yearly";
+    return billingCycle === 0 ? "yearly" : "monthly";
   };
 
   const packageColors = [
     {
       primary: '#1e3a8a',
-      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
+      gradient: 'linear-gradient(135deg, #1e3a8a 0%,rgb(90, 139, 247) 100%)',
       label: 'Basic'
     },
     {
       primary: '#7e22ce',
-      gradient: 'linear-gradient(135deg, #7e22ce 0%, #a855f7 100%)',
+      gradient: 'linear-gradient(135deg, #7e22ce 0%,rgb(186, 112, 255) 100%)',
       label: 'Standard'
     },
     {
       primary: '#d97706',
-      gradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+      gradient: 'linear-gradient(135deg, #d97706 0%,rgb(252, 181, 58) 100%)',
       label: 'Premium'
     },
     {
       primary: '#dc2626',
-      gradient: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+      gradient: 'linear-gradient(135deg, #dc2626 0%,rgb(245, 116, 116) 100%)',
       label: 'Ultimate'
     },
     {
       primary: '#059669',
-      gradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+      gradient: 'linear-gradient(135deg, #059669 0%,rgb(60, 209, 159) 100%)',
       label: 'Enterprise'
+    },
+    {
+      primary: '#e11d48',
+      gradient: 'linear-gradient(135deg,rgb(0, 0, 0) 0%,rgb(97, 97, 97) 100%)',
+      label: 'Unlimited!'
     }
   ];
 

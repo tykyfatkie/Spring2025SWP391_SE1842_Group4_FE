@@ -25,7 +25,6 @@ const DoctorConsultationResponse: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        message.error('No authorization token found');
         setLoading(false);
         return;
       }
@@ -40,11 +39,9 @@ const DoctorConsultationResponse: React.FC = () => {
       if (Array.isArray(response.data)) {
         setRequests(response.data);
       } else {
-        message.error('You have not received any consultation requests yet!');
         setRequests([]);
       }
     } catch (error: any) {
-      message.error('You have not received any consultation requests yet!');
     } finally {
       setLoading(false);
     }
