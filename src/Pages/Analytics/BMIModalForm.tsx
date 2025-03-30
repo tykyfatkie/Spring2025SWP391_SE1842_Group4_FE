@@ -13,6 +13,7 @@ interface Child {
   height: number;
   bmi: number;
   bmiPercentile: number;
+  doY?: string;
 }
 
 interface BMIModalFormProps {
@@ -31,62 +32,37 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
   selectedChildData
 }) => {
   const [submitting, setSubmitting] = useState(false);
+  const today = moment(); // Get today's date
   
   const handleSubmit = async () => {
     try {
-        setSubmitting(true);
-        const values = await form.validateFields();
-
-        // Đặc biệt quan trọng: Chuyển đổi doY thành chuỗi ngày định dạng YYYY-MM-DD
-        // Sử dụng phương thức format trực tiếp và không giữ thông tin về timezone
-        if (values.doY) {
-            // Tách ra thành ngày, tháng, năm để loại bỏ ảnh hưởng múi giờ
-            const date = new Date(values.doY);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            values.doY = `${year}-${month}-${day}`;
-            
-            console.log("Formatted date:", values.doY);
-        }
-
-        values.childId = selectedChildData?.id || selectedChildData?.childId;
-        values.gender = selectedChildData?.gender;
-
-        try {
-            await onSave(values);
-        } catch (error: any) {
-            console.error("Full error:", error);
-            console.error("Error data:", error.response?.data);
-
-            if (error.response?.status === 500) {
-                if (error.response?.data?.message?.includes("BMI Category not found")) {
-                    message.error("Invalid BMI data: BMI Category not found. Please check height and weight values.");
-                } else {
-                    message.error("Server error occurred. Please try again later.");
-                }
-            } else {
-                message.error(error.response?.data?.message || "Failed to save BMI record");
-            }
-            return;
-        }
-
-        form.resetFields();
-    } catch (validationError) {
-        console.log("Validation failed:", validationError);
+      setSubmitting(true);
+      const values = await form.validateFields();
+      
+      // Always use today's date for new records
+      values.doY = today.format("YYYY-MM-DD");
+      
+      console.log("Final formatted date to be sent:", values.doY);
+      
+      await onSave(values);
+      form.resetFields();
+    } catch (error) {
+      console.log("Validation failed:", error);
     } finally {
-        setSubmitting(false);
+      setSubmitting(false);
     }
-};
+  };
   
+  // Initialize the form
   React.useEffect(() => {
     if (visible) {
-      form.setFieldsValue({
-        doY: moment()
+      // Always use today's date
+      form.setFieldsValue({ 
+        doY: today.format("YYYY-MM-DD") 
       });
     }
   }, [visible, form]);
-  
+
   return (
     <Modal
       title={
@@ -137,13 +113,12 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
 
         <Form.Item 
           name="doY" 
-          label="BMI Record Date" 
-          rules={[{ required: true, message: "Please select the date for this BMI record" }]}
+          label="BMI Record Date"
         >
-          <DatePicker 
-            style={{ width: '100%' }} 
-            format="YYYY-MM-DD"
-            value={form.getFieldValue('doY') ? moment(form.getFieldValue('doY')) : null}
+          <Input 
+            value={today.format("YYYY-MM-DD")} 
+            disabled 
+            style={{ background: '#f8fafc' }} 
           />
         </Form.Item>
 

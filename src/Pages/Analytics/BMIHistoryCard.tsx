@@ -28,20 +28,22 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
   chartData, 
   handleOpenBmiModal 
 }) => {
-  // Set hourly as default display mode
-  const [displayMode, setDisplayMode] = useState<'day' | 'month' | 'year' | 'hour'>('hour');
+  const [displayMode, setDisplayMode] = useState<'day' | 'month' | 'year'>('day');
   const [dateRange, setDateRange] = useState<[moment.Moment | null, moment.Moment | null]>([null, null]);
 
-  // Effect to set initial date range for hourly view
   useEffect(() => {
-    if (chartData.length > 0 && displayMode === 'hour') {
+    if (chartData.length > 0 && (!dateRange[0] || !dateRange[1])) {
       const latestDate = moment(chartData[chartData.length - 1].dateTime);
-      // Set start date to beginning of the day, end to end of the day
-      const startOfDay = latestDate.clone().startOf('day');
-      const endOfDay = latestDate.clone().endOf('day');
-      setDateRange([startOfDay, endOfDay]);
+      const earliestDate = moment(chartData[0].dateTime);
+      
+      // Only update if we don't have a range or if the new range would be different
+      if (!dateRange[0] || !dateRange[1] || 
+          !earliestDate.isSame(dateRange[0]) || 
+          !latestDate.isSame(dateRange[1])) {
+        setDateRange([earliestDate, latestDate]);
+      }
     }
-  }, [chartData, displayMode]);
+  }, [chartData]);
 
   // Hàm kiểm tra BMI và trả về thông báo cảnh báo
   const getBMIWarning = (bmi: number) => {
@@ -63,41 +65,37 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     return item.bmi + (Math.random() - 0.5);
   };
 
-  // Process data based on display mode and date range
-  const processedData = chartData.filter(item => {
-    const itemDate = moment(item.dateTime);
+  const isDateInRange = (dateStr: string, startDate: moment.Moment | null, endDate: moment.Moment | null) => {
+    if (!startDate || !endDate) return true;
     
-    // Filter by date range if set
-    const isWithinDateRange = !dateRange[0] || !dateRange[1] || 
-      (itemDate.isSameOrAfter(dateRange[0]) && itemDate.isSameOrBefore(dateRange[1]));
-    
-    return isWithinDateRange;
-  }).map(item => {
-    const date = moment(item.dateTime);
-    let formattedDate = '';
-    
-    switch (displayMode) {
-      case 'day':
-        formattedDate = date.format('YYYY-MM-DD');
-        break;
-      case 'month':
-        formattedDate = date.format('YYYY-MM');
-        break;
-      case 'year':
-        formattedDate = date.format('YYYY');
-        break;
-      case 'hour':
-        // Format with hour and minute for detailed hourly view
-        formattedDate = date.format('HH');
-        break;
-    }
-    
-    return {
-      ...item,
-      date: formattedDate,
-      whoBmi: calculateWhoBMI(item)
-    };
-  });
+    const date = moment(dateStr);
+    return date.isBetween(startDate, endDate, null, '[]'); // inclusive comparison
+  };
+
+  const processedData = chartData
+    .filter(item => isDateInRange(item.dateTime, dateRange[0], dateRange[1]))
+    .map(item => {
+      const date = moment(item.dateTime);
+      let formattedDate = '';
+      
+      switch (displayMode) {
+        case 'day':
+          formattedDate = date.format('YYYY-MM-DD');
+          break;
+        case 'month':
+          formattedDate = date.format('YYYY-MM');
+          break;
+        case 'year':
+          formattedDate = date.format('YYYY');
+          break;
+      }
+      
+      return {
+        ...item,
+        date: formattedDate,
+        whoBmi: calculateWhoBMI(item)
+      };
+    });
 
   // Group and aggregate data based on display mode
   const aggregatedData = processedData.reduce((acc, current) => {
@@ -115,6 +113,12 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     
     return acc;
   }, [] as typeof processedData);
+
+  // Logging for debug (remove in production)
+  console.log("Date Range:", dateRange);
+  console.log("Chart Data:", chartData.length);
+  console.log("Processed Data:", processedData.length);
+  console.log("Aggregated Data:", aggregatedData.length);
 
   // Custom tooltip component for BMI values
   const CustomTooltip = (props: any) => {
@@ -192,6 +196,11 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
   const latestBMI = chartData.length > 0 ? chartData[chartData.length - 1].bmi : null;
   const bmiWarning = latestBMI ? getBMIWarning(latestBMI) : null;
 
+  // Format the displayed dates in a more user-friendly way
+  const formatDisplayDate = (date: moment.Moment | null) => {
+    return date ? date.format('DD/MM/YYYY') : '';
+  };
+
   return (
     <Card 
       title={
@@ -210,6 +219,11 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
               <LineChartOutlined style={{ fontSize: '20px', color: '#1e3a8a' }} />
             </div>
             <Title level={4} style={{ margin: 0, color: '#1e3a8a' }}>BMI History</Title>
+            {dateRange[0] && dateRange[1] && (
+              <Text type="secondary" style={{ marginLeft: '10px', fontSize: '14px' }}>
+                ({formatDisplayDate(dateRange[0])} - {formatDisplayDate(dateRange[1])})
+              </Text>
+            )}
           </div>
         </div>
       }
@@ -260,7 +274,57 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
         <div style={{ textAlign: 'center', padding: '50px' }}>
           <Spin size="large" />
         </div>
-      ) : aggregatedData.length > 0 ? (
+      ) : chartData.length === 0 ? (
+        // Show this when there's no data at all
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '50px',
+          background: 'rgba(30, 58, 138, 0.05)',
+          borderRadius: '12px'
+        }}>
+          <Text>No BMI data available for this child.</Text>
+          <div style={{ marginTop: '20px' }}>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={handleOpenBmiModal}
+              style={{ background: '#1e3a8a' }}
+            >
+              Add BMI Record
+            </Button>
+          </div>
+        </div>
+      ) : aggregatedData.length === 0 ? (
+        // Show this when there's data but none in the selected date range
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '50px',
+          background: 'rgba(30, 58, 138, 0.05)',
+          borderRadius: '12px'
+        }}>
+          <Text>No BMI tracking data available for the selected time range ({formatDisplayDate(dateRange[0])} - {formatDisplayDate(dateRange[1])}).</Text>
+          <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <Button 
+              onClick={() => {
+                // Reset date range to show all data
+                const latestDate = moment(chartData[chartData.length - 1].dateTime);
+                const earliestDate = moment(chartData[0].dateTime);
+                setDateRange([earliestDate, latestDate]);
+              }}
+            >
+              Show All Data
+            </Button>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={handleOpenBmiModal}
+              style={{ background: '#1e3a8a' }}
+            >
+              Add BMI Record
+            </Button>
+          </div>
+        </div>
+      ) : (
         <>
           {/* Hiển thị cảnh báo nếu có */}
           {bmiWarning && (
@@ -277,7 +341,8 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
             display: 'flex', 
             justifyContent: 'space-between', 
             marginBottom: '20px',
-            gap: '10px'
+            gap: '10px',
+            flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <Text>Display by:</Text>
@@ -285,12 +350,9 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
                 value={displayMode} 
                 onChange={(value) => {
                   setDisplayMode(value);
-                  // Reset date range when changing display mode
-                  setDateRange([null, null]);
                 }}
                 style={{ width: 120 }}
               >
-                <Select.Option value="hour">Hour</Select.Option>
                 <Select.Option value="day">Day</Select.Option>
                 <Select.Option value="month">Month</Select.Option>
                 <Select.Option value="year">Year</Select.Option>
@@ -300,10 +362,10 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
             <RangePicker 
               value={dateRange}
               onChange={(dates) => {
-                // Nếu không chọn ngày, giữ nguyên
                 setDateRange(dates ? [dates[0], dates[1]] : [null, null]);
               }}
               style={{ width: 300 }}
+              format="DD/MM/YYYY"
             />
           </div>
 
@@ -391,7 +453,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
                   activeDot={{ r: 8 }} 
                 />
                 
-                {/* New WHO BMI Reference Line */}
+                {/* WHO BMI Reference Line */}
                 <Line 
                   type="monotone" 
                   dataKey="whoBmi" 
@@ -412,25 +474,6 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
             </ResponsiveContainer>
           </div>
         </>
-      ) : (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '50px',
-          background: 'rgba(30, 58, 138, 0.05)',
-          borderRadius: '12px'
-        }}>
-          <Text>No BMI tracking data available for this selected time range.</Text>
-          <div style={{ marginTop: '20px' }}>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />}
-              onClick={handleOpenBmiModal}
-              style={{ background: '#1e3a8a' }}
-            >
-              Add BMI Record
-            </Button>
-          </div>
-        </div>
       )}
     </Card>
   );
