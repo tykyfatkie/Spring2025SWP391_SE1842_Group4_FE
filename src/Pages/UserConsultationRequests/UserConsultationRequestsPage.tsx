@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Typography, Table, Spin, message } from 'antd';
+import { Layout, Typography, Table, Spin } from 'antd';
 import axiosInstance from '../../utils/axiosInstance';
 import Sidebar from "../../components/Sidebar/Sidebar";
 
@@ -37,7 +37,6 @@ const UserConsultationRequests: React.FC = () => {
     try {
       const token = localStorage.getItem('token'); 
       if (!token) {
-        message.error('Authentication token missing');
         setLoading(false);
         return;
       }
@@ -56,13 +55,11 @@ const UserConsultationRequests: React.FC = () => {
       } else if (response.data && Array.isArray((response.data as ApiResponse).data)) {
         setRequests((response.data as ApiResponse).data || []);
       } else {
-        console.error('Unexpected response format:', response.data);
-        message.warning('No consultation requests found or unexpected data format');
         setRequests([]);
       }
     } catch (error: any) {
       console.error('Error fetching consultation requests:', error);
-      message.error(error.response?.data?.message || 'Failed to fetch consultation requests');
+
       setRequests([]);
     } finally {
       setLoading(false);

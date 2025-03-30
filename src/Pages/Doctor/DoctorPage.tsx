@@ -45,10 +45,9 @@ const DoctorPage: React.FC = () => {
   const [sendingMessage, setSendingMessage] = useState<boolean>(false);
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   
-  // Doctor role ID constant
   const DOCTOR_ROLE_ID = '00000000-0000-0000-0000-000000000003';
 
-  // Memoize the fetch doctors function to prevent unnecessary re-renders
+
   const fetchDoctors = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
@@ -56,11 +55,11 @@ const DoctorPage: React.FC = () => {
         throw new Error("No token found");
       }
 
-      // Using the users/all API with RoleIds filter
+
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/all?RoleIds=${DOCTOR_ROLE_ID}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Cache-Control': 'no-cache', // Prevent caching issues
+          'Cache-Control': 'no-cache', 
         },
       });
 
@@ -68,30 +67,29 @@ const DoctorPage: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      // Get the response as JSON directly
+
       let data;
       try {
         data = await response.json();
       } catch (parseError: any) {
-        const responseText = await response.text();
         throw new Error(`Failed to parse API response as JSON: ${parseError.message}`);
       }
       
-      // Handle the nested data structure correctly
+
       let doctorsData: User[] = [];
       
       if (data && typeof data === 'object') {
-        // First check if the response has a 'data' property
+
         if (data.data) {
-          // Check if data.data is an array
+
           if (Array.isArray(data.data)) {
             doctorsData = data.data;
           } 
-          // Check if data.data is an object that contains another 'data' array
+
           else if (data.data.data && Array.isArray(data.data.data)) {
             doctorsData = data.data.data;
           }
-          // If data.data is a single object, wrap it in an array
+
           else if (typeof data.data === 'object' && !Array.isArray(data.data)) {
             doctorsData = [data.data];
           }
@@ -290,15 +288,6 @@ const DoctorPage: React.FC = () => {
     }
   };
 
-  interface RequestData {
-    dto: {
-      doctorReceiveId: string;
-      title: string;
-      description: string;
-      attachments: string;
-    }
-  }
-
   const handleSendMessage = async (): Promise<void> => {
     try {
       const token = localStorage.getItem("token");
@@ -320,16 +309,14 @@ const DoctorPage: React.FC = () => {
       // Upload any pending files first
       const allFileUrls = await uploadPendingFiles();
       
-      // Create a request object with attachments as a string (JSON.stringify the array)
-      const requestData: RequestData = {
-        dto: {
-          doctorReceiveId: selectedDoctorId,
-          title: 'Consultation Request',
-          description: messageText,
-          attachments: JSON.stringify(allFileUrls) // Convert array to JSON string
-        }
+
+      const requestData = {
+        doctorReceiveId: selectedDoctorId,
+        title: 'Consultation Request',
+        description: messageText,
+        attachments: JSON.stringify(allFileUrls) 
       };
-  
+
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
         method: 'POST',
         headers: {

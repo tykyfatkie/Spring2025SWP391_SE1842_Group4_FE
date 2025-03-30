@@ -14,7 +14,6 @@ import {
   Col
 } from 'antd';
 import moment from 'moment';
-import axios from 'axios'; 
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar.tsx';
 import { CheckCircleOutlined, UserOutlined } from '@ant-design/icons';
@@ -28,17 +27,7 @@ const CreateChild: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem('token');
-
-  const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_ENDPOINT,
-    headers: {
-      'Authorization': token ? `Bearer ${token}` : '',
-      'Content-Type': 'application/json'
-    }
-  });
-
-  const saveProfile = async (values: any) => {
+  const saveProfile = async () => {
     setLoading(true);
   
     const token = localStorage.getItem('token');
@@ -48,26 +37,10 @@ const CreateChild: React.FC = () => {
     }
   
     try {
-      const formattedValues = {
-        name: values.name,
-        DoB: values.DoB ? values.DoB.format('YYYY-MM-DD') : undefined,
-        gender: Number(values.gender),
-      };
   
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_ENDPOINT}/children/create`,
-        formattedValues,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-  
+
       message.success('Child profile created successfully!');
       resetForm();
-      // Redirect to child-manage page
       navigate('/child-manage');
     } catch (error: any) {
       console.error('Error saving profile:', error);

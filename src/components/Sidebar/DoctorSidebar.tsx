@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Typography, Avatar, Space, Divider } from 'antd';
+import { Layout, Menu, Typography, Avatar, Divider } from 'antd';
 import { 
   UserOutlined, 
   MessageOutlined,
@@ -36,9 +36,9 @@ const DoctorSidebar: React.FC = () => {
   const navigate = useNavigate();
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
-  // Fetch doctor profile from API
+
   useEffect(() => {
     const fetchDoctorProfile = async () => {
       try {
@@ -83,13 +83,9 @@ const DoctorSidebar: React.FC = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
-    // Any other items that need to be cleared
-    
-    // Redirect to login page
     navigate('/login');
   };
 
-  // Determine which menu item should be active based on current path
   const getSelectedKey = () => {
     const path = location.pathname;
     if (path.includes('consultation-response')) return 'consultation-response';
@@ -100,26 +96,25 @@ const DoctorSidebar: React.FC = () => {
     return 'dashboard';
   };
 
-  // Gradient background
-  const siderStyle = {
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, rgba(110, 0, 168, 0.95) 0%, rgba(185, 0, 209, 0.88) 100%)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-    position: 'relative',
-    zIndex: 1000,
-  };
+const siderStyle: React.CSSProperties = {
+  minHeight: '100vh',
+  background: 'linear-gradient(135deg, rgba(110, 0, 168, 0.95) 0%, rgba(185, 0, 209, 0.88) 100%)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+  position: 'relative' as const,
+  zIndex: 1000,
+};
 
-  // Menu item styles
+
   const menuItemStyle = {
     margin: '8px 0',
     borderRadius: collapsed ? '50%' : '12px',
     transition: 'all 0.3s ease',
   };
 
-  // Get doctor name or fallback
+
   const doctorName = doctor?.user?.name || 'Dr. Unknown';
   const doctorSpecialty = doctor?.specialize || 'Doctor';
   const avatarUrl = doctor?.profileImg || null;
