@@ -55,7 +55,6 @@ const DoctorsSection = ({ doctors, loading, error }: { doctors: Doctor[], loadin
     }
   }, [doctors]);
 
-  // Styled button like Starbucks but keeping the original colors
   const buttonStyle = {
     height: '50px',
     borderRadius: '30px',

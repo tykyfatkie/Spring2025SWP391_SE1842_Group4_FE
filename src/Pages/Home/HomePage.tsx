@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, Button, Card, Row, Col, Space, Statistic } from 'antd';
+import { Layout, Typography, Card, Row, Col, Space, Statistic } from 'antd';
 import AppFooter from '../../components/Footer/Footer';
-import { SmileOutlined, HeartOutlined, StarOutlined, UserOutlined, CheckCircleOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { SmileOutlined, HeartOutlined, StarOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import DoctorsSection from '../../components/Doctor section/DoctorsSection ';
-import { useNavigate } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -29,7 +28,6 @@ const Homepage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [, setCurrentImageIndex] = useState(0);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -180,7 +178,8 @@ const Homepage: React.FC = () => {
                   <CheckCircleOutlined style={{ color: '#3b82f6', marginRight: '12px' }} />
                   <Text style={{ color: 'white' }}>Development milestone tracking</Text>
                 </div>
-              </Space>           
+              </Space>
+              
             </div>
           </div>
 
@@ -210,8 +209,8 @@ const Homepage: React.FC = () => {
               <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'gray' }} />
                 <div style={{ marginLeft: '12px' }}>
-                  <Text style={{ fontSize: '14px', fontWeight: 600 }}>Dr. John Doe</Text>
-                  <Text style={{ fontSize: '12px', color: 'gray' }}>Pediatrician</Text>
+                  <Text style={{ fontSize: '14px', fontWeight: 600 }}>Dr. Phat Tai     </Text>
+                  <Text style={{ fontSize: '12px', color: 'gray' }}>     Pediatrician</Text>
                 </div>
               </div>
             </div>
@@ -257,7 +256,6 @@ const Homepage: React.FC = () => {
             </Col>
           ))}
         </Row>
-
         <DoctorsSection doctors={doctors} loading={loading} error={error} />
       </Content>
       <AppFooter />

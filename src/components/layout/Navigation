@@ -23,7 +23,6 @@ import ManageUserProfile from "../../Pages/ManageUserProfile/ManageUserProfilePa
 import ProtectedRoute from "../../utils/ProtectedRoute";
 import { LayoutRoute } from "../../types/routes";
 
-// ✅ Helper function for protected components
 const ProtectedComponent = (Component, allowedRoles) => {
   return (props) => <ProtectedRoute {...props} component={Component} role={allowedRoles} />;
 };

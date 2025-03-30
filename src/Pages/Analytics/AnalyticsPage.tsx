@@ -1,87 +1,180 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Table, Button, Modal, message, Spin, Space, Layout, Form, Input, DatePicker } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
-import moment from "moment";
-import Sidebar from "../../components/Sidebar/Sidebar";
+import React, { useState, useEffect } from 'react';
+import { Layout, message, Row, Col, Modal, Form } from 'antd';
+import axios from 'axios';
+import Sidebar from '../../components/Sidebar/Sidebar';
+import moment from 'moment';
+import SingleBMIExport from './SingleBMIExport';
+import CollapsibleHeader from './CollapsibleHeader';
+import BMIDetailsCard from './BMIDetailsCard';
+import BMIModalForm from './BMIModalForm';
+import ChildSelectorCard from './ChildSelectorCard';
+import BMIHistoryCard from './BMIHistoryCard';
 
 const { Content } = Layout;
 
-const BMIPage: React.FC = () => {
-  const [children, setChildren] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+interface Child {
+  id: string;
+  name: string;
+  doB: string;
+  gender: number;
+  weight: number;
+  height: number;
+  bmi: number;
+  bmiPercentile: number;
+}
+
+interface BMIRecord {
+  id: string;
+  childrentId: string;
+  weight: number;
+  height: number;
+  bmi: number;
+  bmiPercentile: number;
+  createdAt: string;
+}
+
+interface ChartData {
+  dateTime: string;
+  date: string;
+  bmi: number;
+  weight: number;
+  height: number;
+  percentile: number;
+}
+
+const BMITrackingPage: React.FC = () => {
+  const [children, setChildren] = useState<Child[]>([]);
+  const [selectedChild, setSelectedChild] = useState<string | null>(null);
+  const [selectedChildData, setSelectedChildData] = useState<Child | null>(null);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [fetchingBMI, setFetchingBMI] = useState<boolean>(false);
   const [bmiModalVisible, setBmiModalVisible] = useState<boolean>(false);
-  const [selectedChild, setSelectedChild] = useState<any>(null);
+  const [] = useState<boolean>(false); 
   const [form] = Form.useForm();
-  const navigate = useNavigate();
+
+  // Function to get BMI category
+  const getBMICategory = (bmi: number) => {
+    if (bmi < 18.5) return { label: 'Underweight', color: '#91caff' };
+    if (bmi < 25) return { label: 'Normal', color: '#52c41a' };
+    if (bmi < 30) return { label: 'Overweight', color: '#faad14' };
+    return { label: 'Obese', color: '#ff4d4f' };
+  };
 
   useEffect(() => {
     fetchChildren();
   }, []);
 
+  useEffect(() => {
+    if (selectedChild) {
+      fetchBMIData(selectedChild);
+      const childData = children.find(child => child.id === selectedChild) || null;
+      setSelectedChildData(childData);
+    }
+  }, [selectedChild, children]);
+
   const fetchChildren = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
-        navigate("/login");
         return;
       }
-
+      
       const response = await axios.get(
         `${import.meta.env.VITE_API_ENDPOINT}/children/getChildByToken`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` }
         }
       );
-
-      if (response.status === 200 && response.data?.data) {
-        setChildren(response.data.data);
+  
+      if (response.data?.data && Array.isArray(response.data.data)) {
+        setChildren(response.data.data.map((child: any) => ({
+          id: child.id,
+          name: child.name || `Child ${child.id.substring(0, 8)}`,
+          doB: child.doB,
+          gender: child.gender,
+          weight: child.weight,
+          height: child.height,
+          bmi: child.bmi,
+          bmiPercentile: child.bmiPercentile
+        })));
+      } else {
+        throw new Error("Invalid data format received");
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to fetch children data.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOpenBmiModal = (child: any) => {
-    setSelectedChild(child);
+  const fetchBMIData = async (childId: string) => {
+    setFetchingBMI(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
+      }
+      
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_ENDPOINT}/bmi/tracking?childId=${childId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+  
+      if (response.data?.value?.data && Array.isArray(response.data.value.data)) {
+        setChartData(response.data.value.data.map((record: BMIRecord) => ({
+          dateTime: record.createdAt,
+          date: new Date(record.createdAt).toLocaleDateString(),
+          bmi: record.bmi,
+          weight: record.weight,
+          height: record.height,
+          percentile: record.bmiPercentile
+        })).sort((a: { dateTime: string | number | Date; }, b: { dateTime: string | number | Date; }) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()));
+      } else {
+        throw new Error("Invalid BMI data format received");
+      }
+    } catch (error: any) {
+      setChartData([]);
+    } finally {
+      setFetchingBMI(false);
+    }
+  };
+
+  const handleOpenBmiModal = () => {
+    if (!selectedChild || !selectedChildData) {
+      message.error("Please select a child first.");
+      return;
+    }
     setBmiModalVisible(true);
     form.resetFields();
-
-    form.setFieldsValue({
-      date: moment()
-    });
   };
 
   const handleSaveBMI = async () => {
     try {
+      if (!selectedChild || !selectedChildData) {
+        message.error("No child selected");
+        return;
+      }
+
       const values = await form.validateFields();
       const token = localStorage.getItem("token");
 
       if (!token) {
-        message.error("Authentication information missing. Please login again.");
         return;
       }
 
-      const ageInMonths = moment().diff(moment(selectedChild.doB, "YYYY-MM-DD"), "months");
-      
-      const formattedDate = values.date ? values.date.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
+      // Calculate age in months from date of birth
+      const ageInMonths = moment().diff(moment(selectedChildData.doB, "YYYY-MM-DD"), "months");
 
       const payload = {
-        childId: selectedChild.id,
+        childId: selectedChild,
         height: Number(values.height),
         weight: Number(values.weight),
         ageInMonths: ageInMonths,
-        gender: selectedChild.gender,
+        gender: selectedChildData.gender,
         notes: values.notes?.trim() || "",
-        date: formattedDate 
       };
 
       const response = await axios.post(
@@ -98,117 +191,95 @@ const BMIPage: React.FC = () => {
       if (response.status === 200) {
         message.success("BMI record saved successfully!");
         setBmiModalVisible(false);
+        
+        await fetchBMIData(selectedChild);
+        
+        Modal.confirm({
+          title: 'BMI Record Saved',
+          content: 'Would you like to export this BMI record as a PDF?',
+          okText: 'Yes, Export',
+          cancelText: 'No, Thanks',
+          onOk: () => {
+            if (selectedChildData && chartData.length > 0) {
+              const latestRecord = chartData[chartData.length - 1];
+              const exporter = new SingleBMIExport({
+                childData: selectedChildData,
+                bmiRecord: latestRecord
+              });
+              exporter.generatePDF();
+            } else {
+              message.warning('No data available to export');
+            }
+          }
+        });
       }
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Failed to save BMI record.");
     }
   };
 
-  const columns = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Gender",
-      dataIndex: "gender",
-      key: "gender",
-      render: (gender: number) => (gender === 0 ? "Male" : "Female"),
-    },
-    {
-      title: "Date of Birth",
-      dataIndex: "doB",
-      key: "doB",
-      render: (text: string) => {
-        return text && moment(text, "YYYY-MM-DD", true).isValid()
-          ? moment(text).format("YYYY/MM/DD")
-          : "Invalid Date";
-      },
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_: any, record: any) => (
-        <Space>
-          <Button 
-            icon={<PlusOutlined />} 
-            onClick={() => handleOpenBmiModal(record)} 
-            type="primary"
-          >
-            BMI
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+  // Function to toggle collapsible section
 
   return (
-    <Layout style={{ minHeight: "100vh", margin: "-25px" }}>
-      <Sidebar />
-      <Content style={{ padding: "20px" }}>
-        <h1>BMI Management</h1>
+    <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white', marginRight: '25px' }}>
+      <Layout>
+        <Sidebar />
+        <Content style={{ padding: '24px', background: '#f8fafc' }}>
+          {/* Collapsible Section */}
+          <CollapsibleHeader 
+            title="Track and Manage Your Child's BMI"
+            subtitle="BMI MANAGEMENT"
+            description="Monitor your child's Body Mass Index (BMI) over time. This tracking tool helps you visualize growth patterns and ensure healthy development according to WHO standards."
+            features={[
+              'Visualize BMI trends over time',
+              'Compare with WHO standard percentiles',
+              'Record new BMI measurements easily'
+            ]}
+          />
 
-        {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
-            <Spin size="large" />
-          </div>
-        ) : (
-          <Table dataSource={children} columns={columns} rowKey="id" pagination={{ pageSize: 10 }} />
-        )}
+          <Row gutter={[24, 24]}>
+          <Col xs={24} md={8}>
+            <ChildSelectorCard
+              loading={loading}
+              children={children}
+              selectedChild={selectedChild}
+              setSelectedChild={setSelectedChild}
+              selectedChildData={selectedChildData}
+              chartData={chartData}
+              handleOpenBmiModal={handleOpenBmiModal}
+            />
+          </Col>
 
-        <Modal
-          title="Enter BMI Details"
-          open={bmiModalVisible}
-          onCancel={() => setBmiModalVisible(false)}
-          onOk={handleSaveBMI}
-          okText="Save"
-        >
-          <Form form={form} layout="vertical">
-            <Form.Item label="Child's Name">
-              <Input value={selectedChild?.name} disabled />
-            </Form.Item>
+          <Col xs={24} md={16}>
+          <BMIHistoryCard 
+            selectedChild={selectedChild}
+            fetchingBMI={fetchingBMI}
+            chartData={chartData}
+            handleOpenBmiModal={handleOpenBmiModal}
+          />
+        </Col>
+          </Row>
 
-            <Form.Item label="Gender">
-              <Input value={selectedChild?.gender === 0 ? "Male" : "Female"} disabled />
-            </Form.Item>
+          {/* BMI Details Card - Always display when child is selected, even if there's no data */}
+          <BMIDetailsCard 
+            selectedChild={selectedChild}
+            chartData={chartData}
+            fetchingBMI={fetchingBMI}
+            handleOpenBmiModal={handleOpenBmiModal}
+            getBMICategory={getBMICategory}
+          />
+        </Content>
+      </Layout>
 
-            <Form.Item label="Age (Months)">
-              <Input value={moment().diff(moment(selectedChild?.doB, "YYYY-MM-DD"), "months")} disabled />
-            </Form.Item>
-
-            <Form.Item
-              name="date"
-              label="Record Date"
-              rules={[{ required: true, message: 'Please select the date of measurement' }]}
-            >
-              <DatePicker 
-                style={{ width: '100%' }} 
-                format="YYYY-MM-DD"
-                placeholder="Select date"
-                disabledDate={(current) => {
-
-                  return current && current > moment().endOf('day');
-                }}
-              />
-            </Form.Item>
-
-            <Form.Item name="height" label="Height (cm)" rules={[{ required: true, message: "Please enter height!" }]}>
-              <Input type="number" placeholder="Enter height" />
-            </Form.Item>
-
-            <Form.Item name="weight" label="Weight (kg)" rules={[{ required: true, message: "Please enter weight!" }]}>
-              <Input type="number" placeholder="Enter weight" />
-            </Form.Item>
-
-            <Form.Item name="notes" label="Notes">
-              <Input.TextArea placeholder="Additional notes" />
-            </Form.Item>
-          </Form>
-        </Modal>
-      </Content>
+      {/* Modal for adding new BMI record */}
+      <BMIModalForm
+        visible={bmiModalVisible}
+        onCancel={() => setBmiModalVisible(false)}
+        onSave={handleSaveBMI}
+        form={form}
+        selectedChildData={selectedChildData}
+      />
     </Layout>
   );
 };
 
-export default BMIPage;
+export default BMITrackingPage;
