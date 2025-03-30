@@ -83,7 +83,7 @@ const routes: LayoutRoute[] = [
       { path: "/my-admin/doctors", component: ProtectedComponent(DoctorsPage, ["Admin"]) },
       { path: "/my-admin/settings", component: ProtectedComponent(Settings, ["Admin"]) },
       { path: "/my-admin/packages", component: ProtectedComponent(PackagesPage, ["Admin"]) },
-      { path: "/my-admin/revenue", component: ProtectedComponent(PackagesPage, ["Admin"]) },
+      { path: "/my-admin/revenue", component: ProtectedComponent(RevenuePage, ["Admin"]) },
     ],
   },
 ];

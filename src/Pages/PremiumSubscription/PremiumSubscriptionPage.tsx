@@ -12,7 +12,8 @@ interface PackageType {
   packageName: string;
   price: number;
   durationMonths: number;
-  maxChildrenAllowed: number;
+  maxChildrentAllowed: number;
+  billingCycle: number;
   status: number;
 }
 
@@ -66,7 +67,7 @@ const PremiumSubscriptionPage: React.FC = () => {
       const paymentUrl = await initiateVnPayPayment({
         packageId,
         amount: price,
-        description: `Subscribe to ${selectedPackage.packageName} for ${selectedPackage.durationMonths} months`,
+        description: `Subscribe to ${selectedPackage.packageName} for ${selectedPackage.durationMonths}`,
       });
   
       if (paymentUrl) {
@@ -80,6 +81,9 @@ const PremiumSubscriptionPage: React.FC = () => {
     }
   };
   
+  const getBillingCycleText = (billingCycle: number) => {
+    return billingCycle === 0 ? "monthly" : "yearly";
+  };
 
   const packageColors = [
     {
@@ -236,6 +240,7 @@ const PremiumSubscriptionPage: React.FC = () => {
               {packages.map((plan, index) => {
               const colorScheme = packageColors[index % packageColors.length];
               const isLoadingThisPackage = submitting && submittingPackageId === plan.id;
+              const billingCycleText = getBillingCycleText(plan.billingCycle);
 
               return (
                 <Card
@@ -290,7 +295,7 @@ const PremiumSubscriptionPage: React.FC = () => {
                       fontSize: 14, 
                       color: 'rgba(255,255,255,0.8)' 
                     }}>
-                      for {plan.durationMonths} months
+                      /{billingCycleText}
                     </Text>
                   </div>
 
@@ -309,8 +314,23 @@ const PremiumSubscriptionPage: React.FC = () => {
                       textAlign: 'left', 
                       height: 200 
                     }}>
-                      {[plan.description, `Track up to ${plan.maxChildrenAllowed} children`].map((feature, idx) => (
-                        <li key={idx} style={{ 
+                      {Array.isArray(plan.description) ? (
+                        plan.description.map((desc, idx) => (
+                          <li key={idx} style={{ 
+                            padding: "8px 0", 
+                            fontSize: 14,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <CheckCircleOutlined style={{ 
+                              color: colorScheme.primary, 
+                              marginRight: 8 
+                            }} />
+                            {desc}
+                          </li>
+                        ))
+                      ) : (
+                        <li style={{ 
                           padding: "8px 0", 
                           fontSize: 14,
                           display: 'flex',
@@ -320,9 +340,22 @@ const PremiumSubscriptionPage: React.FC = () => {
                             color: colorScheme.primary, 
                             marginRight: 8 
                           }} />
-                          {feature}
+                          {typeof plan.description === 'string' ? plan.description : 'Features included'}
                         </li>
-                      ))}
+                      )}
+                      
+                      <li style={{ 
+                        padding: "8px 0", 
+                        fontSize: 14,
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>
+                        <CheckCircleOutlined style={{ 
+                          color: colorScheme.primary, 
+                          marginRight: 8 
+                        }} />
+                        Track up to {plan.maxChildrentAllowed} children
+                      </li>                      
                     </ul>
 
                     <Button

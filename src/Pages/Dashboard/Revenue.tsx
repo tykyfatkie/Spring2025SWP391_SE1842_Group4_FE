@@ -1,142 +1,97 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Input, Spin, message, Modal, Space } from "antd";
-import { SearchOutlined, EyeOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Table, Button, Input, Spin, Modal, Space, Card, Statistic } from "antd";
+import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import axios from "axios";
 import type { TableProps } from "antd";
 
 
-// ============ TYPE DEFINITIONS ============
-
-interface Revenue {
-  id: string;
-  orderId: string;
-  date: string;
-  amount: number;
-  status: number;
+interface RevenueItem {
+  packageId: string;
+  ownerId: string;
+  totalPackages: number;
+  activePackages: number;
+  expiredPackages: number;
+  totalRevenuePerPackage: number;
 }
 
-type RevenueStatus = 0 | 1 | 2; // Example: 0 - Pending, 1 - Completed, 2 - Cancelled
-
-// ============ MAIN COMPONENT ============
+interface RevenueData {
+  packagesSummary: RevenueItem[];
+  totalRevenueAllPackages: number;
+}
 
 const RevenuePage = () => {
-  // ============ STATE ============
-
-  const [revenues, setRevenues] = useState<Revenue[]>([]);
+  const [revenueData, setRevenueData] = useState<RevenueData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const [filterStatus] = useState<RevenueStatus>(0);
-  const [selectedRevenue, setSelectedRevenue] = useState<Revenue | null>(null);
+  const [selectedRevenue, setSelectedRevenue] = useState<RevenueItem | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
-  // ============ API CALLS ============
 
   const fetchRevenues = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const params = {
-        searchKeyword: searchKeyword || undefined,
-        page: page - 1,
-        pageSize: 20,
-        status: filterStatus,
-      };
-
-      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/revenues`, {
-        params,
+      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/admin/packages-summary`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          accept: "application/json",
         },
       });
-
-      setRevenues(response.data.data || []);
+      
+      console.log("API Response:", response.data);
+      
+      if (response.data && response.data.data) {
+        setRevenueData(response.data.data);
+      } else {
+        console.error("Unexpected API response structure:", response.data);
+        setRevenueData(null);
+      }
     } catch (error) {
-      message.error("Failed to fetch revenues");
+      console.error("Error fetching revenues:", error);
+      setRevenueData(null);
     } finally {
       setLoading(false);
     }
   };
-
-  // ============ SIDE EFFECTS ============
+  
+  const handleSearch = () => {
+    // Since we're using API data directly, you might want to implement a client-side filter
+    fetchRevenues();
+  };
 
   useEffect(() => {
     fetchRevenues();
-  }, [page, filterStatus]);
+  }, [page]);
 
-  // ============ HANDLERS ============
-
-  const handleViewRevenue = (revenue: Revenue) => {
+  const handleViewRevenue = (revenue: RevenueItem) => {
     setSelectedRevenue(revenue);
     setIsModalVisible(true);
   };
 
-  const handleRevenueStatusChange = async (revenueId: string, status: RevenueStatus) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.patch(
-        `${import.meta.env.VITE_API_ENDPOINT}/revenues/status/${revenueId}?status=${status}`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      fetchRevenues();
-    } catch (error) {
-      message.error("Failed to update revenue status");
-    }
-  };
-
-  // ============ HELPER FUNCTIONS ============
-
-  const getStatusTag = (status: RevenueStatus) => {
-    switch (status) {
-      case 0:
-        return <span style={{ color: "orange" }}>Pending</span>;
-      case 1:
-        return <span style={{ color: "green" }}>Completed</span>;
-      case 2:
-        return <span style={{ color: "red" }}>Cancelled</span>;
-      default:
-        return <span>Unknown</span>;
-    }
-  };
-
-  // ============ TABLE COLUMNS CONFIG ============
-
-  const revenueColumns: TableProps<Revenue>['columns'] = [
+  const revenueColumns: TableProps<RevenueItem>['columns'] = [
     {
-      title: "Order ID",
-      dataIndex: "orderId",
-      key: "orderId",
+      title: "Package ID",
+      dataIndex: "packageId",
+      key: "packageId",
     },
     {
-      title: "Date",
-      dataIndex: "date",
-      key: "date",
-      render: (date: string) => {
-        const dateObj = new Date(date);
-        return dateObj.toLocaleDateString();
-      },
+      title: "Owner ID",
+      dataIndex: "ownerId",
+      key: "ownerId",
     },
     {
-      title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
-      render: (amount: number) => `$${amount.toFixed(2)}`,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status: RevenueStatus) => getStatusTag(status),
+      title: "Total Revenue",
+      dataIndex: "totalRevenuePerPackage",
+      key: "totalRevenuePerPackage",
+      render: (value: number) => 
+        value !== undefined && value !== null 
+          ? `${value} VND` 
+          : '0 VND',
     },
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: Revenue) => (
+      render: (_: any, record: RevenueItem) => (
         <Space>
           <Button
             icon={<EyeOutlined />}
@@ -144,24 +99,24 @@ const RevenuePage = () => {
             type="primary"
             shape="circle"
           />
-          {record.status === 0 && (
-            <Button
-              icon={<ExclamationCircleOutlined />}
-              type="default"
-              danger
-              onClick={() => handleRevenueStatusChange(record.id, 1)}
-              shape="circle"
-            />
-          )}
         </Space>
       ),
     },
   ];
 
-  // ============ RENDER ============
-
   return (
     <div>
+      {/* Total Revenue Summary Card */}
+      <Card style={{ marginBottom: 16 }}>
+        <Statistic
+          title="Total Revenue Across All Packages"
+          value={revenueData?.totalRevenueAllPackages || 0}
+          suffix="VND"
+          precision={2}
+          valueStyle={{ color: '#3f8600', fontWeight: 'bold', fontSize: '24px' }}
+        />
+      </Card>
+
       <div style={{ marginBottom: 16, display: "flex", justifyContent: "right", gap: "10px" }}>
         <Input
           placeholder="Search revenues..."
@@ -170,7 +125,7 @@ const RevenuePage = () => {
           allowClear
           style={{ width: 250 }}
         />
-        <Button type="primary" icon={<SearchOutlined />} onClick={fetchRevenues}>
+        <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
           Search
         </Button>
       </div>
@@ -180,8 +135,8 @@ const RevenuePage = () => {
       ) : (
         <Table
           columns={revenueColumns}
-          dataSource={revenues}
-          rowKey="id"
+          dataSource={revenueData?.packagesSummary || []}
+          rowKey="packageId"
           pagination={{
             current: page,
             pageSize: 10,
@@ -192,7 +147,7 @@ const RevenuePage = () => {
       )}
 
       <Modal
-        title={`Revenue Details for Order ${selectedRevenue?.orderId || 'N/A'}`}
+        title={`Revenue Details for Package ${selectedRevenue?.packageId || 'N/A'}`}
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
@@ -200,9 +155,13 @@ const RevenuePage = () => {
       >
         {selectedRevenue ? (
           <div>
-            <p><strong>Order ID:</strong> {selectedRevenue.orderId}</p>
-            <p><strong>Date:</strong> {new Date(selectedRevenue.date).toLocaleDateString()}</p>
-            <p><strong>Amount:</strong> ${selectedRevenue.amount.toFixed(2)}</p>
+            <p><strong>Package ID:</strong> {selectedRevenue.packageId}</p>
+            <p><strong>Owner ID:</strong> {selectedRevenue.ownerId}</p>
+            <p><strong>Total Revenue:</strong> {selectedRevenue.totalRevenuePerPackage !== undefined ? 
+              `${selectedRevenue.totalRevenuePerPackage} VND` : '0 VND'}</p>
+            <p><strong>Total Packages:</strong> {selectedRevenue.totalPackages}</p>
+            <p><strong>Active Packages:</strong> {selectedRevenue.activePackages}</p>
+            <p><strong>Expired Packages:</strong> {selectedRevenue.expiredPackages}</p>
           </div>
         ) : (
           <p>No details available.</p>
