@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Typography, Layout, Spin, message } from "antd";
+import { Card, Button, Typography, Layout, Spin } from "antd";
 import { CheckCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { initiateVnPayPayment } from "../../services/PaymentService";
 
@@ -7,6 +7,7 @@ const { Title, Text, Paragraph } = Typography;
 const { Content } = Layout;
 
 interface PackageType {
+  description: any;
   id: string;
   packageName: string;
   price: number;
@@ -55,31 +56,30 @@ const PremiumSubscriptionPage: React.FC = () => {
   const handleSubscribe = async (packageId: string, price: number) => {
     setSubmitting(true);
     setSubmittingPackageId(packageId);
-
+  
     try {
       const selectedPackage = packages.find(pkg => pkg.id === packageId);
       if (!selectedPackage) {
-       
+        return;
       }
-
+  
       const paymentUrl = await initiateVnPayPayment({
         packageId,
         amount: price,
         description: `Subscribe to ${selectedPackage.packageName} for ${selectedPackage.durationMonths} months`,
       });
-
+  
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
-
       }
     } catch (error: any) {
-      
     } finally {
       setSubmitting(false);
       setSubmittingPackageId(null);
     }
   };
+  
 
   const packageColors = [
     {
@@ -234,127 +234,123 @@ const PremiumSubscriptionPage: React.FC = () => {
               gap: '24px' 
             }}>
               {packages.map((plan, index) => {
-                const colorScheme = packageColors[index % packageColors.length];
-                const isLoadingThisPackage = submitting && submittingPackageId === plan.id;
-                
-                return (
-                  <Card
-                    key={plan.id}
-                    style={{
-                      width: 320,
-                      borderRadius: '16px',
-                      boxShadow: '0 15px 40px rgba(0,0,0,0.08)',
-                      overflow: 'hidden',
-                      transition: 'all 0.3s ease',
-                      border: 'none',
-                      position: 'relative'
-                    }}
-                    bodyStyle={{ padding: 0 }}
-                    hoverable
-                  >
+              const colorScheme = packageColors[index % packageColors.length];
+              const isLoadingThisPackage = submitting && submittingPackageId === plan.id;
+
+              return (
+                <Card
+                  key={plan.id}
+                  style={{
+                    width: 320,
+                    borderRadius: '16px',
+                    boxShadow: '0 15px 40px rgba(0,0,0,0.08)',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    border: 'none',
+                    position: 'relative'
+                  }}
+                  bodyStyle={{ padding: 0 }}
+                  hoverable
+                >
+                  <div style={{
+                    background: colorScheme.gradient,
+                    padding: '30px 20px 50px',
+                    position: 'relative',
+                    color: 'white'
+                  }}>
                     <div style={{
-                      background: colorScheme.gradient,
-                      padding: '30px 20px 50px',
-                      position: 'relative',
-                      color: 'white'
+                      position: 'absolute',
+                      top: 10,
+                      left: -30,
+                      backgroundColor: colorScheme.primary,
+                      color: 'white',
+                      padding: '5px 30px',
+                      transform: 'rotate(-45deg)',
+                      fontWeight: 'bold',
+                      zIndex: 1,
+                      borderRadius: '0 0 5px 5px',
+                      fontSize: 12
                     }}>
-                      <div style={{
-                        position: 'absolute',
-                        top: 10,
-                        left: -30,
-                        backgroundColor: colorScheme.primary,
-                        color: 'white',
-                        padding: '5px 30px',
-                        transform: 'rotate(-45deg)',
-                        fontWeight: 'bold',
-                        zIndex: 1,
-                        borderRadius: '0 0 5px 5px',
-                        fontSize: 12
-                      }}>
-                        {colorScheme.label}
-                      </div>
-
-                      <Title level={1} style={{ 
-                        color: 'white', 
-                        margin: 0, 
-                        fontWeight: 'bold' 
-                      }}>
-                        {new Intl.NumberFormat("vi-VN").format(plan.price)}
-                        <span style={{ 
-                          fontSize: 16, 
-                          fontWeight: 'normal', 
-                          verticalAlign: 'top' 
-                        }}> VND</span>
-                      </Title>
-                      <Text style={{ 
-                        fontSize: 14, 
-                        color: 'rgba(255,255,255,0.8)' 
-                      }}>
-                        for {plan.durationMonths} months
-                      </Text>
+                      {colorScheme.label}
                     </div>
 
-                    <div style={{ padding: '24px 20px' }}>
-                      <Title level={4} style={{ 
-                        marginBottom: 20, 
-                        color: '#1e3a8a' 
-                      }}>
-                        {plan.packageName}
-                      </Title>
+                    <Title level={1} style={{ 
+                      color: 'white', 
+                      margin: 0, 
+                      fontWeight: 'bold' 
+                    }}>
+                      {new Intl.NumberFormat("vi-VN").format(plan.price)}
+                      <span style={{ 
+                        fontSize: 16, 
+                        fontWeight: 'normal', 
+                        verticalAlign: 'top' 
+                      }}> VND</span>
+                    </Title>
+                    <Text style={{ 
+                      fontSize: 14, 
+                      color: 'rgba(255,255,255,0.8)' 
+                    }}>
+                      for {plan.durationMonths} months
+                    </Text>
+                  </div>
 
-                      <ul style={{ 
-                        listStyleType: 'none', 
-                        padding: 0, 
-                        margin: 0, 
-                        textAlign: 'left', 
-                        height: 200 
-                      }}>
-                        {[
-                          "Basic features to track development",
-                          `Track up to ${plan.maxChildrenAllowed} children`,
-                          "Personalized development information",
-                          "Monthly progress reports"
-                        ].map((feature, idx) => (
-                          <li key={idx} style={{ 
-                            padding: "8px 0", 
-                            fontSize: 14,
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
-                            <CheckCircleOutlined style={{ 
-                              color: colorScheme.primary, 
-                              marginRight: 8 
-                            }} />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
+                  <div style={{ padding: '24px 20px' }}>
+                    <Title level={4} style={{ 
+                      marginBottom: 20, 
+                      color: '#1e3a8a' 
+                    }}>
+                      {plan.packageName}
+                    </Title>
 
-                      <Button
-                        type="primary"
-                        block
-                        loading={isLoadingThisPackage}
-                        disabled={submitting}
-                        style={{
-                          marginTop: 30,
-                          height: 52,
-                          fontSize: 16,
-                          fontWeight: 'bold',
-                          background: colorScheme.gradient,
-                          border: 'none',
-                          borderRadius: 26,
+                    <ul style={{ 
+                      listStyleType: 'none', 
+                      padding: 0, 
+                      margin: 0, 
+                      textAlign: 'left', 
+                      height: 200 
+                    }}>
+                      {[plan.description, `Track up to ${plan.maxChildrenAllowed} children`].map((feature, idx) => (
+                        <li key={idx} style={{ 
+                          padding: "8px 0", 
+                          fontSize: 14,
                           display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                        onClick={() => handleSubscribe(plan.id, plan.price)}
-                      >
-                        Subscribe Now <ArrowRightOutlined style={{ marginLeft: 8 }} />
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
+                          alignItems: 'center'
+                        }}>
+                          <CheckCircleOutlined style={{ 
+                            color: colorScheme.primary, 
+                            marginRight: 8 
+                          }} />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Button
+                      type="primary"
+                      block
+                      loading={isLoadingThisPackage}
+                      disabled={submitting}
+                      style={{
+                        marginTop: 30,
+                        height: 52,
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        background: colorScheme.gradient,
+                        border: 'none',
+                        borderRadius: 26,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      onClick={() => handleSubscribe(plan.id, plan.price)}
+                    >
+                      Subscribe Now <ArrowRightOutlined style={{ marginLeft: 8 }} />
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+
             </div>
           )}
         </div>
