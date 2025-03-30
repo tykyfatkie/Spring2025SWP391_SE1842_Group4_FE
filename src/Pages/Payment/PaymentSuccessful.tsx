@@ -2,7 +2,6 @@ import React from 'react';
 import { Layout, Typography, Button, Row, Col } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -57,16 +56,60 @@ const PaymentSuccessful: React.FC = () => {
         }}>
           <Row justify="center" align="middle" gutter={[0, 24]}>
             <Col span={24}>
-              <DotLottieReact
-                src="https://lottie.host/31fc79ff-8552-4f14-bb62-77b5f8b93af3/cD4jFkoxSd.lottie"
-                loop
-                autoplay
-                style={{ 
-                  width: '250px', 
-                  height: '250px', 
-                  margin: '0 auto 20px' 
-                }}
-              />
+              {/* Inline SVG Animation */}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 100 100" 
+                width="180" 
+                height="180"
+                style={{ margin: '0 auto 20px' }}
+              >
+                <circle 
+                  cx="50" 
+                  cy="50" 
+                  r="45" 
+                  fill="white" 
+                  stroke="#1e3a8a" 
+                  strokeWidth="4"
+                  strokeDasharray="283"
+                  strokeDashoffset="283"
+                >
+                  <animate 
+                    attributeName="stroke-dashoffset" 
+                    from="283" 
+                    to="0" 
+                    dur="0.8s" 
+                    fill="freeze" 
+                  />
+                  <animate 
+                    attributeName="fill" 
+                    from="white" 
+                    to="#e6f7ff" 
+                    dur="0.8s" 
+                    fill="freeze" 
+                    begin="0.8s"
+                  />
+                </circle>
+                <path 
+                  d="M30,50 L45,65 L70,35" 
+                  fill="none" 
+                  stroke="#1e3a8a" 
+                  strokeWidth="6" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  strokeDasharray="100"
+                  strokeDashoffset="100"
+                >
+                  <animate 
+                    attributeName="stroke-dashoffset" 
+                    from="100" 
+                    to="0" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    begin="0.5s"
+                  />
+                </path>
+              </svg>
             </Col>
             
             <Col span={24}>

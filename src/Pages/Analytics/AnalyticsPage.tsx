@@ -155,33 +155,33 @@ const BMITrackingPage: React.FC = () => {
     form.resetFields();
   };
 
-  const handleSaveBMI = async () => {
+  const handleSaveBMI = async (values: any) => {
     try {
       if (!selectedChild || !selectedChildData) {
         message.error("No child selected");
         return;
       }
-
-      const values = await form.validateFields();
+  
       const token = localStorage.getItem("token");
-
+  
       if (!token) {
         message.error("Authentication information missing. Please login again.");
         return;
       }
-
-      // Calculate age in months from date of birth
-      const ageInMonths = moment().diff(moment(selectedChildData.doB, "YYYY-MM-DD"), "months");
-
+  
+      // Đảm bảo chúng ta KHÔNG xử lý doY ở đây nữa
+      // vì đã được xử lý trong BMIModalForm
       const payload = {
         childId: selectedChild,
         height: Number(values.height),
         weight: Number(values.weight),
-        ageInMonths: ageInMonths,
         gender: selectedChildData.gender,
         notes: values.notes?.trim() || "",
+        doY: values.doY, // Sử dụng giá trị đã được định dạng từ BMIModalForm
       };
-
+  
+      console.log("BMI Save Payload:", payload);
+      
       const response = await axios.post(
         `${import.meta.env.VITE_API_ENDPOINT}/bmi/save`,
         payload,
@@ -192,35 +192,19 @@ const BMITrackingPage: React.FC = () => {
           },
         }
       );
-
+  
       if (response.status === 200) {
         message.success("BMI record saved successfully!");
         setBmiModalVisible(false);
         
         // Fetch updated BMI data after saving
         await fetchBMIData(selectedChild);
-        
-        // Optionally, show prompt to export the newly added record
-        Modal.confirm({
-          title: 'BMI Record Saved',
-          content: 'Would you like to export this BMI record as a PDF?',
-          okText: 'Yes, Export',
-          cancelText: 'No, Thanks',
-          onOk: () => {
-            if (selectedChildData && chartData.length > 0) {
-              const latestRecord = chartData[chartData.length - 1];
-              const exporter = new SingleBMIExport({
-                childData: selectedChildData,
-                bmiRecord: latestRecord
-              });
-              exporter.generatePDF();
-            } else {
-              message.warning('No data available to export');
-            }
-          }
-        });
       }
     } catch (error: any) {
+      console.error("BMI Save Error:", error);
+      console.error("Error response data:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+    
       message.error(error.response?.data?.message || "Failed to save BMI record.");
     }
   };

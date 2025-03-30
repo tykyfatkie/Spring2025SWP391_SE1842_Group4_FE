@@ -1,10 +1,11 @@
-import React from 'react';
-import { Modal, Form, Input, Row, Col } from 'antd';
+import React, { useState } from 'react';
+import { Modal, Form, Input, Row, Col, DatePicker, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 interface Child {
   id: string;
+  childId?: string;
   name: string;
   doB: string;
   gender: number;
@@ -17,7 +18,7 @@ interface Child {
 interface BMIModalFormProps {
   visible: boolean;
   onCancel: () => void;
-  onSave: () => void;
+  onSave: (values: any) => Promise<any>;
   form: any;
   selectedChildData: Child | null;
 }
@@ -29,6 +30,63 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
   form,
   selectedChildData
 }) => {
+  const [submitting, setSubmitting] = useState(false);
+  
+  const handleSubmit = async () => {
+    try {
+        setSubmitting(true);
+        const values = await form.validateFields();
+
+        // Đặc biệt quan trọng: Chuyển đổi doY thành chuỗi ngày định dạng YYYY-MM-DD
+        // Sử dụng phương thức format trực tiếp và không giữ thông tin về timezone
+        if (values.doY) {
+            // Tách ra thành ngày, tháng, năm để loại bỏ ảnh hưởng múi giờ
+            const date = new Date(values.doY);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            values.doY = `${year}-${month}-${day}`;
+            
+            console.log("Formatted date:", values.doY);
+        }
+
+        values.childId = selectedChildData?.id || selectedChildData?.childId;
+        values.gender = selectedChildData?.gender;
+
+        try {
+            await onSave(values);
+        } catch (error: any) {
+            console.error("Full error:", error);
+            console.error("Error data:", error.response?.data);
+
+            if (error.response?.status === 500) {
+                if (error.response?.data?.message?.includes("BMI Category not found")) {
+                    message.error("Invalid BMI data: BMI Category not found. Please check height and weight values.");
+                } else {
+                    message.error("Server error occurred. Please try again later.");
+                }
+            } else {
+                message.error(error.response?.data?.message || "Failed to save BMI record");
+            }
+            return;
+        }
+
+        form.resetFields();
+    } catch (validationError) {
+        console.log("Validation failed:", validationError);
+    } finally {
+        setSubmitting(false);
+    }
+};
+  
+  React.useEffect(() => {
+    if (visible) {
+      form.setFieldsValue({
+        doY: moment()
+      });
+    }
+  }, [visible, form]);
+  
   return (
     <Modal
       title={
@@ -50,9 +108,9 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
       }
       visible={visible}
       onCancel={onCancel}
-      onOk={onSave}
+      onOk={handleSubmit}
       okText="Save Record"
-      okButtonProps={{ style: { background: '#1e3a8a' } }}
+      okButtonProps={{ style: { background: '#1e3a8a' }, loading: submitting }}
       width={500}
     >
       <Form form={form} layout="vertical">
@@ -69,7 +127,7 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
           <Col span={12}>
             <Form.Item label="Age (Months)">
               <Input 
-                value={selectedChildData?.doB ? moment().diff(moment(selectedChildData.doB, "YYYY-MM-DD"), "months") : ""} 
+                value={moment().diff(moment(selectedChildData?.doB, "YYYY-MM-DD"), 'months')} 
                 disabled 
                 style={{ background: '#f8fafc' }} 
               />
@@ -77,23 +135,24 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
           </Col>
         </Row>
 
+        <Form.Item 
+          name="doY" 
+          label="BMI Record Date" 
+          rules={[{ required: true, message: "Please select the date for this BMI record" }]}
+        >
+          <DatePicker 
+            style={{ width: '100%' }} 
+            format="YYYY-MM-DD"
+            value={form.getFieldValue('doY') ? moment(form.getFieldValue('doY')) : null}
+          />
+        </Form.Item>
+
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item 
               name="height" 
               label="Height (cm)" 
-              rules={[
-                { required: true, message: "Please enter height!" },
-                { 
-                  validator: (_, value) => {
-                    const num = parseFloat(value);
-                    if (isNaN(num) || num < 1 || num > 300) {
-                      return Promise.reject('Height must be between 1-300 cm');
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
+              rules={[{ required: true, message: "Please enter height!" }]}
             >
               <Input type="number" placeholder="Enter height" step="0.1" />
             </Form.Item>
@@ -102,18 +161,7 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
             <Form.Item 
               name="weight" 
               label="Weight (kg)" 
-              rules={[
-                { required: true, message: "Please enter weight!" },
-                { 
-                  validator: (_, value) => {
-                    const num = parseFloat(value);
-                    if (isNaN(num) || num < 0.1 || num > 300) {
-                      return Promise.reject('Weight must be between 0.1-300 kg');
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
+              rules={[{ required: true, message: "Please enter weight!" }]}
             >
               <Input type="number" placeholder="Enter weight" step="0.1" />
             </Form.Item>

@@ -2,7 +2,6 @@ import React from 'react';
 import { Layout, Typography, Button, Row, Col } from 'antd';
 import { HomeOutlined, SyncOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -62,16 +61,83 @@ const PaymentFailed: React.FC = () => {
         }}>
           <Row justify="center" align="middle" gutter={[0, 24]}>
             <Col span={24}>
-              <DotLottieReact
-                src="https://lottie.host/1ebb5f63-de7f-488f-8453-34902ab82737/Z6KGP61qKC.lottie"
-                loop
-                autoplay
-                style={{ 
-                  width: '250px', 
-                  height: '250px', 
-                  margin: '0 auto 20px' 
-                }}
-              />
+              {/* Inline SVG Animation - Error X Mark */}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 100 100" 
+                width="180" 
+                height="180"
+                style={{ margin: '0 auto 20px' }}
+              >
+                <circle 
+                  cx="50" 
+                  cy="50" 
+                  r="45" 
+                  fill="white" 
+                  stroke="#d32f2f" 
+                  strokeWidth="4"
+                  strokeDasharray="283"
+                  strokeDashoffset="283"
+                >
+                  <animate 
+                    attributeName="stroke-dashoffset" 
+                    from="283" 
+                    to="0" 
+                    dur="0.8s" 
+                    fill="freeze" 
+                  />
+                  <animate 
+                    attributeName="fill" 
+                    from="white" 
+                    to="#fff2f0" 
+                    dur="0.8s" 
+                    fill="freeze" 
+                    begin="0.8s"
+                  />
+                </circle>
+                {/* First line of the X */}
+                <line 
+                  x1="35" 
+                  y1="35" 
+                  x2="65" 
+                  y2="65" 
+                  stroke="#d32f2f" 
+                  strokeWidth="6" 
+                  strokeLinecap="round"
+                  strokeDasharray="45"
+                  strokeDashoffset="45"
+                >
+                  <animate 
+                    attributeName="stroke-dashoffset" 
+                    from="45" 
+                    to="0" 
+                    dur="0.4s" 
+                    fill="freeze"
+                    begin="0.5s"
+                  />
+                </line>
+                {/* Second line of the X */}
+                <line 
+                  x1="65" 
+                  y1="35" 
+                  x2="35" 
+                  y2="65" 
+                  stroke="#d32f2f" 
+                  strokeWidth="6" 
+                  strokeLinecap="round"
+                  strokeDasharray="45"
+                  strokeDashoffset="45"
+                >
+                  <animate 
+                    attributeName="stroke-dashoffset" 
+                    from="45" 
+                    to="0" 
+                    dur="0.4s" 
+                    fill="freeze"
+                    begin="0.9s"
+                  />
+                </line>
+              </svg>
             </Col>
             
             <Col span={24}>
