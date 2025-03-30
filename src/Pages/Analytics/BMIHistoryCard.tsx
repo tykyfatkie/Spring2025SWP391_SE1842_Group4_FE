@@ -20,7 +20,7 @@ interface BMIHistoryCardProps {
 }
 
 const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({ selectedChild, fetchingBMI, chartData, handleOpenBmiModal }) => {
-  // Hàm kiểm tra BMI và trả về thông báo cảnh báo
+
   const getBMIWarning = (bmi: number) => {
     if (bmi < 18.5) {
       return {
@@ -36,28 +36,28 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({ selectedChild, fetching
     return null;
   };
 
-  // Lấy BMI của bản ghi mới nhất
+
   const latestBMI = chartData.length > 0 ? chartData[chartData.length - 1].bmi : null;
   const bmiWarning = latestBMI ? getBMIWarning(latestBMI) : null;
 
-  // Custom tooltip component for BMI values
+
   const CustomTooltip = (props: any) => {
     const { active, payload, label } = props;
     
     if (active && payload && payload.length) {
       const bmi = payload[0].value;
       let statusText = "Normal";
-      let statusColor = "#52c41a"; // Green for normal
+      let statusColor = "#52c41a"; 
       
       if (bmi < 18.5) {
         statusText = "Underweight";
-        statusColor = "#91caff"; // Blue for underweight
+        statusColor = "#91caff"; 
       } else if (bmi >= 25 && bmi < 30) {
         statusText = "Overweight";
-        statusColor = "#faad14"; // Yellow/orange for overweight
+        statusColor = "#faad14"; 
       } else if (bmi >= 30) {
         statusText = "Obese";
-        statusColor = "#ff4d4f"; // Red for obese
+        statusColor = "#ff4d4f"; 
       }
       
       return (
@@ -88,30 +88,30 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({ selectedChild, fetching
     return null;
   };
 
-  // Custom dot renderer to highlight abnormal BMI values
+
   const renderCustomDot = (props: any) => {
     const { cx, cy, payload } = props;
     const bmi = payload.bmi;
     
-    let fillColor = "#1e3a8a"; // Default blue color
-    let size = 6; // Default size
+    let fillColor = "#1e3a8a"; 
+    let size = 6; 
     let showRing = false;
     let ringColor = "";
     
-    // Determine styling based on BMI value
+
     if (bmi < 18.5) {
-      fillColor = "#91caff"; // Blue for underweight
+      fillColor = "#91caff"; 
       size = 8;
       showRing = true;
       ringColor = "rgba(145, 202, 255, 0.3)";
     } else if (bmi >= 25 && bmi < 30) {
-      fillColor = "#faad14"; // Yellow/orange for overweight
+      fillColor = "#faad14"; 
       size = 8;
       showRing = true;
       ringColor = "rgba(250, 173, 20, 0.3)";
     } else if (bmi >= 30) {
-      fillColor = "#ff4d4f"; // Red for obese
-      size = 10; // Larger for obese points
+      fillColor = "#ff4d4f"; 
+      size = 10; 
       showRing = true;
       ringColor = "rgba(255, 77, 79, 0.3)";
     }
@@ -160,7 +160,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({ selectedChild, fetching
       bodyStyle={{ padding: '24px' }}
     >
       {!selectedChild ? (
-        // Show this message when no child is selected
+
         <div style={{ 
           display: 'flex',
           flexDirection: 'column',
@@ -196,7 +196,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({ selectedChild, fetching
         </div>
       ) : chartData.length > 0 ? (
         <>
-          {/* Hiển thị cảnh báo nếu có */}
+
           {bmiWarning && (
             <Alert
               type={bmiWarning.type as 'warning' | 'error'}
@@ -234,7 +234,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({ selectedChild, fetching
                 <XAxis dataKey="date" label={{ value: 'Date', position: 'insideBottom', offset: -5 }} />
                 <YAxis domain={['auto', 'auto']} label={{ value: 'BMI', angle: -90, position: 'insideLeft' }} />
                 
-                {/* Add reference lines for BMI thresholds */}
+
                 <ReferenceLine 
                   y={18.5} 
                   stroke="#91caff" 

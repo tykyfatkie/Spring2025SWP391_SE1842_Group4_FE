@@ -11,8 +11,8 @@ const { Title, Paragraph } = Typography;
 interface Child {
   id: string;
   name: string;
-  doB: string;  // Date of Birth
-  gender: number;  // Assuming 0 or 1 for gender
+  doB: string; 
+  gender: number;  
   weight: number;
   height: number;
   bmi: number;
@@ -38,7 +38,7 @@ interface ChildSelectorCardProps {
   handleOpenBmiModal: () => void;
 }
 
-// Helper function to calculate age in months
+
 const calculateAgeInMonths = (dateOfBirth: string): number => {
   const birthDate = new Date(dateOfBirth);
   const currentDate = new Date();
@@ -49,7 +49,7 @@ const calculateAgeInMonths = (dateOfBirth: string): number => {
   return years * 12 + months;
 };
 
-// Helper function to get gender label
+
 const getGenderLabel = (genderCode: number): string => {
   switch(genderCode) {
     case 0: return 'Female';
@@ -70,11 +70,11 @@ const ChildSelectorCard: React.FC<ChildSelectorCardProps> = ({
   const location = useLocation();
   
   useEffect(() => {
-    // Extract childId from URL query params
+
     const searchParams = new URLSearchParams(location.search);
     const childId = searchParams.get('childId');
     
-    // If childId exists in URL and it's in our children list, select it
+
     if (childId && children.some(child => child.id === childId)) {
       setSelectedChild(childId);
     }
@@ -159,7 +159,7 @@ const ChildSelectorCard: React.FC<ChildSelectorCardProps> = ({
               Add New BMI Record
             </Button>
             
-            {/* BMI Export options */}
+
             {selectedChild && selectedChildData && (
               <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                 <BMIPDFExport 
@@ -167,11 +167,11 @@ const ChildSelectorCard: React.FC<ChildSelectorCardProps> = ({
                   bmiRecords={chartData}
                 />
                 
-                {/* Add the single record export button if there are records */}
+
                 {chartData.length > 0 && (
                   <SingleBMIExport 
                     childData={selectedChildData}
-                    bmiRecord={chartData[chartData.length - 1]} // Use the most recent record
+                    bmiRecord={chartData[chartData.length - 1]} 
                   />
                 )}
               </Space>

@@ -36,7 +36,6 @@ const CollapsibleHeader: React.FC<CollapsibleHeaderProps> = ({
       overflow: 'hidden',
       boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
     }}>
-      {/* Header Section with collapse button */}
       <div style={{ 
         padding: '20px 32px',
         display: 'flex',
@@ -60,7 +59,7 @@ const CollapsibleHeader: React.FC<CollapsibleHeaderProps> = ({
           </Title>
         </div>
         
-        {/* Collapse/Expand Button */}
+
         <Button
           type="default"
           shape="circle"
@@ -80,7 +79,7 @@ const CollapsibleHeader: React.FC<CollapsibleHeaderProps> = ({
         />
       </div>
       
-      {/* Collapsible Content */}
+
       <div style={{ 
         padding: collapsed ? '0 32px' : '0 32px 32px 32px',
         maxHeight: collapsed ? '0' : '500px',
@@ -90,7 +89,7 @@ const CollapsibleHeader: React.FC<CollapsibleHeaderProps> = ({
         position: 'relative',
         zIndex: 2
       }}>
-        {/* Decorative elements */}
+
         <div style={{
           position: 'absolute',
           width: '300px',

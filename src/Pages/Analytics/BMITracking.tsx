@@ -116,7 +116,6 @@ const BMISummaryRow: React.FC<BMISummaryRowProps> = ({
                   Add New BMI Record
                 </Button>
                 
-                {/* BMI Export options */}
                 {selectedChild && selectedChildData && (
                   <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                     <BMIPDFExport 
@@ -124,11 +123,11 @@ const BMISummaryRow: React.FC<BMISummaryRowProps> = ({
                       bmiRecords={chartData}
                     />
                     
-                    {/* Add the single record export button if there are records */}
+
                     {chartData.length > 0 && (
                       <SingleBMIExport 
                         childData={selectedChildData}
-                        bmiRecord={chartData[chartData.length - 1]} // Use the most recent record
+                        bmiRecord={chartData[chartData.length - 1]} 
                       />
                     )}
                   </Space>
@@ -206,7 +205,7 @@ const BMISummaryRow: React.FC<BMISummaryRowProps> = ({
                   padding: '24px', 
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' 
                 }}>
-                  {/* LineChart implementation would be here - using placeholder text */}
+
                   <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Text>Chart will be rendered here with recharts</Text>
                   </div>

@@ -33,7 +33,7 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
   const chartRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Function to get BMI category
+
   const getBMICategory = (bmi: number) => {
     if (bmi < 18.5) return { label: 'Underweight', color: '#91caff' };
     if (bmi < 25) return { label: 'Normal', color: '#52c41a' };
@@ -61,38 +61,38 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
     setIsLoading(true);
     
     try {
-      // Ensure chart is visible when converting to canvas
+
       chartRef.current.style.display = 'block';
       chartRef.current.style.position = 'fixed';
       chartRef.current.style.left = '-9999px';
       chartRef.current.style.visibility = 'visible';
       
-      // Wait a bit to ensure chart is rendered
+
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Convert chart to canvas and get image data
+
       const canvas = await html2canvas(chartRef.current, {
-        scale: 2, // Increase resolution
+        scale: 2, 
         logging: false,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff'
       });
       
-      // Restore hidden state
+
       chartRef.current.style.display = 'none';
       
       const chartImage = canvas.toDataURL('image/png');
 
-      // Create new PDF document
+
       const doc = new jsPDF('portrait', 'mm', 'a4');
       
-      // Add title
+
       doc.setFontSize(18);
-      doc.setTextColor(30, 58, 138); // Dark blue color
+      doc.setTextColor(30, 58, 138); 
       doc.text('BMI Tracking Report', 105, 20, { align: 'center' });
       
-      // Add child information
+
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text(`Child Name: ${childData.name}`, 20, 35);
@@ -100,26 +100,26 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
       doc.text(`Gender: ${childData.gender === 0 ? 'Male' : 'Female'}`, 20, 49);
       doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 20, 56);
       
-      // Add BMI category legend
+
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text('BMI Categories:', 20, 70);
       
-      doc.setTextColor(145, 202, 255); // Underweight
+      doc.setTextColor(145, 202, 255); 
       doc.text('Underweight (< 18.5)', 40, 70);
       
-      doc.setTextColor(82, 196, 26); // Normal
+      doc.setTextColor(82, 196, 26); 
       doc.text('Normal (18.5-24.9)', 90, 70);
       
-      doc.setTextColor(250, 173, 20); // Overweight
+      doc.setTextColor(250, 173, 20);
       doc.text('Overweight (25-29.9)', 140, 70);
       
-      doc.setTextColor(255, 77, 79); // Obese
+      doc.setTextColor(255, 77, 79); 
       doc.text('Obese (≥ 30)', 190, 70);
       
-      // If there are BMI records, add the table
+
       if (bmiRecords.length > 0) {
-        // Create table data
+
         const tableData = bmiRecords.map(record => [
           formatDate(record.date),
           record.weight.toFixed(1),
@@ -128,7 +128,7 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
           getBMICategory(record.bmi).label
         ]);
         
-        // Add table using the autoTable function directly
+
         autoTable(doc, {
           head: [['Date', 'Weight (kg)', 'Height (cm)', 'BMI', 'Status']],
           body: tableData,
@@ -139,39 +139,39 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
           margin: { top: 80 }
         });
         
-        // Get final Y position after table - access this differently since we're using the function
+
         const finalY = (doc as any).lastAutoTable?.finalY || 120;
         
-        // Add chart title
+
         doc.setFontSize(14);
         doc.setTextColor(30, 58, 138);
         doc.text('BMI Trend Chart', 105, finalY + 15, { align: 'center' });
         
-        // Add chart to PDF
+
         const imgWidth = 170;
         const imgHeight = 80;
         doc.addImage(
           chartImage, 
           'PNG', 
-          20, // X position
-          finalY + 20, // Y position
+          20, 
+          finalY + 20, 
           imgWidth, 
           imgHeight
         );
         
-        // Add note about the chart
+
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
         doc.text('Note: This report shows BMI trends over time. Regular monitoring helps ensure healthy development.', 
           105, finalY + 110, { align: 'center', maxWidth: 170 });
       } else {
-        // If no records, add a message
+
         doc.setTextColor(100, 100, 100);
         doc.text('No BMI data available. Please add measurements to see trends.', 
           105, 100, { align: 'center' });
       }
       
-      // Add footer
+
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -190,7 +190,7 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
         );
       }
       
-      // Save PDF with child's name
+
       const fileName = `${childData.name.replace(/\s+/g, '_')}_BMI_Report.pdf`;
       doc.save(fileName);
       
@@ -204,11 +204,11 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
 
   return (
     <>
-      {/* Hidden chart for PDF rendering */}
+
       <div 
         ref={chartRef} 
         style={{ 
-          display: 'none', // Initially hidden
+          display: 'none', 
           width: '600px',
           height: '300px',
           background: 'white',

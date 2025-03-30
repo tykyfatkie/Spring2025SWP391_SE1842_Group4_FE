@@ -112,7 +112,7 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
       doc.text(`Age: ${ageText}`, 30, 72);
       doc.text(`Gender: ${childData.gender === 0 ? 'Male' : 'Female'}`, 120, 56);
       
-      // BMI Assessment section
+
       doc.setFillColor(255, 255, 255);
       doc.rect(20, 85, 170, 100, 'F');
       doc.setDrawColor(200, 200, 200);
