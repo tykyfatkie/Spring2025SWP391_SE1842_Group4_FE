@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Layout, Typography, Button, Card, Form, Input, message, Space, Divider } from 'antd';
 import { LockOutlined, KeyOutlined, CheckCircleOutlined, ArrowRightOutlined, UserOutlined } from '@ant-design/icons';
 import AppFooter from '../../components/Footer/Footer';

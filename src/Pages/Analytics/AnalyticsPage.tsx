@@ -3,7 +3,6 @@ import { Layout, message, Row, Col, Modal, Form } from 'antd';
 import axios from 'axios';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import moment from 'moment';
-import SingleBMIExport from './SingleBMIExport';
 import CollapsibleHeader from './CollapsibleHeader';
 import BMIDetailsCard from './BMIDetailsCard';
 import BMIModalForm from './BMIModalForm';
@@ -199,6 +198,28 @@ const BMITrackingPage: React.FC = () => {
         
         // Fetch updated BMI data after saving
         await fetchBMIData(selectedChild);
+        
+        Modal.confirm({
+          title: 'BMI Record Saved',
+          content: 'Would you like to export this BMI record as a PDF?',
+          okText: 'Yes, Export',
+          cancelText: 'No, Thanks',
+          onOk: () => {
+            if (selectedChildData && chartData.length > 0) {
+              const latestRecord = chartData[chartData.length - 1];
+              import('./SingleBMIExport').then(module => {
+                const { generatePDF } = module.default.prototype;
+                generatePDF.call({
+                  childData: selectedChildData,
+                  bmiRecord: latestRecord
+                });
+              }).catch(() => {
+              });
+            } else {
+              message.warning('No data available to export');
+            }
+          }
+        });
       }
     } catch (error: any) {
       console.error("BMI Save Error:", error);

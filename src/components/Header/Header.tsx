@@ -14,7 +14,6 @@ const AppHeader: React.FC = () => {
   const [hover, setHover] = useState(false);
   const [userName, setUserName] = useState<string>("");
   
-  // Màu xanh dương chính
   const primaryBlue = "#0066CC";
 
   useEffect(() => {
@@ -22,7 +21,6 @@ const AppHeader: React.FC = () => {
     setIsAuthenticated(!!token);
     const path = location.pathname;
 
-    // Reset selectedKey if not in main navigation pages
     const mainNavPages = ["/home", "/contact-us", "/about-us", "/child-manage"];
     if (!mainNavPages.some(page => path.includes(page))) {
       setSelectedKey("");
@@ -34,29 +32,26 @@ const AppHeader: React.FC = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/users/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: "*/*",
+          },
+        });
+        setUserName(response.data.data.userName);
+      } catch (error) {
+        console.error("Failed to load user profile:", error);
+      }
+    };
 
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token) return;
-
-  const fetchProfile = async () => {
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/users/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          accept: "*/*",
-        },
-      });
-      setUserName(response.data.data.userName);
-    } catch (error) {
-      console.error("Failed to load user profile:", error);
-    }
-  };
-
-  fetchProfile();
-}, []);
-
+    fetchProfile();
+  }, []);
 
   const handleLogoClick = () => navigate("/home");
 
@@ -141,7 +136,7 @@ useEffect(() => {
     </Menu>
   );
 
-  const menuItemStyle = (key: string) => ({
+  const menuItemStyle = (key: string): React.CSSProperties => ({
     cursor: "pointer", 
     color: selectedKey === key ? primaryBlue : "#000",
     fontSize: "18px",
@@ -152,10 +147,7 @@ useEffect(() => {
     display: "flex",
     alignItems: "center",
     borderBottom: selectedKey === key ? `4px solid ${primaryBlue}` : "none",
-    transition: "color 0.3s ease",
-    "&:hover": {
-      color: primaryBlue
-    }
+    transition: "color 0.3s ease"
   });
 
   return (
@@ -235,12 +227,10 @@ useEffect(() => {
             </div>
           </Col>
 
-          {/* Authentication Section */}
           <Col>
             <Space size="middle">
               {isAuthenticated ? (
                 <>
-                  {/* Package Button cho người dùng đã đăng nhập */}
                   <Button
                     type="primary"
                     icon={<GiftOutlined />}
@@ -269,15 +259,14 @@ useEffect(() => {
                       icon={<UserOutlined />} 
                       style={{ 
                         cursor: "pointer", 
-                        backgroundColor: primaryBlue,
-                        size: 40 
-                      }} 
+                        backgroundColor: primaryBlue
+                      }}
+                      size={40}  
                     />
                   </Dropdown>
                 </>
               ) : (
                 <>
-                  {/* Package Button cho người dùng chưa đăng nhập */}
                   <Button
                     type="primary"
                     icon={<GiftOutlined />}

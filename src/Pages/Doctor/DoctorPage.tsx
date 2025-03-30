@@ -290,15 +290,6 @@ const DoctorPage: React.FC = () => {
     }
   };
 
-  interface RequestData {
-    dto: {
-      doctorReceiveId: string;
-      title: string;
-      description: string;
-      attachments: string;
-    }
-  }
-
   const handleSendMessage = async (): Promise<void> => {
     try {
       const token = localStorage.getItem("token");
@@ -320,16 +311,14 @@ const DoctorPage: React.FC = () => {
       // Upload any pending files first
       const allFileUrls = await uploadPendingFiles();
       
-      // Create a request object with attachments as a string (JSON.stringify the array)
-      const requestData: RequestData = {
-        dto: {
-          doctorReceiveId: selectedDoctorId,
-          title: 'Consultation Request',
-          description: messageText,
-          attachments: JSON.stringify(allFileUrls) // Convert array to JSON string
-        }
+
+      const requestData = {
+        doctorReceiveId: selectedDoctorId,
+        title: 'Consultation Request',
+        description: messageText,
+        attachments: JSON.stringify(allFileUrls) 
       };
-  
+
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
         method: 'POST',
         headers: {
