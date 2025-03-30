@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Layout, message, Row, Col, Modal, Form } from 'antd';
 import axios from 'axios';
 import Sidebar from '../../components/Sidebar/Sidebar';
-import moment from 'moment';
 import CollapsibleHeader from './CollapsibleHeader';
 import BMIDetailsCard from './BMIDetailsCard';
 import BMIModalForm from './BMIModalForm';
@@ -49,7 +48,7 @@ const BMITrackingPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingBMI, setFetchingBMI] = useState<boolean>(false);
   const [bmiModalVisible, setBmiModalVisible] = useState<boolean>(false);
-  const [collapsed, setCollapsed] = useState<boolean>(false); // New state for collapse functionality
+  const [] = useState<boolean>(false); 
   const [form] = Form.useForm();
 
   // Function to get BMI category
@@ -230,10 +229,7 @@ const BMITrackingPage: React.FC = () => {
     }
   };
 
-  // Function to toggle collapsible section
-  const toggleCollapse = () => {
-    setCollapsed(!collapsed);
-  };
+
 
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white', marginRight: '25px' }}>

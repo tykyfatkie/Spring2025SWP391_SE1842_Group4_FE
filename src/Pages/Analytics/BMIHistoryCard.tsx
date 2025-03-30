@@ -3,6 +3,7 @@ import { Card, Spin, Typography, Tag, Button, Alert, Select, DatePicker } from '
 import { LineChartOutlined, PlusOutlined } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Brush } from 'recharts';
 import moment from 'moment';
+import type { Moment } from 'moment';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -30,7 +31,8 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
 }) => {
   // Set hourly as default display mode
   const [displayMode, setDisplayMode] = useState<'day' | 'month' | 'year' | 'hour'>('hour');
-  const [dateRange, setDateRange] = useState<[moment.Moment | null, moment.Moment | null]>([null, null]);
+  // Fix: Use [Moment, Moment] | null type instead of RangeValue
+  const [dateRange, setDateRange] = useState<[Moment, Moment] | null>(null);
 
   // Effect to set initial date range for hourly view
   useEffect(() => {
@@ -43,7 +45,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     }
   }, [chartData, displayMode]);
 
-  // Hàm kiểm tra BMI và trả về thông báo cảnh báo
+  // Function to check BMI and return warning message
   const getBMIWarning = (bmi: number) => {
     if (bmi < 18.5) {
       return {
@@ -68,7 +70,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     const itemDate = moment(item.dateTime);
     
     // Filter by date range if set
-    const isWithinDateRange = !dateRange[0] || !dateRange[1] || 
+    const isWithinDateRange = !dateRange || !dateRange[0] || !dateRange[1] || 
       (itemDate.isSameOrAfter(dateRange[0]) && itemDate.isSameOrBefore(dateRange[1]));
     
     return isWithinDateRange;
@@ -188,7 +190,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     );
   };
 
-  // Lấy BMI của bản ghi mới nhất
+  // Get BMI of latest record
   const latestBMI = chartData.length > 0 ? chartData[chartData.length - 1].bmi : null;
   const bmiWarning = latestBMI ? getBMIWarning(latestBMI) : null;
 
@@ -262,7 +264,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
         </div>
       ) : aggregatedData.length > 0 ? (
         <>
-          {/* Hiển thị cảnh báo nếu có */}
+          {/* Display warning if available */}
           {bmiWarning && (
             <Alert
               type={bmiWarning.type as 'warning' | 'error'}
@@ -286,7 +288,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
                 onChange={(value) => {
                   setDisplayMode(value);
                   // Reset date range when changing display mode
-                  setDateRange([null, null]);
+                  setDateRange(null);
                 }}
                 style={{ width: 120 }}
               >
@@ -300,8 +302,8 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
             <RangePicker 
               value={dateRange}
               onChange={(dates) => {
-                // Nếu không chọn ngày, giữ nguyên
-                setDateRange(dates ? [dates[0], dates[1]] : [null, null]);
+                // Fixed: properly type the dates parameter
+                setDateRange(dates as [Moment, Moment] | null);
               }}
               style={{ width: 300 }}
             />

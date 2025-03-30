@@ -9,7 +9,7 @@ const { TextArea } = Input;
 const ContactPage: React.FC = () => {
   const [form] = Form.useForm();
 
-  const onFinish = (values: any) => {
+  const onFinish = () => {
     message.success('Message sent successfully! We will get back to you soon.');
     form.resetFields();
   };

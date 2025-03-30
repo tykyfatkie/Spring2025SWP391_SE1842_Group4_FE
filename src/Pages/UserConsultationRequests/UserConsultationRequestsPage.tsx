@@ -59,7 +59,7 @@ const UserConsultationRequests: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error fetching consultation requests:', error);
-      message.error(error.response?.data?.message || 'Failed to fetch consultation requests');
+
       setRequests([]);
     } finally {
       setLoading(false);

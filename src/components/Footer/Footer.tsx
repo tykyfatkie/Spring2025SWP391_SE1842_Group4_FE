@@ -1,6 +1,6 @@
-import { Layout, Row, Col, Typography, Space, Button, Divider } from 'antd';
-import { FacebookOutlined, TwitterOutlined, InstagramOutlined, YoutubeOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Layout, Row, Col, Typography, Space, Button, Divider, Input } from 'antd';
+import { FacebookOutlined, TwitterOutlined, InstagramOutlined, YoutubeOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined, SendOutlined } from '@ant-design/icons';
+import { Form, Link } from 'react-router-dom';
 
 const { Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
