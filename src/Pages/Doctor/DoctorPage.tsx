@@ -301,15 +301,13 @@ const DoctorPage: React.FC = () => {
       const allFileUrls = await uploadPendingFiles();
       
 
-      const requestData: RequestData = {
-        dto: {
-          doctorReceiveId: selectedDoctorId,
-          title: 'Consultation Request',
-          description: messageText,
-          attachments: JSON.stringify(allFileUrls) 
-        }
+      const requestData = {
+        doctorReceiveId: selectedDoctorId,
+        title: 'Consultation Request',
+        description: messageText,
+        attachments: JSON.stringify(allFileUrls) 
       };
-  
+
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
         method: 'POST',
         headers: {

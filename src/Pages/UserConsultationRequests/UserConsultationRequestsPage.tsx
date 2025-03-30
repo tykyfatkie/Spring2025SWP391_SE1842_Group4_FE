@@ -35,7 +35,6 @@ const UserConsultationRequests: React.FC = () => {
     try {
       const token = localStorage.getItem('token'); 
       if (!token) {
-        message.error('Authentication token missing');
         setLoading(false);
         return;
       }
@@ -53,7 +52,6 @@ const UserConsultationRequests: React.FC = () => {
       } else if (response.data && Array.isArray((response.data as ApiResponse).data)) {
         setRequests((response.data as ApiResponse).data || []);
       } else {
-        message.warning('No consultation requests found');
         setRequests([]);
       }
     } catch (error: any) {
