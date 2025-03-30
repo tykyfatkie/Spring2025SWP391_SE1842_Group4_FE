@@ -4,6 +4,7 @@ import { LineChartOutlined, PlusOutlined } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Brush } from 'recharts';
 import moment from 'moment';
 import type { Moment } from 'moment';
+import { RangeValue } from 'rc-picker/lib/interface';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -31,7 +32,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
 }) => {
   // Set hourly as default display mode
   const [displayMode, setDisplayMode] = useState<'day' | 'month' | 'year' | 'hour'>('hour');
-  // Fix: Use [Moment, Moment] | null type instead of RangeValue
+  // Use [Moment, Moment] | null type instead of RangeValue
   const [dateRange, setDateRange] = useState<[Moment, Moment] | null>(null);
 
   // Effect to set initial date range for hourly view
@@ -285,7 +286,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
               <Text>Display by:</Text>
               <Select 
                 value={displayMode} 
-                onChange={(value) => {
+                onChange={(value: 'day' | 'month' | 'year' | 'hour') => {
                   setDisplayMode(value);
                   // Reset date range when changing display mode
                   setDateRange(null);
@@ -299,14 +300,13 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
               </Select>
             </div>
             
-            <RangePicker 
+            {/* <RangePicker 
               value={dateRange}
-              onChange={(dates) => {
-                // Fixed: properly type the dates parameter
+              onChange={(dates: RangeValue<Moment>) => {
                 setDateRange(dates as [Moment, Moment] | null);
               }}
               style={{ width: 300 }}
-            />
+            /> */}
           </div>
 
           <div style={{ 
