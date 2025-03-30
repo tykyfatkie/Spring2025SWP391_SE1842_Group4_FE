@@ -8,7 +8,6 @@ import type { TableColumnsType } from "antd";
 
 const { Title } = Typography;
 
-// ============ ĐỊNH NGHĨA KIỂU DỮ LIỆU ============
 interface Child {
   id: string;
   fullName?: string;
@@ -16,19 +15,14 @@ interface Child {
   dateOfBirth?: string;
   parentName?: string;
   bloodType?: string;
-  // Các trường khác từ API nếu có
 }
 
-// ============ COMPONENT CHÍNH ============
 const ChildrenList = () => {
-  // ============ STATE ============
   const [children, setChildren] = useState<Child[]>([]);
   const [filteredChildren, setFilteredChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState<string>("");
   const navigate = useNavigate();
-
-  // ============ API CALLS ============
   const fetchChildrenByParent = async () => {
     setLoading(true);
     try {
@@ -70,7 +64,6 @@ const ChildrenList = () => {
     }
   };
 
-  // ============ SIDE EFFECTS ============
   useEffect(() => {
     fetchChildrenByParent();
   }, []);
@@ -79,7 +72,6 @@ const ChildrenList = () => {
     applyFilters();
   }, [children, searchText]);
 
-  // ============ FILTERS ============
   const applyFilters = () => {
     let result = [...children];
     
@@ -92,12 +84,10 @@ const ChildrenList = () => {
     setFilteredChildren(result);
   };
 
-  // ============ HANDLERS ============
   const viewChildDetails = (childId: string) => {
     navigate(`/children/${childId}`);
   };
 
-  // ============ TABLE CONFIG ============
   const columns: TableColumnsType<Child> = [
     {
       title: "Tên",
@@ -145,7 +135,6 @@ const ChildrenList = () => {
     },
   ];
 
-  // ============ RENDER ============
   return (
     <div style={{ padding: "20px" }}>
       <Card>

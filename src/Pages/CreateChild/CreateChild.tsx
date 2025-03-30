@@ -77,6 +77,10 @@ const CreateChild: React.FC = () => {
     form.resetFields();
   };
 
+  function day(): string | number | import("dayjs").Dayjs | Date | null | undefined {
+    throw new Error('Function not implemented.');
+  }
+
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white' }}>
       <Layout>
@@ -226,7 +230,7 @@ const CreateChild: React.FC = () => {
                       }} 
                       format="YYYY-MM-DD" 
                       placeholder="YYYY-MM-DD"
-                      disabledDate={(current) => current && current.isAfter(moment(), 'day')}
+                      disabledDate={(current) => current && current.isAfter(day(), 'day')}
                     /> 
                   </Form.Item>
                   
