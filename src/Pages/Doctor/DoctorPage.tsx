@@ -28,8 +28,8 @@ interface UploadResponse {
   url: string;
 }
 
-// Add a default placeholder image
-const DEFAULT_PLACEHOLDER = '/assets/doctor-placeholder.png'; // Update with your actual placeholder path
+
+const DEFAULT_PLACEHOLDER = '/assets/doctor-placeholder.png';
 
 const DoctorPage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,10 +45,10 @@ const DoctorPage: React.FC = () => {
   const [sendingMessage, setSendingMessage] = useState<boolean>(false);
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   
-  // Doctor role ID constant
+
   const DOCTOR_ROLE_ID = '00000000-0000-0000-0000-000000000003';
 
-  // Memoize the fetch doctors function to prevent unnecessary re-renders
+
   const fetchDoctors = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
@@ -56,47 +56,41 @@ const DoctorPage: React.FC = () => {
         throw new Error("No token found");
       }
 
-      // Using the users/all API with RoleIds filter
+   
       const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/all?RoleIds=${DOCTOR_ROLE_ID}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Cache-Control': 'no-cache', // Prevent caching issues
+          'Cache-Control': 'no-cache', 
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      // Get the response as JSON directly
       let data;
       try {
         data = await response.json();
       } catch (parseError: any) {
-        const responseText = await response.text();
         throw new Error(`Failed to parse API response as JSON: ${parseError.message}`);
       }
       
-      // Handle the nested data structure correctly
+
       let doctorsData: User[] = [];
       
       if (data && typeof data === 'object') {
-        // First check if the response has a 'data' property
+
         if (data.data) {
-          // Check if data.data is an array
+
           if (Array.isArray(data.data)) {
             doctorsData = data.data;
           } 
-          // Check if data.data is an object that contains another 'data' array
+
           else if (data.data.data && Array.isArray(data.data.data)) {
             doctorsData = data.data.data;
           }
-          // If data.data is a single object, wrap it in an array
+
           else if (typeof data.data === 'object' && !Array.isArray(data.data)) {
             doctorsData = [data.data];
           }
         } 
-        // Check other common response patterns
+
         else if (Array.isArray(data)) {
           doctorsData = data;
         } else if (data.users && Array.isArray(data.users)) {
@@ -106,15 +100,12 @@ const DoctorPage: React.FC = () => {
         } else if (data.results && Array.isArray(data.results)) {
           doctorsData = data.results;
         } else {
-          // Check if data itself is a valid doctor object (single doctor case)
           if (data.id && data.name) {
             doctorsData = [data];
           } else {
-            throw new Error(`Could not find doctors array in API response.`);
           }
         }
       } else {
-        throw new Error(`API response is not a valid object: ${typeof data}`);
       }
       
       setDoctors(doctorsData);
@@ -136,17 +127,14 @@ const DoctorPage: React.FC = () => {
     setIsModalVisible(true);
   };
 
-  // Helper function to validate image URLs
   const isValidImageUrl = (url?: string): boolean => {
     if (!url) return false;
     return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/');
   };
 
-  // Improved image URL getter with validation
   const getDoctorImageUrl = (doctor: User): string => {
     const doctorId = doctor.id;
     
-    // Check if this image previously had a loading error
     if (imageLoadErrors[doctorId]) {
       return DEFAULT_PLACEHOLDER;
     }
@@ -157,11 +145,10 @@ const DoctorPage: React.FC = () => {
       return doctor.profileImg!;
     }
     
-    // Return default placeholder if no valid image URL
     return DEFAULT_PLACEHOLDER;
   };
 
-  // Image error handler to track failed images
+
   const handleImageError = (doctorId: string) => {
     setImageLoadErrors(prev => ({
       ...prev,
@@ -169,7 +156,7 @@ const DoctorPage: React.FC = () => {
     }));
   };
 
-  // These are the allowed file types
+
   const acceptedFileTypes = [
     'image/jpeg',
     'image/jpg',
@@ -178,7 +165,7 @@ const DoctorPage: React.FC = () => {
     'application/pdf'
   ];
 
-  // Function to check if file type is allowed
+ 
   const isFileTypeAccepted = (file: any): boolean => {
     const isAccepted = acceptedFileTypes.includes(file.type);
     if (!isAccepted) {
@@ -187,11 +174,11 @@ const DoctorPage: React.FC = () => {
     return isAccepted;
   };
 
-  // Function to upload a single file
+
   const uploadFile = async (file: File): Promise<string> => {
     const token = localStorage.getItem("token");
     if (!token) {
-      throw new Error("No token found");
+     
     }
 
     const formData = new FormData();
@@ -206,13 +193,7 @@ const DoctorPage: React.FC = () => {
         },
         body: formData
       });
-
-      if (!response.ok) {
-        const responseText = await response.text();
-        throw new Error(`Upload failed with status: ${response.status}. Response: ${responseText.substring(0, 500)}`);
-      }
-
-      // Try to parse the JSON response
+    
       const data: UploadResponse = await response.json();
       
       if (data && data.url) {
@@ -225,15 +206,15 @@ const DoctorPage: React.FC = () => {
     }
   };
 
-  // Function to upload all pending files
+
   const uploadPendingFiles = async (): Promise<string[]> => {
-    // Filter files that need to be uploaded (no URL yet)
+
     const pendingFiles = fileList.filter(fileItem => 
       fileItem.originFileObj && !fileItem.url && fileItem.status !== 'error'
     );
     
     if (pendingFiles.length === 0) {
-      // Return current uploaded URLs if no new files to upload
+     
       return [...uploadedFileUrls];
     }
 
@@ -241,16 +222,16 @@ const DoctorPage: React.FC = () => {
       setUploading(true);
       
       const newUrls: string[] = [];
-      const allUrls = [...uploadedFileUrls]; // Start with already uploaded URLs
+      const allUrls = [...uploadedFileUrls]; 
       
-      // Upload files one by one
+      
       for (const fileItem of pendingFiles) {
         try {
           const url = await uploadFile(fileItem.originFileObj);
           newUrls.push(url);
           allUrls.push(url);
           
-          // Update file item with URL and status
+         
           fileItem.url = url;
           fileItem.status = 'done';
         } catch (error: any) {
@@ -259,22 +240,22 @@ const DoctorPage: React.FC = () => {
         }
       }
       
-      // Update the file list
+      
       setFileList([...fileList]);
       
-      // Update state with all URLs
+     
       setUploadedFileUrls(allUrls);
       
       return allUrls;
     } catch (error: any) {
       message.error(`Error uploading files: ${error.message}`);
-      return [...uploadedFileUrls]; // Return existing URLs on error
+      return [...uploadedFileUrls];
     } finally {
       setUploading(false);
     }
   };
 
-  // Manual upload function
+  
   const handleUploadFiles = async () => {
     if (fileList.length === 0) {
       message.info('No files selected for upload');
@@ -283,7 +264,7 @@ const DoctorPage: React.FC = () => {
 
     message.loading('Uploading files...', 0);
     const urls = await uploadPendingFiles();
-    message.destroy(); // Remove the loading message
+    message.destroy(); 
     
     if (urls.length > 0) {
       message.success(`Successfully uploaded ${urls.length} file(s)`);
@@ -303,7 +284,6 @@ const DoctorPage: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("No token found");
       }
   
       if (!messageText.trim()) {
@@ -313,20 +293,20 @@ const DoctorPage: React.FC = () => {
 
       setSendingMessage(true);
       
-      // First, upload any pending files
+   
       const messageLoadingKey = 'sendingMessage';
       message.loading({ content: 'Uploading files and sending message...', key: messageLoadingKey });
       
-      // Upload any pending files first
+   
       const allFileUrls = await uploadPendingFiles();
       
-      // Create a request object with attachments as a string (JSON.stringify the array)
+
       const requestData: RequestData = {
         dto: {
           doctorReceiveId: selectedDoctorId,
           title: 'Consultation Request',
           description: messageText,
-          attachments: JSON.stringify(allFileUrls) // Convert array to JSON string
+          attachments: JSON.stringify(allFileUrls) 
         }
       };
   
@@ -350,21 +330,19 @@ const DoctorPage: React.FC = () => {
       setFileList([]);
       setUploadedFileUrls([]);
     } catch (error: any) {
-      message.error(`Failed to send message: ${error.message}`);
     } finally {
       setSendingMessage(false);
     }
   };
 
   const handleFileChange = ({ fileList }: any) => {
-    // Filter out files that don't pass validation
+
     const validFiles = fileList.filter((file: any) => {
-      // If the file is already uploaded or being uploaded, consider it valid
+ 
       if (file.status === 'done' || file.status === 'uploading') {
         return true;
       }
       
-      // For new files, validate the type
       return acceptedFileTypes.includes(file.type);
     });
     
@@ -377,7 +355,6 @@ const DoctorPage: React.FC = () => {
       return Upload.LIST_IGNORE;
     }
     
-    // Always return false to prevent auto upload
     return false;
   };
 
@@ -421,7 +398,7 @@ const DoctorPage: React.FC = () => {
                           alt={doctor.name || "Doctor Image"} 
                           src={getDoctorImageUrl(doctor)} 
                           onError={() => handleImageError(doctor.id)}
-                          loading="lazy" // Add lazy loading
+                          loading="lazy" 
                           style={{ 
                             objectFit: 'cover', 
                             width: '100%', 

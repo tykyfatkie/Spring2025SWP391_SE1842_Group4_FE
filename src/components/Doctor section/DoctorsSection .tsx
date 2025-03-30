@@ -37,7 +37,7 @@ const DoctorsSection = ({ doctors, loading, error }: { doctors: Doctor[], loadin
             if (profileResponse.ok) {
               const profileData = await profileResponse.json();
               if (profileData.data && Array.isArray(profileData.data) && profileData.data.length > 0) {
-                doctor.user = { name: profileData.data[0].user?.name || "Bác sĩ chưa cập nhật tên" };
+                doctor.user = { name: profileData.data[0].user?.name || "Doctor has not updated name" };
               }
             }
           }
@@ -76,7 +76,6 @@ const DoctorsSection = ({ doctors, loading, error }: { doctors: Doctor[], loadin
     <div style={{ padding: '90px 0', background: '#e6f7ff', color: '#000' }}>
       <Row justify="center" align="middle" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
         <Col xs={24} md={10} style={{ paddingRight: '40px' }}>
-          {/* Styled text section similar to Starbucks ad but with original colors */}
           <div style={{ textAlign: 'left', marginBottom: '30px' }}>
             <Title level={2} style={{ 
               color: '#0050b3', 
@@ -132,14 +131,14 @@ const DoctorsSection = ({ doctors, loading, error }: { doctors: Doctor[], loadin
                 >
                   <div>
                     <img
-                      src={doctor.profileImg || "https://via.placeholder.com/110"}
-                      alt={doctor.user?.name || "Doctor Image"}
+                      src={doctor.profileImg}
+                      alt={doctor.user?.name}
                       style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                     />
                   </div>
                   <Card.Meta
-                    title={<div>{doctor.user?.name || "Bác sĩ chưa cập nhật tên"}</div>}
-                    description={<p>Chuyên môn: {doctor.specialize || "Không có chuyên môn"}</p>}
+                    title={<div>{doctor.user?.name || "Doctor has not updated name"}</div>}
+                    description={<p>Specialization: {doctor.specialize || "No specialization"}</p>}
                   />
                 </Card>
               </SwiperSlide>

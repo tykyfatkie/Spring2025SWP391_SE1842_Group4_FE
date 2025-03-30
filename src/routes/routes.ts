@@ -11,7 +11,6 @@ import ForgotPasswordPage from "../Pages/ForgotPassword/ForgotPasswordPage";
 import UpdateChildPage from "../Pages/UpdateChild/UpdateChildPage";
 import CreateChild from "../Pages/CreateChild/CreateChild";
 import DoctorPage from "../Pages/Doctor/DoctorPage";
-import DoctorProfilePage from "../Pages/Doctor/DoctorProfilePage";
 import ParentProfilePage from "../Pages/Parent/ParentProfilePage";
 import DefaultLayout from "../layouts/DefaultLayout";
 import AdminPage from "../Pages/Dashboard/AdminPage";
@@ -60,7 +59,6 @@ const routes: LayoutRoute[] = [
       { path: "/child-create", component: ProtectedComponent(CreateChild, ["User"]) },
       { path: "/child-analytics", component: ProtectedComponent(BMITrackingPage, ["User"]) },
       { path: "/doctor", component: ProtectedComponent(DoctorPage, ["User", "Doctor"]) },
-      { path: "/doctor/:id", component: ProtectedComponent(DoctorProfilePage, ["User"]) },
       { path: "/my-doctor", component: ProtectedComponent(MyDoctorProfilePage, [ "Doctor"]) },
       { path: "/profile", component: ProtectedComponent(ParentProfilePage, ["User", "Doctor"]) },
       { path: "/child-manage", component: ProtectedComponent(ChildManage, ["User"]) },
