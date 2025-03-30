@@ -50,7 +50,7 @@ const BMITrackingPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingBMI, setFetchingBMI] = useState<boolean>(false);
   const [bmiModalVisible, setBmiModalVisible] = useState<boolean>(false);
-  const [] = useState<boolean>(false); 
+  const [collapsed, setCollapsed] = useState<boolean>(false); // New state for collapse functionality
   const [form] = Form.useForm();
 
   // Function to get BMI category
@@ -78,6 +78,7 @@ const BMITrackingPage: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+        message.error("Authentication token missing. Please login again.");
         return;
       }
       
@@ -103,6 +104,7 @@ const BMITrackingPage: React.FC = () => {
         throw new Error("Invalid data format received");
       }
     } catch (error: any) {
+      message.error(error.response?.data?.message || "Failed to load children data");
     } finally {
       setLoading(false);
     }
@@ -113,6 +115,7 @@ const BMITrackingPage: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+        message.error("Authentication token missing. Please login again.");
         return;
       }
       
@@ -136,6 +139,7 @@ const BMITrackingPage: React.FC = () => {
         throw new Error("Invalid BMI data format received");
       }
     } catch (error: any) {
+      message.error(error.response?.data?.message || "Failed to load BMI tracking data");
       setChartData([]);
     } finally {
       setFetchingBMI(false);
@@ -151,32 +155,33 @@ const BMITrackingPage: React.FC = () => {
     form.resetFields();
   };
 
-  const handleSaveBMI = async () => {
+  const handleSaveBMI = async (values: any) => {
     try {
       if (!selectedChild || !selectedChildData) {
         message.error("No child selected");
         return;
       }
-
-      const values = await form.validateFields();
+  
       const token = localStorage.getItem("token");
-
+  
       if (!token) {
+        message.error("Authentication information missing. Please login again.");
         return;
       }
-
-      // Calculate age in months from date of birth
-      const ageInMonths = moment().diff(moment(selectedChildData.doB, "YYYY-MM-DD"), "months");
-
+  
+      // Đảm bảo chúng ta KHÔNG xử lý doY ở đây nữa
+      // vì đã được xử lý trong BMIModalForm
       const payload = {
         childId: selectedChild,
         height: Number(values.height),
         weight: Number(values.weight),
-        ageInMonths: ageInMonths,
         gender: selectedChildData.gender,
         notes: values.notes?.trim() || "",
+        doY: values.doY, // Sử dụng giá trị đã được định dạng từ BMIModalForm
       };
-
+  
+      console.log("BMI Save Payload:", payload);
+      
       const response = await axios.post(
         `${import.meta.env.VITE_API_ENDPOINT}/bmi/save`,
         payload,
@@ -187,37 +192,27 @@ const BMITrackingPage: React.FC = () => {
           },
         }
       );
-
+  
       if (response.status === 200) {
         message.success("BMI record saved successfully!");
         setBmiModalVisible(false);
         
+        // Fetch updated BMI data after saving
         await fetchBMIData(selectedChild);
-        
-        Modal.confirm({
-          title: 'BMI Record Saved',
-          content: 'Would you like to export this BMI record as a PDF?',
-          okText: 'Yes, Export',
-          cancelText: 'No, Thanks',
-          onOk: () => {
-            if (selectedChildData && chartData.length > 0) {
-              const latestRecord = chartData[chartData.length - 1];
-              const exporter = new SingleBMIExport({
-                childData: selectedChildData,
-                bmiRecord: latestRecord
-              });
-              exporter.generatePDF();
-            } else {
-              message.warning('No data available to export');
-            }
-          }
-        });
       }
     } catch (error: any) {
+      console.error("BMI Save Error:", error);
+      console.error("Error response data:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+    
+      message.error(error.response?.data?.message || "Failed to save BMI record.");
     }
   };
 
   // Function to toggle collapsible section
+  const toggleCollapse = () => {
+    setCollapsed(!collapsed);
+  };
 
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white', marginRight: '25px' }}>
