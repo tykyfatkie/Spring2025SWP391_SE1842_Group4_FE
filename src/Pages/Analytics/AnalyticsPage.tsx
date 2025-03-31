@@ -154,6 +154,7 @@ const BMITrackingPage: React.FC = () => {
   };
 
   const handleSaveBMI = async (values: any) => {
+    console.log("⭐ handleSaveBMI received values:", JSON.stringify(values));
     try {
       if (!selectedChild || !selectedChildData) {
         message.error("No child selected");
@@ -167,18 +168,17 @@ const BMITrackingPage: React.FC = () => {
         return;
       }
   
-      // Đảm bảo chúng ta KHÔNG xử lý doY ở đây nữa
-      // vì đã được xử lý trong BMIModalForm
+      // Important: Do not manipulate the doY value here - use it directly as received from BMIModalForm
       const payload = {
         childId: selectedChild,
         height: Number(values.height),
         weight: Number(values.weight),
         gender: selectedChildData.gender,
         notes: values.notes?.trim() || "",
-        doY: values.doY, // Sử dụng giá trị đã được định dạng từ BMIModalForm
+        doY: values.doY, // Use directly without any additional processing
       };
   
-      console.log("BMI Save Payload:", payload);
+      console.log("⭐ Final payload being sent to API:", JSON.stringify(payload));
       
       const response = await axios.post(
         `${import.meta.env.VITE_API_ENDPOINT}/bmi/save`,
