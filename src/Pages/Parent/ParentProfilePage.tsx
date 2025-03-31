@@ -12,10 +12,8 @@ import {
   Rate} from 'antd';
 import { 
   UserOutlined, 
-  CrownOutlined, 
   PlusOutlined,
   EditOutlined,
-  CheckCircleOutlined,
   HeartOutlined,
   ArrowRightOutlined,
   CalendarOutlined
@@ -23,9 +21,11 @@ import {
 import AppFooter from "../../components/Footer/Footer";
 import doctorImage from "../../assets/doctor.png";
 import { Link } from 'react-router-dom';
+import PremiumPackageCard from './PremiumPackageCard';
+import PremiumMemberDisplay from './PremiumMemberDisplay';
 
 const { Content } = Layout;
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const ParentProfilePage: React.FC = () => {
   const [userData, setUserData] = useState<any>(null);
@@ -58,6 +58,8 @@ const ParentProfilePage: React.FC = () => {
         const data = await response.json();
         setUserData(data.data);
       } catch (error) {
+        console.error("Error fetching user data:", error);
+        // setError("Failed to load user data");
       } finally {
         setLoading(false);
       }
@@ -82,11 +84,12 @@ const ParentProfilePage: React.FC = () => {
 
         const data = await response.json();
         if (Array.isArray(data.data) && data.data.length > 0) {
-          setChildData(data.data[0]); // Get first child only
+          setChildData(data.data[0]); 
         } else {
           setChildData(null);
         }
       } catch (error) {
+        console.error("Error fetching child data:", error);
       }
     };
 
@@ -110,12 +113,14 @@ const ParentProfilePage: React.FC = () => {
               }
             }
           } catch (profileError) {
+            console.error("Error fetching doctor profile:", profileError);
           }
           return doctor;
         }));
 
         setDoctors(updatedDoctors);
       } catch (error) {
+        console.error("Error fetching doctors:", error);
       }
     };
 
@@ -209,19 +214,7 @@ const ParentProfilePage: React.FC = () => {
                   </Link>
                 </Title>
                 <div style={{ display: 'flex', marginTop: '12px' }}>
-                  <Tag 
-                    color="#f0f7ff" 
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      padding: '4px 12px', 
-                      borderRadius: '20px',
-                      color: '#1e3a8a',
-                      fontWeight: 600
-                    }}
-                  >
-                    <CrownOutlined style={{ marginRight: '6px', color: '#fbbf24' }} /> Premium Member
-                  </Tag>
+                <PremiumMemberDisplay />
                 </div>
               </div>
             </Col>
@@ -567,75 +560,7 @@ const ParentProfilePage: React.FC = () => {
                 </div>
               </Card>
 
-              {/* Premium Features or Tips Card */}
-              <Card 
-                style={{ 
-                  marginBottom: '24px', 
-                  borderRadius: '16px', 
-                  overflow: 'hidden',
-                  border: 'none',
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-                }}
-              >
-                <div style={{ 
-                  padding: '30px 24px',
-                  background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  borderRadius: '16px 16px 0 0'
-                }}>
-                  {/* Decorative elements */}
-                  <div style={{
-                    position: 'absolute',
-                    width: '150px',
-                    height: '150px',
-                    borderRadius: '50%',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    top: '-50px',
-                    right: '-50px',
-                  }} />
-                  
-                  <CrownOutlined style={{ fontSize: '40px', color: '#fbbf24', marginBottom: '16px' }} />
-                  <Title level={3} style={{ color: 'white', marginTop: 0, marginBottom: '12px' }}>
-                    Premium Benefits
-                  </Title>
-                  <Paragraph style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '16px', marginBottom: '24px' }}>
-                    You have access to exclusive features and personalized advice from experts.
-                  </Paragraph>
-                </div>
-                
-                <div style={{ padding: '24px' }}>
-                  <div style={{ marginBottom: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-                      <CheckCircleOutlined style={{ color: '#1e3a8a', marginRight: '12px' }} />
-                      <Text strong>Advanced growth analytics</Text>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-                      <CheckCircleOutlined style={{ color: '#1e3a8a', marginRight: '12px' }} />
-                      <Text strong>Priority doctor consultations</Text>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-                      <CheckCircleOutlined style={{ color: '#1e3a8a', marginRight: '12px' }} />
-                      <Text strong>Personalized nutrition plans</Text>
-                    </div>
-                  </div>
-                  <Link to="/package">
-                    <Button
-                      type="primary"
-                      block
-                      style={{
-                        background: "#1e3a8a",
-                        border: "none",
-                        borderRadius: "8px",
-                        height: "44px",
-                        fontWeight: 600,
-                      }}
-                    >
-                      Explore Premium Features
-                    </Button>
-                  </Link>
-                </div>
-              </Card>
+              <PremiumPackageCard />
             </Col>
           </Row>
         )}
