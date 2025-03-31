@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, Button, Typography, Layout, Spin } from "antd";
 import { CheckCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { initiateVnPayPayment } from "../../services/PaymentService";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text, Paragraph } = Typography;
 const { Content } = Layout;
@@ -22,10 +23,38 @@ const PremiumSubscriptionPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [submittingPackageId, setSubmittingPackageId] = useState<string | null>(null);
+  const [checkingUserPackage, setCheckingUserPackage] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPackages();
+    checkUserPackage();
   }, []);
+
+  const checkUserPackage = async () => {
+    setCheckingUserPackage(true);
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/user-packages/getUserPackage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        
+        if (responseData && responseData.data) {
+          navigate("/user-package");
+          return;
+        }
+      }
+      
+      fetchPackages();
+    } catch (error) {
+      fetchPackages();
+    } finally {
+      setCheckingUserPackage(false);
+    }
+  };
 
   const fetchPackages = async () => {
     setLoading(true);
@@ -37,7 +66,7 @@ const PremiumSubscriptionPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        
+        // Handle error
       }
 
       const responseData = await response.json();
@@ -48,7 +77,7 @@ const PremiumSubscriptionPage: React.FC = () => {
         setPackages(sortedPackages);
       }
     } catch (error) {
-      
+      // Handle error
     } finally {
       setLoading(false);
     }
@@ -73,8 +102,10 @@ const PremiumSubscriptionPage: React.FC = () => {
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
+        // Handle error
       }
     } catch (error: any) {
+      // Handle error
     } finally {
       setSubmitting(false);
       setSubmittingPackageId(null);
@@ -113,11 +144,23 @@ const PremiumSubscriptionPage: React.FC = () => {
     }
   ];
 
+  if (checkingUserPackage) {
+    return (
+      <Layout style={{ minHeight: '100vh', background: 'white' }}>
+        <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Spin size="large" />
+        </Content>
+      </Layout>
+    );
+  }
+
   return (
     <Layout style={{ 
-      minHeight: '110vh', 
+      minHeight: '130vh', 
       margin: '-25px', 
-      background: 'white' 
+      background: 'white', 
+      marginBottom: "-30px"
+
     }}>
       <Content>
         {/* Enhanced Hero Section */}
