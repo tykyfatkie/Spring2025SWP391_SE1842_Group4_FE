@@ -35,6 +35,7 @@ import PaymentReturn from "../Pages/PaymentSuccess/PaymentReturn";
 import PaymentSuccessful from "../Pages/Payment/PaymentSuccessful";
 import PaymentFailed from "../Pages/Payment/PaymentFailed";
 import RevenuePage from "../Pages/Dashboard/Revenue";
+import UserPackagePage from "../Pages/PremiumSubscription/UserPackagePage";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -54,6 +55,7 @@ const routes: LayoutRoute[] = [
       { path: "/contact-us", component: ContactPage, role: ["Guest", "User"] },
       { path: "/package", component: PackagePage, role: ["User"] },
       { path: "/bmi", component: BMIPage, role: ["User"] },
+      { path: "/user-package", component: UserPackagePage, role: ["User"] },
       { path: "/successful", component: PaymentSuccessful, role: ["User"] },
       { path: "/failed", component: PaymentFailed, role: ["User"] },
       { path: "/guestbmi", component: GuestBMICalculator, role: ["Guest", "User"] },
