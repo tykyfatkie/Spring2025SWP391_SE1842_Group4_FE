@@ -260,9 +260,9 @@ const Homepage: React.FC = () => {
           {features.map((feature, index) => (
             <Col key={index} xs={24} sm={12} md={6}>
               <Card
-                bordered={false}
+                variant="outlined"
                 style={{ borderRadius: '20px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
-                bodyStyle={{ textAlign: 'center' }}
+                styles={{ body: { textAlign: 'center' } }}
               >
                 <div style={{ marginBottom: '16px' }}>
                   {feature.icon}
@@ -278,7 +278,7 @@ const Homepage: React.FC = () => {
           {statistics.map((stat, index) => (
             <Col key={index} xs={24} sm={12} md={6}>
               <Card
-                bordered={false}
+                variant="outlined"
                 style={{
                   borderRadius: '20px',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',

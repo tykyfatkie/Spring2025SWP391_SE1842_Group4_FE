@@ -1,6 +1,6 @@
-import { Layout, Row, Col, Typography, Space, Button, Divider, Input } from 'antd';
+import { Layout, Row, Col, Typography, Space, Button, Divider, Input, Form as AntForm } from 'antd';
 import { FacebookOutlined, TwitterOutlined, InstagramOutlined, YoutubeOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined, SendOutlined } from '@ant-design/icons';
-import { Form, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const { Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -203,7 +203,7 @@ const AppFooter = () => {
           <Paragraph style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '24px' }}>
             Subscribe to our newsletter for the latest updates and insights on child health and development.
           </Paragraph>
-          <Form>
+          <AntForm>
             <Space.Compact style={{ width: '100%' }}>
               <Input 
                 placeholder="Your email address" 
@@ -227,7 +227,7 @@ const AppFooter = () => {
                 }}
               />
             </Space.Compact>
-          </Form>
+          </AntForm>
         </Col>
       </Row>
       
