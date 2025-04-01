@@ -50,7 +50,7 @@ const ChangePasswordPage = () => {
         {/* Header Section with blue background */}
         <div
           style={{
-            background: '#1e3a8a',
+            background: 'linear-gradient(135deg, rgb(30, 58, 138) 0%, rgb(59, 130, 246) 100%)',
             color: 'white',
             padding: '60px 48px',
             borderRadius: '0 0 30px 30px',

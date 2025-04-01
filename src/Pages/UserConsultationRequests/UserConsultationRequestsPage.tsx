@@ -94,7 +94,7 @@ const UserConsultationRequests: React.FC = () => {
       <Sidebar /> 
 
       <Layout>
-        <Content style={{ padding: '24px', background: '#f5f5f5' }}>
+        <Content style={{ padding: '24px', background: '#f5f5f5', marginLeft: '260px' }}>
           <Title level={4}>Your Consultation Requests</Title>
           {loading ? (
             <Spin size="large" />

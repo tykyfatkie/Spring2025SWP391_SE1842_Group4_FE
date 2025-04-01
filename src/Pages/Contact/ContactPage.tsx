@@ -15,7 +15,7 @@ const ContactPage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', margin: '-25px', background: 'white' }}>
+    <Layout style={{ minHeight: '100vh', margin: '-25px', background: 'white', marginTop:'-52px' }}>
       <Layout.Content>
         {/* Hero Section with styling similar to Homepage */}
         <div
@@ -40,7 +40,7 @@ const ContactPage: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '0 48px',
-              background: '#1e3a8a',
+              background: 'linear-gradient(135deg, rgb(30, 58, 138) 0%, rgb(59, 130, 246) 100%)',
               color: 'white',
               position: 'relative',
               overflow: 'hidden',

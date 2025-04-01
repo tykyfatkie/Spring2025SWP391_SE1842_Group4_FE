@@ -267,7 +267,8 @@ const BMITrackingPage: React.FC = () => {
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white', marginRight: '25px' }}>
       <Layout>
         <Sidebar />
-        <Content style={{ padding: '24px', background: '#f8fafc' }}>
+        <Layout style={{ marginLeft: 0 }}>
+        <Content style={{ padding: '24px', background: '#f8fafc', marginLeft: '260px' }}>
           {/* Collapsible Section */}
           <CollapsibleHeader 
             title="Track and Manage Your Child's BMI"
@@ -313,6 +314,7 @@ const BMITrackingPage: React.FC = () => {
           />
         </Content>
       </Layout>
+      </Layout>
 
       {/* Modal for adding new BMI record */}
       <BMIModalForm
@@ -323,6 +325,7 @@ const BMITrackingPage: React.FC = () => {
         selectedChildData={selectedChildData}
       />
     </Layout>
+    
   );
 };
 

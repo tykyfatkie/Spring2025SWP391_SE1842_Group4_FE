@@ -9,7 +9,7 @@ import {
   Button, 
   Tag, 
   Progress, 
-  Rate} from 'antd';
+} from 'antd';
 import { 
   UserOutlined, 
   PlusOutlined,
@@ -19,12 +19,52 @@ import {
 } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
 import doctorImage from "../../assets/doctor.png";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PremiumPackageCard from './PremiumPackageCard';
 import PremiumMemberDisplay from './PremiumMemberDisplay';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
+
+// Interfaces
+interface User {
+  name: string;
+  // other user properties
+}
+
+interface Child {
+  id: string;
+  name: string;
+  doB?: string;
+  gender: number;
+  height?: number;
+  weight?: number;
+  bmi?: number;
+}
+
+interface Doctor {
+  id: string;
+  userId: string;
+  profileImg?: string;
+  specialize?: string;
+  user?: {
+    name?: string;
+  };
+}
+
+interface BmiRecord {
+  dateTime: string;
+  bmi: number;
+  // other bmi properties
+}
+
+interface DoctorProfileResponse {
+  data: Array<{
+    user?: {
+      name?: string;
+    };
+  }>;
+}
 
 // WHO BMI reference data matching the BMIDetailsCard component
 const whoBmiReferenceData = {
@@ -87,12 +127,99 @@ const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'):
   };
 };
 
+// Doctor list item component to display doctor information
+const DoctorListItem: React.FC<{ doctor: Doctor }> = ({ doctor }) => {
+  const navigate = useNavigate();
+  
+  // Extract first specialization if it contains multiple ones
+  const firstSpecialization = doctor.specialize ? 
+    doctor.specialize.split(',')[0].trim() : 
+    "General Practice";
+  
+  // Function to truncate text with ellipsis
+  const truncateText = (text: string | undefined, maxLength: number): string => {
+    if (!text) return "";
+    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  };
+  
+  // Add function to navigate to doctor profile
+  const navigateToDoctorProfile = () => {
+    navigate(`/doctor/${doctor.userId}`);
+  };
+  
+  // Get the doctor name and truncate if necessary
+  const doctorName = doctor.user?.name || "Doctor name not updated";
+  const truncatedName = truncateText(doctorName, 20);
+  const truncatedSpecialization = truncateText(firstSpecialization, 15);
+  
+  return (
+    <div 
+      key={doctor.id} 
+      style={{ 
+        padding: '20px', 
+        borderBottom: '1px solid #f0f0f0', 
+        transition: 'all 0.3s ease',
+        cursor: 'pointer'
+      }}
+      onClick={navigateToDoctorProfile}
+    >
+      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <Avatar 
+          src={doctor.profileImg || doctorImage} 
+          size={64} 
+          style={{ 
+            border: '2px solid #e5e7eb',
+            flexShrink: 0 // Prevent avatar from shrinking
+          }}
+        />
+        <div style={{ 
+          flex: 1,
+          minWidth: 0, // Important for text overflow to work
+          overflow: 'hidden'
+        }}>
+          <Text 
+            strong 
+            style={{ 
+              display: 'block', 
+              fontSize: '16px', 
+              marginBottom: '4px',
+              color: '#1e3a8a',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+            title={doctorName} // Show full name on hover
+          >
+            {truncatedName}
+          </Text>
+          <Tag 
+            color="#f0f7ff" 
+            style={{ 
+              color: '#1e3a8a', 
+              border: 'none', 
+              fontWeight: 500,
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              display: 'inline-block'
+            }}
+            title={firstSpecialization} // Show full specialization on hover
+          >
+            {truncatedSpecialization}
+          </Tag>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ParentProfilePage: React.FC = () => {
-  const [userData, setUserData] = useState<any>(null);
-  const [childData, setChildData] = useState<any>(null);
+  const [userData, setUserData] = useState<User | null>(null);
+  const [childData, setChildData] = useState<Child | null>(null);
   const [loading, setLoading] = useState(true);
-  const [doctors, setDoctors] = useState<any[]>([]);
-  const [_bmiRecords, setBmiRecords] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [_bmiRecords, setBmiRecords] = useState<BmiRecord[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -177,12 +304,11 @@ const ParentProfilePage: React.FC = () => {
         const data = await response.json();
         if (Array.isArray(data.data) && data.data.length > 0) {
           // Sort by date descending to get the most recent record first
-          const sortedRecords = data.data.sort((a: any, b: any) => {
+          const sortedRecords = data.data.sort((a: BmiRecord, b: BmiRecord) => {
             return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
           });
           
           setBmiRecords(sortedRecords);
-          
         }
       } catch (error) {
         console.error("Error fetching BMI records:", error);
@@ -199,13 +325,17 @@ const ParentProfilePage: React.FC = () => {
         if (!Array.isArray(data.data)) {
           throw new Error('Invalid API response: Expected an array');
         }
-        const updatedDoctors = await Promise.all(data.data.map(async (doctor: { userId: any; user: { name: any; }; }) => {
+        
+        const updatedDoctors = await Promise.all(data.data.map(async (doctor: Doctor) => {
           try {
             const profileResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${doctor.userId}`);
             if (profileResponse.ok) {
-              const profileData = await profileResponse.json();
+              const profileData = await profileResponse.json() as DoctorProfileResponse;
               if (profileData.data && Array.isArray(profileData.data) && profileData.data.length > 0) {
-                doctor.user = { name: profileData.data[0].user?.name || "Doctor has not updated " };
+                // Create user property if it doesn't exist
+                doctor.user = {
+                  name: profileData.data[0].user?.name || "Doctor has not updated"
+                };
               }
             }
           } catch (profileError) {
@@ -241,7 +371,7 @@ const ParentProfilePage: React.FC = () => {
   };
 
   // Updated BMI status function that matches the WHO guidelines used in BMIDetailsCard
-  const getBmiStatus = (bmi: number) => {
+  const getBmiStatus = (bmi: number | undefined) => {
     if (!bmi) return { color: '#1e3a8a', status: 'normal', text: 'No data' };
     
     // Calculate the child's age in months
@@ -619,41 +749,7 @@ const ParentProfilePage: React.FC = () => {
                 bodyStyle={{ padding: '0' }}
               >
                 {doctors.slice(0, 3).map(doctor => (
-                  <div 
-                    key={doctor.id} 
-                    style={{ 
-                      padding: '20px', 
-                      borderBottom: '1px solid #f0f0f0', 
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <Avatar 
-                        src={doctor.profileImg || doctorImage} 
-                        size={64} 
-                        style={{ border: '2px solid #e5e7eb' }}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <Text 
-                          strong 
-                          style={{ 
-                            display: 'block', 
-                            fontSize: '16px', 
-                            marginBottom: '4px',
-                            color: '#1e3a8a' 
-                          }}
-                        >
-                          {doctor.user?.name || "Doctor name not updated"}
-                        </Text>
-                        <Tag color="#f0f7ff" style={{ color: '#1e3a8a', border: 'none', fontWeight: 500 }}>
-                          {doctor.specialize}
-                        </Tag>
-                        <div style={{ marginTop: '12px' }}>
-                          <Rate disabled defaultValue={4.5} style={{ fontSize: '14px', color: '#fbbf24' }} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <DoctorListItem key={doctor.id} doctor={doctor} />
                 ))}
                 <div style={{ padding: '16px', textAlign: 'center' }}>
                   <Link to="/doctor">

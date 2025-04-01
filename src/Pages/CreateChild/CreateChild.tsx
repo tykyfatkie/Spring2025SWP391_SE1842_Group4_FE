@@ -58,11 +58,11 @@ const CreateChild: React.FC = () => {
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white' }}>
       <Layout>
         <Sidebar />
-        <Content style={{ padding: '24px', background: '#f8fafc' }}>
+        <Content style={{ padding: '24px', background: '#f8fafc', marginLeft: '260px' }}>
           {/* Header Section */}
           <div style={{ 
             marginBottom: '40px', 
-            background: '#1e3a8a', 
+            background: 'linear-gradient(135deg, rgb(30, 58, 138) 0%, rgb(59, 130, 246) 100%)', 
             padding: '48px 32px', 
             borderRadius: '20px',
             position: 'relative',
