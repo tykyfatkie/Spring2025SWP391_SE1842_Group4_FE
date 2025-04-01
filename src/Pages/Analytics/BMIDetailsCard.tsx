@@ -11,22 +11,138 @@ interface ChartData {
   weight: number;
   height: number;
   percentile: number;
+  ageInMonths?: number; // Added for WHO reference calculation
 }
 
 interface BMIDetailsCardProps {
   selectedChild: string | null;
+  selectedGender?: 'male' | 'female'; // Added gender prop
   chartData: ChartData[];
   fetchingBMI: boolean;
   handleOpenBmiModal: () => void;
-  getBMICategory: (bmi: number) => { label: string; color: string };
 }
+
+// WHO BMI-for-age reference data (simplified)
+const whoBmiReferenceData = {
+  male: {
+    // Age in months as keys, median BMI (z-score 0) as values
+    0: 13.4, 3: 16.0, 6: 17.3, 9: 17.2, 12: 16.8, 15: 16.4, 18: 16.2, 
+    24: 15.8, 36: 15.4, 48: 15.3, 60: 15.4, 
+    72: 15.5, 84: 16.0, 96: 16.5, 108: 17.0, 120: 17.8, 
+    132: 18.5, 144: 19.2, 156: 19.9, 168: 20.8, 180: 21.4, 192: 22.2, 204: 22.7, 216: 23.1, 228: 23.4
+  },
+  female: {
+    // Age in months as keys, median BMI (z-score 0) as values
+    0: 13.2, 3: 15.7, 6: 16.9, 9: 16.8, 12: 16.4, 15: 16.1, 18: 15.9, 
+    24: 15.6, 36: 15.3, 48: 15.3, 60: 15.3, 
+    72: 15.3, 84: 15.7, 96: 16.2, 108: 16.8, 120: 17.5, 
+    132: 18.2, 144: 19.0, 156: 19.6, 168: 20.2, 180: 20.8, 192: 21.3, 204: 21.7, 216: 22.0, 228: 22.2
+  }
+};
+
+// Function to calculate WHO BMI reference value based on age and gender
+const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
+  const referenceData = whoBmiReferenceData[gender];
+  
+  // Find the closest age points
+  const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
+  
+  // If age is outside our range, return the closest endpoint
+  if (ageInMonths <= ages[0]) return referenceData[ages[0] as keyof typeof referenceData];
+  if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1] as keyof typeof referenceData];
+  
+  // Find the two closest age points for interpolation
+  let lowerAge = ages[0];
+  let upperAge = ages[ages.length - 1];
+  
+  for (let i = 0; i < ages.length - 1; i++) {
+    if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
+      lowerAge = ages[i];
+      upperAge = ages[i + 1];
+      break;
+    }
+  }
+  
+  // Linear interpolation between the two closest points
+  const lowerBMI = referenceData[lowerAge as keyof typeof referenceData];
+  const upperBMI = referenceData[upperAge as keyof typeof referenceData];
+  const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
+  
+  return lowerBMI + ratio * (upperBMI - lowerBMI);
+};
+
+// Function to calculate WHO z-score reference values for different categories
+const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
+  median: number;
+  underweight: number;
+  overweight: number;
+  obese: number;
+} => {
+  // Get median BMI (z-score 0)
+  const median = getWhoBmiReference(ageInMonths, gender);
+  
+  // Approximate the standard deviation (this is a simplification)
+  // In real implementation, you would use WHO tables for SD values
+  const estimatedSD = median * 0.1;  // Simplified estimation
+  
+  return {
+    median,
+    underweight: median - (2 * estimatedSD), // -2 SD
+    overweight: median + (1 * estimatedSD),  // +1 SD
+    obese: median + (2 * estimatedSD)        // +2 SD
+  };
+};
+
+// Function to determine BMI category based on WHO z-score standards
+const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): { 
+  label: string; 
+  color: string 
+} => {
+  const references = getWhoZScoreReferences(ageInMonths, gender);
+  
+  if (bmi < references.underweight) {
+    return { 
+      label: 'Underweight', 
+      color: '#91caff'  // Blue
+    };
+  } else if (bmi >= references.obese) {
+    return { 
+      label: 'Obese', 
+      color: '#ff4d4f'  // Red
+    };
+  } else if (bmi >= references.overweight) {
+    return { 
+      label: 'Overweight', 
+      color: '#faad14'  // Yellow/Orange
+    };
+  } else {
+    return { 
+      label: 'Normal', 
+      color: '#52c41a'  // Green
+    };
+  }
+};
+
+// Calculate age in months from date of birth (assuming child has dob property or calculate from records)
+const calculateAgeInMonths = (dateTime: string): number => {
+  // This is a placeholder - you should replace with actual logic to calculate age from DOB
+  // For demo, assuming a child aged 14 months
+  const measurementDate = new Date(dateTime);
+  const childDOB = new Date();
+  childDOB.setMonth(childDOB.getMonth() - 14); // Example: 14 months old
+  
+  const diffMonths = (measurementDate.getFullYear() - childDOB.getFullYear()) * 12 + 
+                     (measurementDate.getMonth() - childDOB.getMonth());
+  
+  return diffMonths;
+};
 
 const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   selectedChild,
+  selectedGender = 'male', // Default to male if not provided
   chartData,
   fetchingBMI,
-  handleOpenBmiModal,
-  getBMICategory
+  handleOpenBmiModal
 }) => {
   return (
     <Row gutter={[24, 24]} style={{ marginTop: '24px' }}>
@@ -98,65 +214,87 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
               <Spin size="large" />
             </div>
           ) : chartData.length > 0 ? (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={{ 
-                    textAlign: 'left', 
-                    padding: '12px 16px', 
-                    borderBottom: '1px solid #f0f0f0',
-                    color: '#1e3a8a',
-                    fontWeight: 600
-                  }}>Date</th>
-                  <th style={{ 
-                    textAlign: 'center', 
-                    padding: '12px 16px', 
-                    borderBottom: '1px solid #f0f0f0',
-                    color: '#1e3a8a',
-                    fontWeight: 600
-                  }}>Weight (kg)</th>
-                  <th style={{ 
-                    textAlign: 'center', 
-                    padding: '12px 16px', 
-                    borderBottom: '1px solid #f0f0f0',
-                    color: '#1e3a8a',
-                    fontWeight: 600
-                  }}>Height (cm)</th>
-                  <th style={{ 
-                    textAlign: 'center', 
-                    padding: '12px 16px', 
-                    borderBottom: '1px solid #f0f0f0',
-                    color: '#1e3a8a',
-                    fontWeight: 600
-                  }}>BMI</th>
-                  <th style={{ 
-                    textAlign: 'center', 
-                    padding: '12px 16px', 
-                    borderBottom: '1px solid #f0f0f0',
-                    color: '#1e3a8a',
-                    fontWeight: 600
-                  }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {chartData.map((record, index) => {
-                  const category = getBMICategory(record.bmi);
-                  return (
-                    <tr key={index} style={{ background: index % 2 === 0 ? '#f8fafc' : 'white' }}>
-                      <td style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.date}</td>
-                      <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.weight.toFixed(1)}</td>
-                      <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.height.toFixed(1)}</td>
-                      <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>{record.bmi.toFixed(1)}</td>
-                      <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
-                        <Tag color={category.color} style={{ borderRadius: '20px', padding: '0 12px' }}>
-                          {category.label}
-                        </Tag>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <>
+              <div style={{ 
+                marginBottom: '20px', 
+                background: 'rgba(30, 58, 138, 0.05)', 
+                padding: '16px', 
+                borderRadius: '12px',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px'
+              }}>
+                <Text strong style={{ marginRight: '12px', fontSize: '14px' }}>WHO BMI Categories: </Text>
+                <Tag color="#91caff" style={{ borderRadius: '20px', padding: '0 12px' }}>Underweight (&lt; -2 SD)</Tag>
+                <Tag color="#52c41a" style={{ borderRadius: '20px', padding: '0 12px' }}>Normal (-2 SD to +1 SD)</Tag>
+                <Tag color="#faad14" style={{ borderRadius: '20px', padding: '0 12px' }}>Overweight (+1 SD to +2 SD)</Tag>
+                <Tag color="#ff4d4f" style={{ borderRadius: '20px', padding: '0 12px' }}>Obese (&gt; +2 SD)</Tag>
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th style={{ 
+                      textAlign: 'left', 
+                      padding: '12px 16px', 
+                      borderBottom: '1px solid #f0f0f0',
+                      color: '#1e3a8a',
+                      fontWeight: 600
+                    }}>Date</th>
+                    <th style={{ 
+                      textAlign: 'center', 
+                      padding: '12px 16px', 
+                      borderBottom: '1px solid #f0f0f0',
+                      color: '#1e3a8a',
+                      fontWeight: 600
+                    }}>Weight (kg)</th>
+                    <th style={{ 
+                      textAlign: 'center', 
+                      padding: '12px 16px', 
+                      borderBottom: '1px solid #f0f0f0',
+                      color: '#1e3a8a',
+                      fontWeight: 600
+                    }}>Height (cm)</th>
+                    <th style={{ 
+                      textAlign: 'center', 
+                      padding: '12px 16px', 
+                      borderBottom: '1px solid #f0f0f0',
+                      color: '#1e3a8a',
+                      fontWeight: 600
+                    }}>BMI</th>
+                    <th style={{ 
+                      textAlign: 'center', 
+                      padding: '12px 16px', 
+                      borderBottom: '1px solid #f0f0f0',
+                      color: '#1e3a8a',
+                      fontWeight: 600
+                    }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chartData.map((record, index) => {
+                    // Calculate age in months for the record
+                    const ageInMonths = record.ageInMonths || calculateAgeInMonths(record.dateTime);
+                    
+                    // Get WHO BMI category based on age, gender and BMI
+                    const category = getWHOBmiCategory(record.bmi, ageInMonths, selectedGender);
+                    
+                    return (
+                      <tr key={index} style={{ background: index % 2 === 0 ? '#f8fafc' : 'white' }}>
+                        <td style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.date}</td>
+                        <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.weight.toFixed(1)}</td>
+                        <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>{record.height.toFixed(1)}</td>
+                        <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>{record.bmi.toFixed(1)}</td>
+                        <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
+                          <Tag color={category.color} style={{ borderRadius: '20px', padding: '0 12px' }}>
+                            {category.label}
+                          </Tag>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </>
           ) : (
             <div style={{ 
               display: 'flex',

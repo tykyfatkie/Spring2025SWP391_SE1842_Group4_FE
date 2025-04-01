@@ -24,18 +24,47 @@ interface ChildData {
 
 interface SingleBMIExportProps {
   childData: ChildData;
-  bmiRecord: BMIRecord; // Single record instead of an array
+  bmiRecord: BMIRecord;
 }
 
 const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Function to get BMI category
-  const getBMICategory = (bmi: number) => {
+  // Function to get BMI category based on WHO standards for children
+  const getBMICategory = (bmi: number, percentile: number, age: number) => {
+    // If we have percentile data, use that for categorization
+    if (percentile !== undefined && !isNaN(percentile)) {
+      if (percentile < 3) return { label: 'Severe thinness', color: '#91caff' };
+      if (percentile < 15) return { label: 'Thinness', color: '#d3adf7' };
+      if (percentile < 85) return { label: 'Normal', color: '#52c41a' };
+      if (percentile < 97) return { label: 'Overweight', color: '#faad14' };
+      return { label: 'Obesity', color: '#ff4d4f' };
+    }
+    
+    // Fallback to Z-score approximation if percentile is not available
+    // For children under 5 years
+    if (age < 5) {
+      if (bmi < 13) return { label: 'Severe thinness', color: '#91caff' };
+      if (bmi < 14.5) return { label: 'Thinness', color: '#d3adf7' };
+      if (bmi < 17) return { label: 'Normal', color: '#52c41a' };
+      if (bmi < 19) return { label: 'Overweight', color: '#faad14' };
+      return { label: 'Obesity', color: '#ff4d4f' };
+    }
+    
+    // For children 5-19 years
+    if (age >= 5 && age <= 19) {
+      if (bmi < 14) return { label: 'Severe thinness', color: '#91caff' };
+      if (bmi < 16) return { label: 'Thinness', color: '#d3adf7' };
+      if (bmi < 23) return { label: 'Normal', color: '#52c41a' };
+      if (bmi < 27) return { label: 'Overweight', color: '#faad14' };
+      return { label: 'Obesity', color: '#ff4d4f' };
+    }
+    
+    // For adults (fallback, though not ideal for this application)
     if (bmi < 18.5) return { label: 'Underweight', color: '#91caff' };
-    if (bmi < 25) return { label: 'Normal', color: '#52c41a' };
+    if (bmi < 25) return { label: 'Normal weight', color: '#52c41a' };
     if (bmi < 30) return { label: 'Overweight', color: '#faad14' };
-    return { label: 'Obese', color: '#ff4d4f' };
+    return { label: 'Obesity', color: '#ff4d4f' };
   };
 
   const formatDate = (dateString: string) => {
@@ -108,6 +137,7 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
       const ageText = age.years > 0 
         ? `${age.years} years, ${age.months} months` 
         : `${age.months} months`;
+      const ageInYears = age.years + (age.months / 12);
       
       // Child details
       doc.text(`Name: ${childData.name}`, 30, 56);
@@ -130,7 +160,11 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       
-      const bmiCategory = getBMICategory(bmiRecord.bmi);
+      const bmiCategory = getBMICategory(
+        bmiRecord.bmi, 
+        bmiRecord.percentile, 
+        ageInYears
+      );
       
       // BMI data in a cleaner format
       doc.text(`Date of Assessment: ${formatDate(bmiRecord.date)}`, 30, 110);
@@ -164,21 +198,43 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
         margin: { left: 30, right: 30 }
       });
       
-      // Add BMI Categories reference
+      // Add BMI Categories reference based on WHO charts
       doc.setFontSize(12);
       doc.setTextColor(30, 58, 138);
-      doc.text('BMI Categories Reference', 105, 195, { align: 'center' });
+      doc.text('BMI Categories Reference (WHO Standards)', 105, 195, { align: 'center' });
       
-      // Add category table
-      autoTable(doc, {
-        startY: 200,
-        head: [['Category', 'BMI Range']],
-        body: [
+      // Select appropriate categories based on age
+      let categoryTable;
+      if (ageInYears < 5) {
+        categoryTable = [
+          ['Severe thinness', 'Below -3 z-score'],
+          ['Thinness', '-3 to -2 z-score'],
+          ['Normal', '-2 to +1 z-score'],
+          ['Overweight', '+1 to +2 z-score'],
+          ['Obesity', 'Above +2 z-score']
+        ];
+      } else if (ageInYears <= 19) {
+        categoryTable = [
+          ['Severe thinness', 'Below -3 z-score'],
+          ['Thinness', '-3 to -2 z-score'],
+          ['Normal', '-2 to +1 z-score'],
+          ['Overweight', '+1 to +2 z-score'],
+          ['Obesity', 'Above +2 z-score']
+        ];
+      } else {
+        categoryTable = [
           ['Underweight', 'Less than 18.5'],
           ['Normal weight', '18.5 - 24.9'],
           ['Overweight', '25 - 29.9'],
           ['Obesity', '30 or greater']
-        ],
+        ];
+      }
+      
+      // Add category table
+      autoTable(doc, {
+        startY: 200,
+        head: [['Category', 'Classification']],
+        body: categoryTable,
         theme: 'grid',
         headStyles: { 
           fillColor: [30, 58, 138], 
@@ -198,10 +254,11 @@ const SingleBMIExport: React.FC<SingleBMIExportProps> = ({ childData, bmiRecord 
       doc.setFontSize(10);
       doc.setTextColor(0, 0, 0);
       doc.text([
-        '• BMI is an indicator of body fatness and is used to screen for potential health problems.',
+        '• BMI for children is assessed using age and gender-specific growth charts.',
+        '• WHO standards are used to determine weight status categories.',
+        '• For children, percentile or z-score is more informative than the raw BMI value.',
         '• This is a single assessment and should be viewed as part of ongoing health monitoring.',
-        '• Please consult with your healthcare provider for a comprehensive evaluation.',
-        '• Regular monitoring of BMI helps track growth patterns and development.'
+        '• Please consult with your healthcare provider for a comprehensive evaluation.'
       ], 30, 260);
       
       // Add footer

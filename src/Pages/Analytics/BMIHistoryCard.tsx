@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Spin, Typography, Tag, Button, Alert, Select } from 'antd';
+import { Card, Spin, Typography, Tag, Button, Alert, Select, DatePicker } from 'antd';
 import { LineChartOutlined, PlusOutlined } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Brush } from 'recharts';
 import moment from 'moment';
-import type { Moment } from 'moment';
-// import { RangeValue } from 'rc-picker/lib/interface';
+import type { RangePickerProps } from 'antd/es/date-picker';
+import type { Dayjs } from 'dayjs';
 
 const { Title, Text } = Typography;
-// const { RangePicker } = DatePicker;
+const { RangePicker } = DatePicker;
 
 interface BMIHistoryCardProps {
   selectedChild: string | null;
+  selectedGender?: 'male' | 'female'; 
   fetchingBMI: boolean;
   chartData: Array<{
     dateTime: string;
@@ -19,63 +20,196 @@ interface BMIHistoryCardProps {
     weight: number;
     height: number;
     percentile: number;
-    whoBmi?: number;
+    ageInMonths?: number; 
   }>;
   handleOpenBmiModal: () => void;
+  onDateRangeChange: (startDate?: string, endDate?: string) => void;
 }
+
+// Define the type for the BMI reference data
+interface BMIReferenceData {
+  [key: number]: number;
+}
+
+interface GenderSpecificBMIData {
+  male: BMIReferenceData;
+  female: BMIReferenceData;
+}
+
+const whoBmiReferenceData: GenderSpecificBMIData = {
+  male: {
+    0: 13.4, 3: 16.0, 6: 17.3, 9: 17.2, 12: 16.8, 15: 16.4, 18: 16.2, 
+    24: 15.8, 36: 15.4, 48: 15.3, 60: 15.4, 
+    72: 15.5, 84: 16.0, 96: 16.5, 108: 17.0, 120: 17.8, 
+    132: 18.5, 144: 19.2, 156: 19.9, 168: 20.8, 180: 21.4, 192: 22.2, 204: 22.7, 216: 23.1, 228: 23.4
+  },
+  female: {
+    0: 13.2, 3: 15.7, 6: 16.9, 9: 16.8, 12: 16.4, 15: 16.1, 18: 15.9, 
+    24: 15.6, 36: 15.3, 48: 15.3, 60: 15.3, 
+    72: 15.3, 84: 15.7, 96: 16.2, 108: 16.8, 120: 17.5, 
+    132: 18.2, 144: 19.0, 156: 19.6, 168: 20.2, 180: 20.8, 192: 21.3, 204: 21.7, 216: 22.0, 228: 22.2
+  }
+};
+
+
+const whoZScoreOffsets = {
+  severelyUnderweight: -3,  
+  underweight: -2,          
+  normal: {                 
+    min: -2,
+    max: 1
+  },
+  overweight: 2,            
+  obese: 3                 
+};
+
+const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
+  const referenceData = whoBmiReferenceData[gender];
+  
+  const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
+  
+  if (ageInMonths <= ages[0]) return referenceData[ages[0]];
+  if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1]];
+  
+  let lowerAge = ages[0];
+  let upperAge = ages[ages.length - 1];
+  
+  for (let i = 0; i < ages.length - 1; i++) {
+    if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
+      lowerAge = ages[i];
+      upperAge = ages[i + 1];
+      break;
+    }
+  }
+  
+  const lowerBMI = referenceData[lowerAge];
+  const upperBMI = referenceData[upperAge];
+  const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
+  
+  return lowerBMI + ratio * (upperBMI - lowerBMI);
+};
+
+const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
+  median: number;
+  underweight: number;
+  overweight: number;
+  obese: number;
+} => {
+  const median = getWhoBmiReference(ageInMonths, gender);
+  
+  const estimatedSD = median * 0.1; 
+  
+  return {
+    median,
+    underweight: median + (whoZScoreOffsets.underweight * estimatedSD),
+    overweight: median + (whoZScoreOffsets.overweight * estimatedSD),
+    obese: median + (whoZScoreOffsets.obese * estimatedSD)
+  };
+};
+
+const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): {
+  category: 'severely-underweight' | 'underweight' | 'normal' | 'overweight' | 'obese';
+  color: string;
+} => {
+  const references = getWhoZScoreReferences(ageInMonths, gender);
+  
+  if (bmi < references.underweight) {
+    return { 
+      category: 'underweight', 
+      color: '#91caff'  // Blue
+    };
+  } else if (bmi >= references.obese) {
+    return { 
+      category: 'obese', 
+      color: '#ff4d4f'  // Red
+    };
+  } else if (bmi >= references.overweight) {
+    return { 
+      category: 'overweight', 
+      color: '#faad14'  // Yellow/Orange
+    };
+  } else {
+    return { 
+      category: 'normal', 
+      color: '#52c41a'  // Green
+    };
+  }
+};
 
 const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({ 
   selectedChild, 
+  selectedGender = 'male', 
   fetchingBMI, 
   chartData, 
-  handleOpenBmiModal 
+  handleOpenBmiModal,
+  onDateRangeChange
 }) => {
-  // Set hourly as default display mode
-  const [displayMode, setDisplayMode] = useState<'day' | 'month' | 'year' | 'hour'>('hour');
-  // Use [Moment, Moment] | null type instead of RangeValue
-  const [dateRange, setDateRange] = useState<[Moment, Moment] | null>(null);
+  const [displayMode, setDisplayMode] = useState<'day' | 'month' | 'year'>('day');
+  // Change type to use Dayjs instead of Moment
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
+  const [originalData, setOriginalData] = useState(chartData);
+  const [filteredData, setFilteredData] = useState(chartData);
+  const [isFiltered, setIsFiltered] = useState(false);
 
-  // Effect to set initial date range for hourly view
   useEffect(() => {
-    if (chartData.length > 0 && displayMode === 'hour') {
-      const latestDate = moment(chartData[chartData.length - 1].dateTime);
-      // Set start date to beginning of the day, end to end of the day
-      const startOfDay = latestDate.clone().startOf('day');
-      const endOfDay = latestDate.clone().endOf('day');
-      setDateRange([startOfDay, endOfDay]);
-    }
-  }, [chartData, displayMode]);
+    console.log("New chart data received from API:", chartData);
+    console.log("Number of records:", chartData.length);
+    
+    setFilteredData(chartData);
+    setOriginalData(chartData);
+  }, [chartData]);
 
-  // Function to check BMI and return warning message
-  const getBMIWarning = (bmi: number) => {
-    if (bmi < 18.5) {
+  // Update handler to use Dayjs type
+  const handleDateRangeChange: RangePickerProps['onChange'] = (dates, dateStrings) => {
+    setDateRange(dates as [Dayjs, Dayjs] | null);
+    
+    if (dates && dates[0] && dates[1] && selectedChild) {
+      const startDate = dateStrings[0];
+      const endDate = dateStrings[1];
+      
+      console.log("Date range selected for API:", startDate, "to", endDate);
+      
+      onDateRangeChange(startDate, endDate);
+      setIsFiltered(true);
+    } else {
+      console.log("Clearing date range filters");
+      setIsFiltered(false);
+      onDateRangeChange(undefined, undefined);
+    }
+  };
+
+  const clearAllFilters = () => {
+    setDateRange(null);
+    setFilteredData(originalData);
+    setIsFiltered(false);
+    onDateRangeChange(undefined, undefined);
+  };
+  
+  const getBMIWarning = (bmi: number, ageInMonths: number) => {
+    const category = getWHOBmiCategory(bmi, ageInMonths, selectedGender);
+    
+    if (category.category === 'underweight') {
       return {
         type: 'warning',
-        message: 'The child is underweight (BMI < 18.5). Please consult a healthcare professional.',
+        message: 'The child falls below the WHO underweight threshold for their age. Please consult a healthcare professional.',
       };
-    } else if (bmi >= 30) {
+    } else if (category.category === 'obese') {
       return {
         type: 'error',
-        message: 'The child is obese (BMI ≥ 30). Please consult a healthcare professional.',
+        message: 'The child exceeds the WHO obesity threshold for their age. Please consult a healthcare professional.',
       };
     }
     return null;
   };
 
-  const calculateWhoBMI = (item: any) => {
-    return item.bmi + (Math.random() - 0.5);
+  const calculateAgeInMonths = (dateTime: string): number => {
+    const measurementDate = moment(dateTime);
+    const childDOB = moment().subtract(14, 'months'); 
+    
+    return measurementDate.diff(childDOB, 'months');
   };
 
-  // Process data based on display mode and date range
-  const processedData = chartData.filter(item => {
-    const itemDate = moment(item.dateTime);
-    
-    // Filter by date range if set
-    const isWithinDateRange = !dateRange || !dateRange[0] || !dateRange[1] || 
-      (itemDate.isSameOrAfter(dateRange[0]) && itemDate.isSameOrBefore(dateRange[1]));
-    
-    return isWithinDateRange;
-  }).map(item => {
+  const processedData = filteredData.map(item => {
     const date = moment(item.dateTime);
     let formattedDate = '';
     
@@ -89,29 +223,35 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
       case 'year':
         formattedDate = date.format('YYYY');
         break;
-      case 'hour':
-        // Format with hour and minute for detailed hourly view
-        formattedDate = date.format('HH');
-        break;
     }
+    
+    const ageInMonths = item.ageInMonths || calculateAgeInMonths(item.dateTime);
+    
+    const whoBmi = getWhoBmiReference(ageInMonths, selectedGender);
+    
+    const zScoreRefs = getWhoZScoreReferences(ageInMonths, selectedGender);
     
     return {
       ...item,
       date: formattedDate,
-      whoBmi: calculateWhoBMI(item)
+      ageInMonths,
+      whoBmi,
+      whoUnderweight: zScoreRefs.underweight,
+      whoOverweight: zScoreRefs.overweight,
+      whoObese: zScoreRefs.obese,
+      category: getWHOBmiCategory(item.bmi, ageInMonths, selectedGender).category
     };
   });
 
-  // Group and aggregate data based on display mode
   const aggregatedData = processedData.reduce((acc, current) => {
     const existingEntry = acc.find(entry => entry.date === current.date);
     
     if (existingEntry) {
-      // If entry exists, average the BMI values
       existingEntry.bmi = (existingEntry.bmi + current.bmi) / 2;
-      existingEntry.whoBmi = existingEntry.whoBmi 
-        ? (existingEntry.whoBmi + (current.whoBmi || 0)) / 2 
-        : current.whoBmi;
+      existingEntry.whoBmi = (existingEntry.whoBmi + current.whoBmi) / 2;
+      existingEntry.whoUnderweight = (existingEntry.whoUnderweight + current.whoUnderweight) / 2;
+      existingEntry.whoOverweight = (existingEntry.whoOverweight + current.whoOverweight) / 2;
+      existingEntry.whoObese = (existingEntry.whoObese + current.whoObese) / 2;
     } else {
       acc.push(current);
     }
@@ -119,13 +259,17 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     return acc;
   }, [] as typeof processedData);
 
-  // Custom tooltip component for BMI values
   const CustomTooltip = (props: any) => {
     const { active, payload, label } = props;
     
     if (active && payload && payload.length) {
       const bmiPayload = payload.find((p: any) => p.dataKey === 'bmi');
       const whoBmiPayload = payload.find((p: any) => p.dataKey === 'whoBmi');
+      const item = aggregatedData.find(d => d.date === label);
+      
+      if (!item || !bmiPayload) return null;
+      
+      const category = getWHOBmiCategory(bmiPayload.value, item.ageInMonths, selectedGender);
       
       return (
         <div style={{ 
@@ -146,6 +290,18 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
               <strong>WHO BMI Reference:</strong> {whoBmiPayload.value.toFixed(1)}
             </p>
           )}
+          {bmiPayload && (
+            <p style={{ margin: '0 0 5px' }}>
+              <strong>Status:</strong> <span style={{ color: category.color }}>{category.category.charAt(0).toUpperCase() + category.category.slice(1)}</span>
+            </p>
+          )}
+          {item && (
+            <>
+              <p style={{ margin: '0 0 5px' }}><strong>Age:</strong> {item.ageInMonths} months</p>
+              <p style={{ margin: '0 0 5px' }}><strong>Height:</strong> {item.height} cm</p>
+              <p style={{ margin: '0 0 5px' }}><strong>Weight:</strong> {item.weight} kg</p>
+            </>
+          )}
         </div>
       );
     }
@@ -153,32 +309,19 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     return null;
   };
 
-  // Custom dot renderer to highlight abnormal BMI values
   const renderCustomDot = (props: any) => {
     const { cx, cy, payload } = props;
-    const bmi = payload.bmi;
+    const category = getWHOBmiCategory(payload.bmi, payload.ageInMonths, selectedGender);
     
-    let fillColor = "#1e3a8a"; // Default blue color
-    let size = 6; // Default size
+    const { color: fillColor } = category;
+    let size = 6; 
     let showRing = false;
     let ringColor = "";
     
-    // Determine styling based on BMI value
-    if (bmi < 18.5) {
-      fillColor = "#91caff"; // Blue for underweight
+    if (category.category === 'underweight' || category.category === 'obese') {
       size = 8;
       showRing = true;
-      ringColor = "rgba(145, 202, 255, 0.3)";
-    } else if (bmi >= 25 && bmi < 30) {
-      fillColor = "#faad14"; // Yellow/orange for overweight
-      size = 8;
-      showRing = true;
-      ringColor = "rgba(250, 173, 20, 0.3)";
-    } else if (bmi >= 30) {
-      fillColor = "#ff4d4f"; // Red for obese
-      size = 10; // Larger for obese points
-      showRing = true;
-      ringColor = "rgba(255, 77, 79, 0.3)";
+      ringColor = `${fillColor}40`; 
     }
     
     return (
@@ -191,9 +334,96 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     );
   };
 
-  // Get BMI of latest record
-  const latestBMI = chartData.length > 0 ? chartData[chartData.length - 1].bmi : null;
-  const bmiWarning = latestBMI ? getBMIWarning(latestBMI) : null;
+  const latestRecord = chartData.length > 0 ? chartData[chartData.length - 1] : null;
+  const latestBMI = latestRecord ? latestRecord.bmi : null;
+  const latestAgeInMonths = latestRecord ? (latestRecord.ageInMonths || calculateAgeInMonths(latestRecord.dateTime)) : null;
+  const bmiWarning = (latestBMI && latestAgeInMonths) ? getBMIWarning(latestBMI, latestAgeInMonths) : null;
+
+  const renderBMICategories = () => (
+    <div style={{ 
+      marginBottom: '20px', 
+      background: 'rgba(30, 58, 138, 0.05)', 
+      padding: '16px', 
+      borderRadius: '12px',
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '8px'
+    }}>
+      <Text strong style={{ marginRight: '12px', fontSize: '14px' }}>WHO BMI Categories: </Text>
+      <Tag color="#91caff" style={{ borderRadius: '20px', padding: '0 12px' }}>Underweight (&lt; -2 SD)</Tag>
+      <Tag color="#52c41a" style={{ borderRadius: '20px', padding: '0 12px' }}>Normal (-2 SD to +1 SD)</Tag>
+      <Tag color="#faad14" style={{ borderRadius: '20px', padding: '0 12px' }}>Overweight (+1 SD to +2 SD)</Tag>
+      <Tag color="#ff4d4f" style={{ borderRadius: '20px', padding: '0 12px' }}>Obese (&gt; +2 SD)</Tag>
+    </div>
+  );
+
+  const renderFilters = () => (
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'space-between', 
+      marginBottom: '20px',
+      gap: '10px',
+      flexWrap: 'wrap'
+    }}>
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <Text>Display by:</Text>
+        <Select 
+          value={displayMode} 
+          onChange={(value: 'day' | 'month' | 'year') => {
+            setDisplayMode(value);
+          }}
+          style={{ width: 120 }}
+        >
+          <Select.Option value="day">Day</Select.Option>
+          <Select.Option value="month">Month</Select.Option>
+          <Select.Option value="year">Year</Select.Option>
+        </Select>
+      </div>
+      
+      {/* Date Range Picker with future date prevention */}
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <Text>Filter date range:</Text>
+        <RangePicker 
+          value={dateRange}
+          onChange={handleDateRangeChange}
+          disabledDate={(current) => {
+            return current && current > moment().endOf('day');
+          }}
+          style={{ width: 280 }}
+          allowClear={true}
+          placeholder={['Start date', 'End date']}
+        />
+      </div>
+    </div>
+  );
+
+  const renderFilterStatus = () => (
+    isFiltered && dateRange && dateRange[0] && dateRange[1] && (
+      <div style={{ marginBottom: '16px' }}>
+        <Alert
+          type="info"
+          message={
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <Text>Showing BMI data from: </Text>
+                <Text strong>
+                  {dateRange[0].format('YYYY-MM-DD')} to {dateRange[1].format('YYYY-MM-DD')}
+                </Text>
+                {filteredData.length === 0 && (
+                  <span> (No data found in this range)</span>
+                )}
+              </div>
+              <Button type="link" onClick={clearAllFilters}>
+                Clear Filter
+              </Button>
+            </div>
+          }
+          showIcon
+          style={{ backgroundColor: 'rgba(30, 58, 138, 0.05)' }}
+        />
+      </div>
+    )
+  );
 
   return (
     <Card 
@@ -229,7 +459,6 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
       bodyStyle={{ padding: '24px' }}
     >
       {!selectedChild ? (
-        // Show this message when no child is selected
         <div style={{ 
           display: 'flex',
           flexDirection: 'column',
@@ -263,7 +492,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
         <div style={{ textAlign: 'center', padding: '50px' }}>
           <Spin size="large" />
         </div>
-      ) : aggregatedData.length > 0 ? (
+      ) : (
         <>
           {/* Display warning if available */}
           {bmiWarning && (
@@ -275,164 +504,144 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
             />
           )}
 
-          {/* Display mode and date range selectors */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            marginBottom: '20px',
-            gap: '10px'
-          }}>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <Text>Display by:</Text>
-              <Select 
-                value={displayMode} 
-                onChange={(value: 'day' | 'month' | 'year' | 'hour') => {
-                  setDisplayMode(value);
-                  // Reset date range when changing display mode
-                  setDateRange(null);
-                }}
-                style={{ width: 120 }}
-              >
-                <Select.Option value="hour">Hour</Select.Option>
-                <Select.Option value="day">Day</Select.Option>
-                <Select.Option value="month">Month</Select.Option>
-                <Select.Option value="year">Year</Select.Option>
-              </Select>
+          {/* Always show filters */}
+          {renderFilters()}
+
+          {/* Show filter status */}
+          {renderFilterStatus()}
+
+          {/* Always show BMI categories */}
+          {renderBMICategories()}
+
+          {chartData.length > 0 && aggregatedData.length > 0 ? (
+            <div style={{ 
+              background: 'white', 
+              borderRadius: '12px', 
+              padding: '24px', 
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' 
+            }}>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart 
+                  data={aggregatedData} 
+                  margin={{ top: 5, right: 30, left: 20, bottom: 30 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="date" 
+                    label={{ 
+                      value: displayMode === 'day' ? 'Date' : displayMode === 'month' ? 'Month' : 'Year', 
+                      position: 'insideBottom', 
+                      offset: -5 
+                    }} 
+                  />
+                  <YAxis 
+                    domain={['auto', 'auto']} 
+                    label={{ value: 'BMI', angle: -90, position: 'insideLeft' }} 
+                  />
+                  
+                  {/* Dynamic reference lines based on WHO standards */}
+                  {aggregatedData.length > 0 && (
+                    <>
+                      <ReferenceLine 
+                        y={aggregatedData[0].whoUnderweight} 
+                        stroke="#91caff" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Underweight', 
+                          position: 'insideBottomLeft', 
+                          fill: '#91caff',
+                          fontSize: 12
+                        }} 
+                      />
+                      <ReferenceLine 
+                        y={aggregatedData[0].whoOverweight} 
+                        stroke="#faad14" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Overweight', 
+                          position: 'insideBottomLeft', 
+                          fill: '#faad14',
+                          fontSize: 12
+                        }} 
+                      />
+                      <ReferenceLine 
+                        y={aggregatedData[0].whoObese} 
+                        stroke="#ff4d4f" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Obese', 
+                          position: 'insideTopLeft', 
+                          fill: '#ff4d4f',
+                          fontSize: 12
+                        }} 
+                      />
+                    </>
+                  )}
+                  
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  
+                  <Line 
+                    type="monotone" 
+                    dataKey="bmi" 
+                    name="Personal BMI" 
+                    stroke="#1e3a8a" 
+                    strokeWidth={2} 
+                    dot={renderCustomDot}
+                    activeDot={{ r: 8 }} 
+                  />
+                  
+                  {/* WHO BMI Reference Line */}
+                  <Line 
+                    type="monotone" 
+                    dataKey="whoBmi" 
+                    name="WHO BMI Reference" 
+                    stroke="#ff6b6b" 
+                    strokeWidth={2} 
+                    strokeDasharray="5 5"
+                    dot={false}
+                  />
+                  
+                  {/* Brush for zooming and panning */}
+                  <Brush 
+                    dataKey="date"
+                    height={20}
+                    stroke="#8884d8"
+                    y={375}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-            
-            {/* <RangePicker 
-              value={dateRange}
-              onChange={(dates: RangeValue<Moment>) => {
-                setDateRange(dates as [Moment, Moment] | null);
-              }}
-              style={{ width: 300 }}
-            /> */}
-          </div>
-
-          <div style={{ 
-            marginBottom: '20px', 
-            background: 'rgba(30, 58, 138, 0.05)', 
-            padding: '16px', 
-            borderRadius: '12px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px'
-          }}>
-            <Text strong style={{ marginRight: '12px', fontSize: '14px' }}>BMI Categories: </Text>
-            <Tag color="#91caff" style={{ borderRadius: '20px', padding: '0 12px' }}>Underweight (&lt; 18.5)</Tag>
-            <Tag color="#52c41a" style={{ borderRadius: '20px', padding: '0 12px' }}>Normal (18.5-24.9)</Tag>
-            <Tag color="#faad14" style={{ borderRadius: '20px', padding: '0 12px' }}>Overweight (25-29.9)</Tag>
-            <Tag color="#ff4d4f" style={{ borderRadius: '20px', padding: '0 12px' }}>Obese (&ge; 30)</Tag>
-          </div>
-
-          <div style={{ 
-            background: 'white', 
-            borderRadius: '12px', 
-            padding: '24px', 
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' 
-          }}>
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart 
-                data={aggregatedData} 
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  label={{ value: 'Time', position: 'insideBottom', offset: -5 }} 
-                />
-                <YAxis 
-                  domain={['auto', 'auto']} 
-                  label={{ value: 'BMI', angle: -90, position: 'insideLeft' }} 
-                />
-                
-                <ReferenceLine 
-                  y={18.5} 
-                  stroke="#91caff" 
-                  strokeDasharray="3 3" 
-                  label={{ 
-                    value: 'Underweight', 
-                    position: 'insideBottomLeft', 
-                    fill: '#91caff',
-                    fontSize: 12
-                  }} 
-                />
-                <ReferenceLine 
-                  y={25} 
-                  stroke="#faad14" 
-                  strokeDasharray="3 3" 
-                  label={{ 
-                    value: 'Overweight', 
-                    position: 'insideBottomLeft', 
-                    fill: '#faad14',
-                    fontSize: 12
-                  }} 
-                />
-                <ReferenceLine 
-                  y={30} 
-                  stroke="#ff4d4f" 
-                  strokeDasharray="3 3" 
-                  label={{ 
-                    value: 'Obese', 
-                    position: 'insideTopLeft', 
-                    fill: '#ff4d4f',
-                    fontSize: 12
-                  }} 
-                />
-                
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                
-                <Line 
-                  type="monotone" 
-                  dataKey="bmi" 
-                  name="Personal BMI" 
-                  stroke="#1e3a8a" 
-                  strokeWidth={2} 
-                  dot={renderCustomDot}
-                  activeDot={{ r: 8 }} 
-                />
-                
-                {/* New WHO BMI Reference Line */}
-                <Line 
-                  type="monotone" 
-                  dataKey="whoBmi" 
-                  name="WHO BMI Reference" 
-                  stroke="#ff6b6b" 
-                  strokeWidth={2} 
-                  strokeDasharray="5 5"
-                  dot={false}
-                />
-                
-                {/* Brush for zooming and panning */}
-                <Brush 
-                  dataKey="date"
-                  height={30}
-                  stroke="#8884d8"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          ) : (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '50px',
+              background: 'rgba(30, 58, 138, 0.05)',
+              borderRadius: '12px'
+            }}>
+              <Text>No BMI tracking data available{isFiltered ? " for this selected time range" : ""}.</Text>
+              <div style={{ marginTop: '20px' }}>
+                {isFiltered && (
+                  <Button 
+                    type="default"
+                    onClick={clearAllFilters}
+                    style={{ marginRight: '10px' }}
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />}
+                  onClick={handleOpenBmiModal}
+                  style={{ background: '#1e3a8a' }}
+                >
+                  Add BMI Record
+                </Button>
+              </div>
+            </div>
+          )}
         </>
-      ) : (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '50px',
-          background: 'rgba(30, 58, 138, 0.05)',
-          borderRadius: '12px'
-        }}>
-          <Text>No BMI tracking data available for this selected time range.</Text>
-          <div style={{ marginTop: '20px' }}>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />}
-              onClick={handleOpenBmiModal}
-              style={{ background: '#1e3a8a' }}
-            >
-              Add BMI Record
-            </Button>
-          </div>
-        </div>
       )}
     </Card>
   );

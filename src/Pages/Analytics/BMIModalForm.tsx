@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, Row, Col, DatePicker, message } from 'antd';
+import { Modal, Form, Input, Row, Col, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
@@ -37,24 +37,19 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
         setSubmitting(true);
         const values = await form.validateFields();
 
-        // Đặc biệt quan trọng: Chuyển đổi doY thành chuỗi ngày định dạng YYYY-MM-DD
-        // Sử dụng phương thức format trực tiếp và không giữ thông tin về timezone
-        if (values.doY) {
-            // Tách ra thành ngày, tháng, năm để loại bỏ ảnh hưởng múi giờ
-            const date = new Date(values.doY);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            values.doY = `${year}-${month}-${day}`;
-            
-            console.log("Formatted date:", values.doY);
-        }
+        // Sử dụng giá trị ngày đã được set mặc định
+        values.doY = moment().format('YYYY-MM-DD');
+        console.log("Using current date:", values.doY);
 
         values.childId = selectedChildData?.id || selectedChildData?.childId;
         values.gender = selectedChildData?.gender;
 
         try {
             await onSave(values);
+            // Hiển thị thông báo thành công
+            message.success(`BMI record for ${selectedChildData?.name} has been saved successfully!`);
+            // Đóng modal sau khi lưu thành công
+            onCancel();
         } catch (error: any) {
             console.error("Full error:", error);
             console.error("Error data:", error.response?.data);
@@ -81,8 +76,9 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
   
   React.useEffect(() => {
     if (visible) {
+      // Set các giá trị mặc định khi modal hiển thị
       form.setFieldsValue({
-        doY: moment()
+        doY: moment().format('YYYY-MM-DD')
       });
     }
   }, [visible, form]);
@@ -137,13 +133,12 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
 
         <Form.Item 
           name="doY" 
-          label="BMI Record Date" 
-          rules={[{ required: true, message: "Please select the date for this BMI record" }]}
+          label="BMI Record Date"
         >
-          <DatePicker 
-            style={{ width: '100%' }} 
-            format="YYYY-MM-DD"
-            value={form.getFieldValue('doY') ? moment(form.getFieldValue('doY')) : null}
+          <Input 
+            disabled 
+            style={{ background: '#f8fafc' }} 
+            value={moment().format('YYYY-MM-DD')}
           />
         </Form.Item>
 
