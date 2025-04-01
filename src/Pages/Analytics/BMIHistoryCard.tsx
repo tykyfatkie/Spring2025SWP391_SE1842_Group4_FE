@@ -26,7 +26,6 @@ interface BMIHistoryCardProps {
   onDateRangeChange: (startDate?: string, endDate?: string) => void;
 }
 
-// Define the type for the BMI reference data
 interface BMIReferenceData {
   [key: number]: number;
 }
@@ -145,7 +144,6 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
   onDateRangeChange
 }) => {
   const [displayMode, setDisplayMode] = useState<'day' | 'month' | 'year'>('day');
-  // Change type to use Dayjs instead of Moment
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
   const [originalData, setOriginalData] = useState(chartData);
   const [filteredData, setFilteredData] = useState(chartData);
@@ -159,7 +157,6 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     setOriginalData(chartData);
   }, [chartData]);
 
-  // Update handler to use Dayjs type
   const handleDateRangeChange: RangePickerProps['onChange'] = (dates, dateStrings) => {
     setDateRange(dates as [Dayjs, Dayjs] | null);
     

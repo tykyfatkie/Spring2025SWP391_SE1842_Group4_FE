@@ -11,8 +11,8 @@ const { Title, Paragraph } = Typography;
 interface Child {
   id: string;
   name: string;
-  doB: string;  // Date of Birth
-  gender: number;  // Assuming 0 or 1 for gender
+  doB: string;  
+  gender: number;  
   weight: number;
   height: number;
   bmi: number;
@@ -70,11 +70,9 @@ const ChildSelectorCard: React.FC<ChildSelectorCardProps> = ({
   const location = useLocation();
   
   useEffect(() => {
-    // Extract childId from URL query params
     const searchParams = new URLSearchParams(location.search);
     const childId = searchParams.get('childId');
     
-    // If childId exists in URL and it's in our children list, select it
     if (childId && children.some(child => child.id === childId)) {
       setSelectedChild(childId);
     }
