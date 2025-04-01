@@ -12,7 +12,7 @@ interface BMIRecord {
   weight: number;
   height: number;
   percentile: number;
-  ageInMonths?: number; // Added for WHO reference calculation
+  ageInMonths?: number; 
 }
 
 interface ChildData {
@@ -30,7 +30,6 @@ interface BMIPDFExportProps {
   bmiRecords: BMIRecord[];
 }
 
-// Define a type for the reference data
 type ReferenceDataByAge = {
   [key: number]: number;
 };
@@ -57,14 +56,11 @@ const whoBmiReferenceData: { male: ReferenceDataByAge; female: ReferenceDataByAg
 const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
   const referenceData = whoBmiReferenceData[gender];
   
-  // Find the closest age points
   const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
   
-  // If age is outside our range, return the closest endpoint
   if (ageInMonths <= ages[0]) return referenceData[ages[0]];
   if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1]];
   
-  // Find the two closest age points for interpolation
   let lowerAge = ages[0];
   let upperAge = ages[ages.length - 1];
   
@@ -76,7 +72,6 @@ const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'ma
     }
   }
   
-  // Linear interpolation between the two closest points
   const lowerBMI = referenceData[lowerAge];
   const upperBMI = referenceData[upperAge];
   const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
@@ -84,19 +79,16 @@ const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'ma
   return lowerBMI + ratio * (upperBMI - lowerBMI);
 };
 
-// Function to calculate WHO z-score reference values for different categories
 const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
   median: number;
   underweight: number;
   overweight: number;
   obese: number;
 } => {
-  // Get median BMI (z-score 0)
   const median = getWhoBmiReference(ageInMonths, gender);
   
-  // Approximate the standard deviation (this is a simplification)
-  // In real implementation, you would use WHO tables for SD values
-  const estimatedSD = median * 0.1;  // Simplified estimation
+
+  const estimatedSD = median * 0.1;  
   
   return {
     median,
@@ -106,7 +98,6 @@ const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'):
   };
 };
 
-// Function to determine BMI category based on WHO z-score standards
 const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): { 
   label: string; 
   color: string 
@@ -136,7 +127,6 @@ const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'f
   }
 };
 
-// Calculate age in months from date of birth and measurement date
 const calculateAgeInMonths = (measurementDate: string, dob: string): number => {
   const birthDate = new Date(dob);
   const recordDate = new Date(measurementDate);
@@ -144,7 +134,7 @@ const calculateAgeInMonths = (measurementDate: string, dob: string): number => {
   const diffMonths = (recordDate.getFullYear() - birthDate.getFullYear()) * 12 + 
                      (recordDate.getMonth() - birthDate.getMonth());
   
-  return Math.max(0, diffMonths); // Ensure non-negative value
+  return Math.max(0, diffMonths); 
 };
 
 const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) => {
@@ -171,38 +161,31 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
     setIsLoading(true);
     
     try {
-      // Ensure chart is visible when converting to canvas
       chartRef.current.style.display = 'block';
       chartRef.current.style.position = 'fixed';
       chartRef.current.style.left = '-9999px';
       chartRef.current.style.visibility = 'visible';
       
-      // Wait a bit to ensure chart is rendered
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Convert chart to canvas and get image data
       const canvas = await html2canvas(chartRef.current, {
-        scale: 2, // Increase resolution
+        scale: 2, 
         logging: false,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff'
       });
       
-      // Restore hidden state
       chartRef.current.style.display = 'none';
       
       const chartImage = canvas.toDataURL('image/png');
 
-      // Create new PDF document
       const doc = new jsPDF('portrait', 'mm', 'a4');
       
-      // Add title
       doc.setFontSize(18);
-      doc.setTextColor(30, 58, 138); // Dark blue color
+      doc.setTextColor(30, 58, 138); 
       doc.text('BMI Tracking Report', 105, 20, { align: 'center' });
       
-      // Add child information
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text(`Child Name: ${childData.name}`, 20, 35);
@@ -210,12 +193,10 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
       doc.text(`Gender: ${childData.gender === 0 ? 'Male' : 'Female'}`, 20, 49);
       doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 20, 56);
       
-      // Add WHO BMI category legend
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text('WHO BMI Categories:', 20, 63);
       
-      // Create a proper layout for BMI categories with better spacing
       const categoryY = 70;
       const leftColumnX = 30;
       const rightColumnX = 120;
@@ -232,15 +213,11 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
       doc.setTextColor(255, 77, 79); // Obese
       doc.text('Obese (> +2 SD)', rightColumnX, categoryY + 7);
       
-      // If there are BMI records, add the table
       if (bmiRecords.length > 0) {
-        // Create table data
         const tableData = bmiRecords.map(record => {
-          // Calculate age in months for each record
           const ageInMonths = record.ageInMonths || 
             calculateAgeInMonths(record.date, childData.doB);
           
-          // Get WHO BMI category based on age, gender and BMI
           const gender = childData.gender === 0 ? 'male' : 'female';
           const category = getWHOBmiCategory(record.bmi, ageInMonths, gender);
           
@@ -253,26 +230,22 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
           ];
         });
         
-        // Add table using the autoTable function directly
         autoTable(doc, {
           head: [['Date', 'Weight (kg)', 'Height (cm)', 'BMI', 'Status']],
           body: tableData,
-          startY: 85, // Adjusted to account for the new BMI categories layout
+          startY: 85, 
           theme: 'grid',
           headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255] },
           alternateRowStyles: { fillColor: [248, 250, 252] },
           margin: { top: 85 }
         });
         
-        // Get final Y position after table - access this differently since we're using the function
         const finalY = (doc as any).lastAutoTable?.finalY || 120;
         
-        // Add chart title
         doc.setFontSize(14);
         doc.setTextColor(30, 58, 138);
         doc.text('BMI Trend Chart', 105, finalY + 15, { align: 'center' });
         
-        // Add chart to PDF
         const imgWidth = 170;
         const imgHeight = 80;
         doc.addImage(
@@ -284,19 +257,16 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
           imgHeight
         );
         
-        // Add note about the chart
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
         doc.text('Note: This report shows BMI trends over time according to WHO standards. Regular monitoring helps ensure healthy development.', 
           105, finalY + 110, { align: 'center', maxWidth: 170 });
       } else {
-        // If no records, add a message
         doc.setTextColor(100, 100, 100);
         doc.text('No BMI data available. Please add measurements to see trends.', 
           105, 100, { align: 'center' });
       }
       
-      // Add footer
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -315,7 +285,6 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
         );
       }
       
-      // Save PDF with child's name
       const fileName = `${childData.name.replace(/\s+/g, '_')}_BMI_Report.pdf`;
       doc.save(fileName);
       
@@ -333,7 +302,7 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
       <div 
         ref={chartRef} 
         style={{ 
-          display: 'none', // Initially hidden
+          display: 'none', 
           width: '600px',
           height: '300px',
           background: 'white',

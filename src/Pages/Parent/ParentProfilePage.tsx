@@ -27,11 +27,73 @@ import PremiumMemberDisplay from './PremiumMemberDisplay';
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
+// WHO BMI reference data matching the BMIDetailsCard component
+const whoBmiReferenceData = {
+  male: {
+    0: 13.4, 3: 16.0, 6: 17.3, 9: 17.2, 12: 16.8, 15: 16.4, 18: 16.2, 
+    24: 15.8, 36: 15.4, 48: 15.3, 60: 15.4, 
+    72: 15.5, 84: 16.0, 96: 16.5, 108: 17.0, 120: 17.8, 
+    132: 18.5, 144: 19.2, 156: 19.9, 168: 20.8, 180: 21.4, 192: 22.2, 204: 22.7, 216: 23.1, 228: 23.4
+  },
+  female: {
+    0: 13.2, 3: 15.7, 6: 16.9, 9: 16.8, 12: 16.4, 15: 16.1, 18: 15.9, 
+    24: 15.6, 36: 15.3, 48: 15.3, 60: 15.3, 
+    72: 15.3, 84: 15.7, 96: 16.2, 108: 16.8, 120: 17.5, 
+    132: 18.2, 144: 19.0, 156: 19.6, 168: 20.2, 180: 20.8, 192: 21.3, 204: 21.7, 216: 22.0, 228: 22.2
+  }
+};
+
+// Helper functions from BMIDetailsCard
+const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
+  const referenceData = whoBmiReferenceData[gender];
+  
+  const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
+  
+  if (ageInMonths <= ages[0]) return referenceData[ages[0] as keyof typeof referenceData];
+  if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1] as keyof typeof referenceData];
+  
+  let lowerAge = ages[0];
+  let upperAge = ages[ages.length - 1];
+  
+  for (let i = 0; i < ages.length - 1; i++) {
+    if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
+      lowerAge = ages[i];
+      upperAge = ages[i + 1];
+      break;
+    }
+  }
+  
+  const lowerBMI = referenceData[lowerAge as keyof typeof referenceData];
+  const upperBMI = referenceData[upperAge as keyof typeof referenceData];
+  const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
+  
+  return lowerBMI + ratio * (upperBMI - lowerBMI);
+};
+
+const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
+  median: number;
+  underweight: number;
+  overweight: number;
+  obese: number;
+} => {
+  const median = getWhoBmiReference(ageInMonths, gender);
+  
+  const estimatedSD = median * 0.1;  
+  
+  return {
+    median,
+    underweight: median - (2 * estimatedSD), 
+    overweight: median + (1 * estimatedSD),  
+    obese: median + (2 * estimatedSD)       
+  };
+};
+
 const ParentProfilePage: React.FC = () => {
   const [userData, setUserData] = useState<any>(null);
   const [childData, setChildData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState<any[]>([]);
+  const [bmiRecords, setBmiRecords] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -84,12 +146,47 @@ const ParentProfilePage: React.FC = () => {
 
         const data = await response.json();
         if (Array.isArray(data.data) && data.data.length > 0) {
-          setChildData(data.data[0]); 
+          setChildData(data.data[0]);
+          
+          // After getting child data, fetch BMI records for this child
+          fetchBmiRecords(data.data[0].id);
         } else {
           setChildData(null);
         }
       } catch (error) {
         console.error("Error fetching child data:", error);
+      }
+    };
+
+    const fetchBmiRecords = async (childId: string) => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token || !childId) {
+          return;
+        }
+        
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/growth/getByChildId/${childId}`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch BMI records');
+        }
+        
+        const data = await response.json();
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          // Sort by date descending to get the most recent record first
+          const sortedRecords = data.data.sort((a: any, b: any) => {
+            return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
+          });
+          
+          setBmiRecords(sortedRecords);
+          
+        }
+      } catch (error) {
+        console.error("Error fetching BMI records:", error);
       }
     };
 
@@ -144,13 +241,35 @@ const ParentProfilePage: React.FC = () => {
     return `${years} years ${months} months`;
   };
 
+  // Updated BMI status function that matches the WHO guidelines used in BMIDetailsCard
   const getBmiStatus = (bmi: number) => {
     if (!bmi) return { color: '#1e3a8a', status: 'normal', text: 'No data' };
     
-    if (bmi < 18.5) return { color: '#3b82f6', status: 'exception', text: 'Underweight' };
-    if (bmi < 25) return { color: '#10b981', status: 'success', text: 'Normal' };
-    if (bmi < 30) return { color: '#f59e0b', status: 'active', text: 'Overweight' };
-    return { color: '#ef4444', status: 'exception', text: 'Obese' };
+    // Calculate the child's age in months
+    const calculateAgeInMonths = () => {
+      if (!childData || !childData.doB) return 24; // Default to 24 months if no data
+      
+      const birthDate = new Date(childData.doB);
+      const today = new Date();
+      
+      return (today.getFullYear() - birthDate.getFullYear()) * 12 + 
+             (today.getMonth() - birthDate.getMonth());
+    };
+    
+    const ageInMonths = calculateAgeInMonths();
+    const gender = childData && childData.gender === 0 ? 'male' : 'female';
+    
+    const references = getWhoZScoreReferences(ageInMonths, gender);
+    
+    if (bmi < references.underweight) {
+      return { color: '#91caff', status: 'exception', text: 'Underweight' };
+    } else if (bmi >= references.obese) {
+      return { color: '#ff4d4f', status: 'exception', text: 'Obese' };
+    } else if (bmi >= references.overweight) {
+      return { color: '#faad14', status: 'active', text: 'Overweight' };
+    } else {
+      return { color: '#52c41a', status: 'success', text: 'Normal' };
+    }
   };
 
   return (
@@ -219,6 +338,7 @@ const ParentProfilePage: React.FC = () => {
               </div>
             </Col>
             <Col xs={24} md={8} style={{ textAlign: 'right' }}>
+            <Link to="/child-analytics">
               <Button 
                 type="primary" 
                 size="large"
@@ -236,6 +356,7 @@ const ParentProfilePage: React.FC = () => {
               >
                 Track New Growth Data <ArrowRightOutlined style={{ marginLeft: '6px' }} />
               </Button>
+            </Link>
             </Col>
           </Row>
         </div>
@@ -328,24 +449,6 @@ const ParentProfilePage: React.FC = () => {
                             </div>
                           </div>
                           
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <div style={{ 
-                              width: '32px', 
-                              height: '32px', 
-                              borderRadius: '50%', 
-                              background: 'rgba(30, 58, 138, 0.1)', 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              justifyContent: 'center',
-                              marginRight: '12px'
-                            }}>
-                              <HeartOutlined style={{ color: '#1e3a8a' }} />
-                            </div>
-                            <div>
-                              <Text type="secondary" style={{ display: 'block', fontSize: '13px' }}>Last Checkup</Text>
-                              <Text strong>{childData.lastCheckup || "N/A"}</Text>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </Col>
@@ -554,9 +657,11 @@ const ParentProfilePage: React.FC = () => {
                   </div>
                 ))}
                 <div style={{ padding: '16px', textAlign: 'center' }}>
-                  <Button type="link" style={{ color: '#1e3a8a', fontWeight: 600 }}>
-                    View All Doctors <ArrowRightOutlined />
-                  </Button>
+                  <Link to="/doctor">
+                    <Button type="link" style={{ color: '#1e3a8a', fontWeight: 600 }}>
+                      View All Doctors <ArrowRightOutlined />
+                    </Button>
+                  </Link>
                 </div>
               </Card>
 

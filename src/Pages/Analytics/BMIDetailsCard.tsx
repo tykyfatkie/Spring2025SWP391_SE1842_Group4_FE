@@ -11,28 +11,25 @@ interface ChartData {
   weight: number;
   height: number;
   percentile: number;
-  ageInMonths?: number; // Added for WHO reference calculation
+  ageInMonths?: number; 
 }
 
 interface BMIDetailsCardProps {
   selectedChild: string | null;
-  selectedGender?: 'male' | 'female'; // Added gender prop
+  selectedGender?: 'male' | 'female'; 
   chartData: ChartData[];
   fetchingBMI: boolean;
   handleOpenBmiModal: () => void;
 }
 
-// WHO BMI-for-age reference data (simplified)
 const whoBmiReferenceData = {
   male: {
-    // Age in months as keys, median BMI (z-score 0) as values
     0: 13.4, 3: 16.0, 6: 17.3, 9: 17.2, 12: 16.8, 15: 16.4, 18: 16.2, 
     24: 15.8, 36: 15.4, 48: 15.3, 60: 15.4, 
     72: 15.5, 84: 16.0, 96: 16.5, 108: 17.0, 120: 17.8, 
     132: 18.5, 144: 19.2, 156: 19.9, 168: 20.8, 180: 21.4, 192: 22.2, 204: 22.7, 216: 23.1, 228: 23.4
   },
   female: {
-    // Age in months as keys, median BMI (z-score 0) as values
     0: 13.2, 3: 15.7, 6: 16.9, 9: 16.8, 12: 16.4, 15: 16.1, 18: 15.9, 
     24: 15.6, 36: 15.3, 48: 15.3, 60: 15.3, 
     72: 15.3, 84: 15.7, 96: 16.2, 108: 16.8, 120: 17.5, 
@@ -40,18 +37,14 @@ const whoBmiReferenceData = {
   }
 };
 
-// Function to calculate WHO BMI reference value based on age and gender
 const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
   const referenceData = whoBmiReferenceData[gender];
   
-  // Find the closest age points
   const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
   
-  // If age is outside our range, return the closest endpoint
   if (ageInMonths <= ages[0]) return referenceData[ages[0] as keyof typeof referenceData];
   if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1] as keyof typeof referenceData];
   
-  // Find the two closest age points for interpolation
   let lowerAge = ages[0];
   let upperAge = ages[ages.length - 1];
   
@@ -63,7 +56,6 @@ const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'ma
     }
   }
   
-  // Linear interpolation between the two closest points
   const lowerBMI = referenceData[lowerAge as keyof typeof referenceData];
   const upperBMI = referenceData[upperAge as keyof typeof referenceData];
   const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
@@ -71,29 +63,24 @@ const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'ma
   return lowerBMI + ratio * (upperBMI - lowerBMI);
 };
 
-// Function to calculate WHO z-score reference values for different categories
 const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
   median: number;
   underweight: number;
   overweight: number;
   obese: number;
 } => {
-  // Get median BMI (z-score 0)
   const median = getWhoBmiReference(ageInMonths, gender);
   
-  // Approximate the standard deviation (this is a simplification)
-  // In real implementation, you would use WHO tables for SD values
-  const estimatedSD = median * 0.1;  // Simplified estimation
+  const estimatedSD = median * 0.1;  
   
   return {
     median,
-    underweight: median - (2 * estimatedSD), // -2 SD
-    overweight: median + (1 * estimatedSD),  // +1 SD
-    obese: median + (2 * estimatedSD)        // +2 SD
+    underweight: median - (2 * estimatedSD), 
+    overweight: median + (1 * estimatedSD),  
+    obese: median + (2 * estimatedSD)       
   };
 };
 
-// Function to determine BMI category based on WHO z-score standards
 const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): { 
   label: string; 
   color: string 
@@ -123,13 +110,10 @@ const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'f
   }
 };
 
-// Calculate age in months from date of birth (assuming child has dob property or calculate from records)
 const calculateAgeInMonths = (dateTime: string): number => {
-  // This is a placeholder - you should replace with actual logic to calculate age from DOB
-  // For demo, assuming a child aged 14 months
   const measurementDate = new Date(dateTime);
   const childDOB = new Date();
-  childDOB.setMonth(childDOB.getMonth() - 14); // Example: 14 months old
+  childDOB.setMonth(childDOB.getMonth() - 14); 
   
   const diffMonths = (measurementDate.getFullYear() - childDOB.getFullYear()) * 12 + 
                      (measurementDate.getMonth() - childDOB.getMonth());
@@ -139,7 +123,7 @@ const calculateAgeInMonths = (dateTime: string): number => {
 
 const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   selectedChild,
-  selectedGender = 'male', // Default to male if not provided
+  selectedGender = 'male', 
   chartData,
   fetchingBMI,
   handleOpenBmiModal
@@ -272,10 +256,8 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
                 </thead>
                 <tbody>
                   {chartData.map((record, index) => {
-                    // Calculate age in months for the record
                     const ageInMonths = record.ageInMonths || calculateAgeInMonths(record.dateTime);
                     
-                    // Get WHO BMI category based on age, gender and BMI
                     const category = getWHOBmiCategory(record.bmi, ageInMonths, selectedGender);
                     
                     return (

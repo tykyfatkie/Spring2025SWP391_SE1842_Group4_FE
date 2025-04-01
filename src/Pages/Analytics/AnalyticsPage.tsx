@@ -57,7 +57,7 @@ const BMITrackingPage: React.FC = () => {
 
   useEffect(() => {
     if (selectedChild) {
-      fetchBMIData(selectedChild); // Initial load without date filters
+      fetchBMIData(selectedChild); 
       const childData = children.find(child => child.id === selectedChild) || null;
       setSelectedChildData(childData);
     }
@@ -109,12 +109,9 @@ const BMITrackingPage: React.FC = () => {
       return;
     }
     
-    // Build URL with query parameters
     let url = `${import.meta.env.VITE_API_ENDPOINT}/bmi/tracking?childId=${childId}`;
     
-    // Only append date parameters if they are defined
     if (startDate && startDate.trim() !== '') {
-      // Create a custom ISO string with the specific format
       const startDateObj = new Date(startDate);
       const formattedStartDate = `${startDateObj.toISOString().split('T')[0]}T12:11:16.641652Z`;
       url += `&startDate=${encodeURIComponent(formattedStartDate)}`;
@@ -122,10 +119,9 @@ const BMITrackingPage: React.FC = () => {
     }
     
     if (endDate && endDate.trim() !== '') {
-      // Convert to ISO format with time component and timezone
       const endDateTime = new Date(endDate);
       endDateTime.setHours(23, 59, 59, 999);
-      const formattedEndDate = endDateTime.toISOString(); // This gives the YYYY-MM-DDThh:mm:ss.sssZ format
+      const formattedEndDate = endDateTime.toISOString(); 
       url += `&endDate=${encodeURIComponent(formattedEndDate)}`;
       console.log("Using end date:", formattedEndDate);
     }
@@ -139,11 +135,9 @@ const BMITrackingPage: React.FC = () => {
       }
     );
   
-      // Log API response for debugging
       console.log("BMI data received, count:", response.data?.value?.data?.length || 0);
   
       if (response.data?.value?.data && Array.isArray(response.data.value.data)) {
-        // Process all data returned from server
         const processedData = response.data.value.data.map((record: BMIRecord) => {
           const dateObj = new Date(record.createdAt);
           console.log("Processing date:", record.createdAt, "->", dateObj.toISOString());
@@ -176,7 +170,6 @@ const BMITrackingPage: React.FC = () => {
   const handleDateRangeChange = (startDate?: string, endDate?: string) => {
     if (selectedChild) {
       console.log("Filtering by date range:", startDate, "to", endDate);
-      // Passing undefined parameters will fetch all data
       fetchBMIData(selectedChild, startDate, endDate);
     }
   };
@@ -227,19 +220,15 @@ const BMITrackingPage: React.FC = () => {
       );
   
       if (response.status === 200) {
-        // Close the input modal
         setBmiModalVisible(false);
         
-        // Fetch updated BMI data after saving - pass no date parameters to get all data
         await fetchBMIData(selectedChild);
         
-        // Display success modal
         Modal.success({
           title: 'BMI Record Added Successfully!',
           content: `New BMI data for ${selectedChildData.name} has been saved and updated in the system.`,
           okText: 'OK',
           onOk: () => {
-            // Show PDF export modal after closing the success modal
             Modal.confirm({
               title: 'Export BMI Report',
               content: 'Would you like to export this BMI record as a PDF?',
