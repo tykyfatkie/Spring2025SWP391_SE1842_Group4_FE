@@ -14,7 +14,6 @@ import {
   UserOutlined, 
   PlusOutlined,
   EditOutlined,
-  HeartOutlined,
   ArrowRightOutlined,
   CalendarOutlined
 } from '@ant-design/icons';
@@ -93,7 +92,7 @@ const ParentProfilePage: React.FC = () => {
   const [childData, setChildData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState<any[]>([]);
-  const [bmiRecords, setBmiRecords] = useState<any[]>([]);
+  const [_bmiRecords, setBmiRecords] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
