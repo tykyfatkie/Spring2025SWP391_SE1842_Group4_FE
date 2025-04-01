@@ -21,13 +21,13 @@ const AppHeader: React.FC = () => {
     setIsAuthenticated(!!token);
     const path = location.pathname;
 
-    const mainNavPages = ["/home", "/contact-us", "/about-us", "/child-manage"];
+    const mainNavPages = ["/home", "/contact-us", "/doctor", "/child-manage"];
     if (!mainNavPages.some(page => path.includes(page))) {
       setSelectedKey("");
     } else {
       if (path.includes("/home")) setSelectedKey("home");
       else if (path.includes("/contact-us")) setSelectedKey("contact");
-      else if (path.includes("/about-us")) setSelectedKey("about");
+      else if (path.includes("/doctor")) setSelectedKey("doctor");
       else if (path.includes("/child-manage")) setSelectedKey("child");
     }
   }, [location]);
@@ -102,6 +102,19 @@ const AppHeader: React.FC = () => {
       >
         Profile
       </Menu.Item>
+
+      <Menu.Item 
+        key="about" 
+        onClick={() => navigate("/about-us")}
+        icon={<InfoCircleOutlined style={{ color: primaryBlue }} />}
+        style={{ 
+          ...menuItemBaseStyle,
+          color: "#333",
+        }}
+        className="menu-item-hover"
+      >
+        About
+      </Menu.Item>
       
       <Menu.Item 
         key="security" 
@@ -167,18 +180,31 @@ const AppHeader: React.FC = () => {
           .ant-menu-item-selected {
             background-color: transparent !important;
           }
+          
+          /* Thêm các quy tắc CSS để đảm bảo header luôn cố định */
+          .sticky-header {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
+            transition: all 0.3s ease;
+          }
+          
+          /* Thêm padding-top cho body để tránh nội dung bị che khuất bởi header cố định */
+          body {
+            padding-top: 80px;
+          }
         `}
       </style>
     
-      <Header style={{ 
+      <Header className="sticky-header" style={{ 
         background: "#fff", 
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)", 
         padding: "0 40px", 
         height: "80px", 
-        lineHeight: "80px", 
-        position: "sticky", 
-        top: 0, 
-        zIndex: 1000,
+        lineHeight: "80px",
         fontFamily: "SoDoSans, sans-serif", 
       }}>
         <Row justify="space-between" align="middle" style={{ height: "100%" }}>
@@ -209,12 +235,12 @@ const AppHeader: React.FC = () => {
                 Contact
               </div>
               <div 
-                style={menuItemStyle("about")}
-                onClick={() => navigate("/about-us")}
+                style={menuItemStyle("doctor")}
+                onClick={() => navigate("/doctor")}
                 onMouseEnter={(e) => e.currentTarget.style.color = primaryBlue}
-                onMouseLeave={(e) => e.currentTarget.style.color = selectedKey === "about" ? primaryBlue : "#000"}
+                onMouseLeave={(e) => e.currentTarget.style.color = selectedKey === "doctor" ? primaryBlue : "#000"}
               >
-                About
+                Doctor
               </div>
               <div 
                 style={menuItemStyle("child")}

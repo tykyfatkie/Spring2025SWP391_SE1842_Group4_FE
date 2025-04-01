@@ -30,7 +30,7 @@ const CollapsibleHeader: React.FC<CollapsibleHeaderProps> = ({
   return (
     <div style={{ 
       marginBottom: '40px', 
-      background: '#1e3a8a', 
+      background: 'linear-gradient(135deg, rgb(30, 58, 138) 0%, rgb(59, 130, 246) 100%)', 
       borderRadius: '20px',
       position: 'relative',
       overflow: 'hidden',

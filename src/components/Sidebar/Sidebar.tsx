@@ -32,11 +32,14 @@ const Sidebar: React.FC = () => {
       onCollapse={(value) => setCollapsed(value)}
       width={260}
       style={{
-        minHeight: '100vh',
+        height: '100vh',
+        position: 'fixed',
+        left: 0,
+        top: 80, 
+        overflow: 'auto',
         background: '#1e3a8a', 
         boxShadow: '0 0 15px rgba(0, 0, 0, 0.1)',
-        position: 'relative',
-        zIndex: 1000,
+        zIndex: 999, 
       }}
     >
       {/* Logo and Title Section */}

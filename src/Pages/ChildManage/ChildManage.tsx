@@ -484,7 +484,7 @@ const ChildManage: React.FC = () => {
     <Layout style={{ minHeight: "100vh", margin: "-25px", background: 'white', marginRight: '25px' }}>
       <Layout>
         <Sidebar />
-        <Content style={{ padding: '24px', background: '#f8fafc' }}>
+        <Content style={{ padding: '24px', background: '#f8fafc', marginLeft: '260px' }}>
         <CollapsibleHeader
           title="Manage Child Profiles"
           subtitle="MANAGE PROFILES"
