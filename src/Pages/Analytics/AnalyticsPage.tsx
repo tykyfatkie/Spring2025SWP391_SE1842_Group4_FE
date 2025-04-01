@@ -31,6 +31,7 @@ interface BMIRecord {
   createdAt: string;
 }
 
+
 interface ChartData {
   dateTime: string;
   date: string;
@@ -48,16 +49,7 @@ const BMITrackingPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingBMI, setFetchingBMI] = useState<boolean>(false);
   const [bmiModalVisible, setBmiModalVisible] = useState<boolean>(false);
-  const [] = useState<boolean>(false); 
   const [form] = Form.useForm();
-
-  // Function to get BMI category
-  const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { label: 'Underweight', color: '#91caff' };
-    if (bmi < 25) return { label: 'Normal', color: '#52c41a' };
-    if (bmi < 30) return { label: 'Overweight', color: '#faad14' };
-    return { label: 'Obese', color: '#ff4d4f' };
-  };
 
   useEffect(() => {
     fetchChildren();
@@ -65,7 +57,7 @@ const BMITrackingPage: React.FC = () => {
 
   useEffect(() => {
     if (selectedChild) {
-      fetchBMIData(selectedChild);
+      fetchBMIData(selectedChild); // Initial load without date filters
       const childData = children.find(child => child.id === selectedChild) || null;
       setSelectedChildData(childData);
     }
@@ -108,39 +100,84 @@ const BMITrackingPage: React.FC = () => {
     }
   };
 
-  const fetchBMIData = async (childId: string) => {
+  const fetchBMIData = async (childId: string, startDate?: string, endDate?: string) => {
     setFetchingBMI(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        message.error("Authentication token missing. Please login again.");
-        return;
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      message.error("Authentication token missing. Please login again.");
+      return;
+    }
+    
+    // Build URL with query parameters
+    let url = `${import.meta.env.VITE_API_ENDPOINT}/bmi/tracking?childId=${childId}`;
+    
+    // Only append date parameters if they are defined
+    if (startDate && startDate.trim() !== '') {
+      // Create a custom ISO string with the specific format
+      const startDateObj = new Date(startDate);
+      const formattedStartDate = `${startDateObj.toISOString().split('T')[0]}T12:11:16.641652Z`;
+      url += `&startDate=${encodeURIComponent(formattedStartDate)}`;
+      console.log("Using start date:", formattedStartDate);
+    }
+    
+    if (endDate && endDate.trim() !== '') {
+      // Convert to ISO format with time component and timezone
+      const endDateTime = new Date(endDate);
+      endDateTime.setHours(23, 59, 59, 999);
+      const formattedEndDate = endDateTime.toISOString(); // This gives the YYYY-MM-DDThh:mm:ss.sssZ format
+      url += `&endDate=${encodeURIComponent(formattedEndDate)}`;
+      console.log("Using end date:", formattedEndDate);
+    }
+    
+    console.log("Fetching BMI data with URL:", url);
+    
+    const response = await axios.get(
+      url,
+      {
+        headers: { Authorization: `Bearer ${token}` }
       }
-      
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_ENDPOINT}/bmi/tracking?childId=${childId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+    );
+  
+      // Log API response for debugging
+      console.log("BMI data received, count:", response.data?.value?.data?.length || 0);
   
       if (response.data?.value?.data && Array.isArray(response.data.value.data)) {
-        setChartData(response.data.value.data.map((record: BMIRecord) => ({
-          dateTime: record.createdAt,
-          date: new Date(record.createdAt).toLocaleDateString(),
-          bmi: record.bmi,
-          weight: record.weight,
-          height: record.height,
-          percentile: record.bmiPercentile
-        })).sort((a: { dateTime: string | number | Date; }, b: { dateTime: string | number | Date; }) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()));
+        // Process all data returned from server
+        const processedData = response.data.value.data.map((record: BMIRecord) => {
+          const dateObj = new Date(record.createdAt);
+          console.log("Processing date:", record.createdAt, "->", dateObj.toISOString());
+          return {
+            dateTime: record.createdAt,
+            date: dateObj.toLocaleDateString(),
+            bmi: record.bmi,
+            weight: record.weight,
+            height: record.height,
+            percentile: record.bmiPercentile
+          };
+        }).sort((a: ChartData, b: ChartData) => 
+          new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+        
+        setChartData(processedData);
+        console.log("Chart data after processing:", processedData.length, "records");
       } else {
         throw new Error("Invalid BMI data format received");
       }
     } catch (error: any) {
+      console.error("Error fetching BMI data:", error);
+      console.error("Error response data:", error.response?.data);
       message.error(error.response?.data?.message || "Failed to load BMI tracking data");
       setChartData([]);
     } finally {
       setFetchingBMI(false);
+    }
+  };
+
+  const handleDateRangeChange = (startDate?: string, endDate?: string) => {
+    if (selectedChild) {
+      console.log("Filtering by date range:", startDate, "to", endDate);
+      // Passing undefined parameters will fetch all data
+      fetchBMIData(selectedChild, startDate, endDate);
     }
   };
 
@@ -167,15 +204,13 @@ const BMITrackingPage: React.FC = () => {
         return;
       }
   
-      // Đảm bảo chúng ta KHÔNG xử lý doY ở đây nữa
-      // vì đã được xử lý trong BMIModalForm
       const payload = {
         childId: selectedChild,
         height: Number(values.height),
         weight: Number(values.weight),
         gender: selectedChildData.gender,
         notes: values.notes?.trim() || "",
-        doY: values.doY, // Sử dụng giá trị đã được định dạng từ BMIModalForm
+        doY: values.doY,
       };
   
       console.log("BMI Save Payload:", payload);
@@ -192,31 +227,41 @@ const BMITrackingPage: React.FC = () => {
       );
   
       if (response.status === 200) {
-        message.success("BMI record saved successfully!");
+        // Close the input modal
         setBmiModalVisible(false);
         
-        // Fetch updated BMI data after saving
+        // Fetch updated BMI data after saving - pass no date parameters to get all data
         await fetchBMIData(selectedChild);
         
-        Modal.confirm({
-          title: 'BMI Record Saved',
-          content: 'Would you like to export this BMI record as a PDF?',
-          okText: 'Yes, Export',
-          cancelText: 'No, Thanks',
+        // Display success modal
+        Modal.success({
+          title: 'BMI Record Added Successfully!',
+          content: `New BMI data for ${selectedChildData.name} has been saved and updated in the system.`,
+          okText: 'OK',
           onOk: () => {
-            if (selectedChildData && chartData.length > 0) {
-              const latestRecord = chartData[chartData.length - 1];
-              import('./SingleBMIExport').then(module => {
-                const { generatePDF } = module.default.prototype;
-                generatePDF.call({
-                  childData: selectedChildData,
-                  bmiRecord: latestRecord
-                });
-              }).catch(() => {
-              });
-            } else {
-              message.warning('No data available to export');
-            }
+            // Show PDF export modal after closing the success modal
+            Modal.confirm({
+              title: 'Export BMI Report',
+              content: 'Would you like to export this BMI record as a PDF?',
+              okText: 'Yes, Export PDF',
+              cancelText: 'No, Thanks',
+              onOk: () => {
+                if (selectedChildData && chartData.length > 0) {
+                  const latestRecord = chartData[chartData.length - 1];
+                  import('./SingleBMIExport').then(module => {
+                    const { generatePDF } = module.default.prototype;
+                    generatePDF.call({
+                      childData: selectedChildData,
+                      bmiRecord: latestRecord
+                    });
+                  }).catch(() => {
+                    message.error('Could not generate PDF file');
+                  });
+                } else {
+                  message.warning('No data available to export');
+                }
+              }
+            });
           }
         });
       }
@@ -228,8 +273,6 @@ const BMITrackingPage: React.FC = () => {
       message.error(error.response?.data?.message || "Failed to save BMI record.");
     }
   };
-
-
 
   return (
     <Layout style={{ minHeight: '100vh', margin: "-25px", background: 'white', marginRight: '25px' }}>
@@ -267,6 +310,7 @@ const BMITrackingPage: React.FC = () => {
             fetchingBMI={fetchingBMI}
             chartData={chartData}
             handleOpenBmiModal={handleOpenBmiModal}
+            onDateRangeChange={handleDateRangeChange}
           />
         </Col>
           </Row>
@@ -277,7 +321,6 @@ const BMITrackingPage: React.FC = () => {
             chartData={chartData}
             fetchingBMI={fetchingBMI}
             handleOpenBmiModal={handleOpenBmiModal}
-            getBMICategory={getBMICategory}
           />
         </Content>
       </Layout>
