@@ -5,15 +5,15 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import CollapsibleHeader from "../ChildManage/CollapsibleHeader";
 
 const { Content } = Layout;
-// Removed unused Title import
 
 const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/request/my-request`;
+
 
 // Define interface for consultation request
 interface ConsultationRequest {
   id: string | number;
   doctorName: string;
-  status: string;
+  status: string; // Changed to string to handle any format the API returns
   date: string;
   // Add other properties that might be in your response
 }
@@ -28,7 +28,6 @@ interface ApiResponse {
 const UserConsultationRequests: React.FC = () => {
   const [requests, setRequests] = useState<ConsultationRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<string>("all");
 
   useEffect(() => {
     fetchConsultationRequests();
@@ -43,11 +42,13 @@ const UserConsultationRequests: React.FC = () => {
         return;
       }
 
-      const response = await axiosInstance.get<ConsultationRequest[] | ApiResponse>(API_BASE_URL, {
+      const response = await axiosInstance.get(API_BASE_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      console.log("API Response:", response.data); // Log the entire response
 
       // Check the actual structure of your response
       if (Array.isArray(response.data)) {
@@ -57,10 +58,27 @@ const UserConsultationRequests: React.FC = () => {
       } else if (response.data && Array.isArray((response.data as ApiResponse).data)) {
         setRequests((response.data as ApiResponse).data || []);
       } else {
-        setRequests([]);
+        // If none of the expected formats, try to determine if there's data in another format
+        const responseData = response.data;
+        if (responseData && typeof responseData === 'object') {
+          // Look for any array property that might contain our data
+          const possibleArrayProps = Object.keys(responseData).filter(key => 
+            Array.isArray(responseData[key])
+          );
+          
+          if (possibleArrayProps.length > 0) {
+            // Use the first array found
+            setRequests(responseData[possibleArrayProps[0]]);
+          } else {
+            setRequests([]);
+          }
+        } else {
+          setRequests([]);
+        }
       }
     } catch (error: any) {
       console.error("Error fetching consultation requests:", error);
+      message.error("Failed to load consultation requests");
       setRequests([]);
     } finally {
       setLoading(false);
@@ -104,18 +122,6 @@ const UserConsultationRequests: React.FC = () => {
     }
   };
 
-  const handleTabChange = (key: string) => {
-    setActiveTab(key);
-  };
-
-  const filteredRequests = activeTab === "all" 
-    ? requests 
-    : requests.filter(request => 
-        activeTab === "pending" 
-          ? request.status.toLowerCase() === "pending" 
-          : request.status.toLowerCase() === activeTab
-      );
-
   const columns = [
     {
       title: "Request ID",
@@ -131,16 +137,31 @@ const UserConsultationRequests: React.FC = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => (
-        <span style={{ 
-          color: status.toLowerCase() === "approved" ? "#52c41a" : 
-                 status.toLowerCase() === "pending" ? "#faad14" : 
-                 status.toLowerCase() === "rejected" ? "#f5222d" : 
-                 status.toLowerCase() === "canceled" ? "#8c8c8c" : "#000000" 
-        }}>
-          {status}
-        </span>
-      ),
+      render: (status: string) => {
+        let color = "#000000";
+        let displayText = status;
+        
+        switch(status) {
+          case "Approve":
+            color = "#52c41a"; // Green
+            displayText = "Approved";
+            break;
+          case "Pending":
+            color = "#faad14"; // Yellow/Orange
+            displayText = "Pending";
+            break;
+          case "Reject":
+            color = "#f5222d"; // Red
+            displayText = "Rejected";
+            break;
+          case "Archived":
+            color = "#8c8c8c"; // Gray
+            displayText = "Archived";
+            break;
+        }
+        
+        return <span style={{ color }}>{displayText}</span>;
+      },
     },
     {
       title: "Date",
@@ -152,7 +173,7 @@ const UserConsultationRequests: React.FC = () => {
       key: "actions",
       render: (_: any, record: ConsultationRequest) => (
         <Space>
-          {record.status.toLowerCase() === "pending" && (
+          {record.status === "Pending" && (
             <Button
               danger
               onClick={() => handleCancelRequest(record.id)}
@@ -186,55 +207,11 @@ const UserConsultationRequests: React.FC = () => {
     },
   ];
 
-  const tabList = [
-    {
-      key: "all",
-      tab: "All Requests",
-    },
-    {
-      key: "pending",
-      tab: "Pending",
-    },
-    {
-      key: "approved",
-      tab: "Approved",
-    },
-    {
-      key: "rejected",
-      tab: "Rejected",
-    },
-    {
-      key: "canceled",
-      tab: "Canceled",
-    },
-  ];
-
   const RequestsTable = () => (
     <div style={{ background: "white", borderRadius: "8px", padding: "16px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)" }}>
-      <div style={{ marginBottom: "16px", borderBottom: "1px solid #f0f0f0" }}>
-        <Space size="middle">
-          {tabList.map(item => (
-            <span
-              key={item.key}
-              onClick={() => handleTabChange(item.key)}
-              style={{
-                padding: "12px 0",
-                marginRight: "24px",
-                cursor: "pointer",
-                borderBottom: activeTab === item.key ? "2px solid #1e3a8a" : "none",
-                color: activeTab === item.key ? "#1e3a8a" : "inherit",
-                fontWeight: activeTab === item.key ? 600 : 400,
-              }}
-            >
-              {item.tab}
-            </span>
-          ))}
-        </Space>
-      </div>
-
       <Table
         columns={columns}
-        dataSource={filteredRequests}
+        dataSource={requests}
         rowKey="id"
         pagination={{
           pageSize: 10,
@@ -257,7 +234,6 @@ const UserConsultationRequests: React.FC = () => {
             description="View and manage all your consultation requests. Track the status of your requests and cancel pending requests if needed."
             features={[
               "View all consultation requests",
-              "Filter requests by status",
               "Cancel pending requests",
               "See consultation details"
             ]}
