@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Layout, Typography, Row, Col, Card, Tag, Spin, Alert, Button, Empty } from 'antd';
-import { CheckCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
+
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -292,17 +293,27 @@ const MyDoctorProfilePage: React.FC = () => {
                     background: '#f0f0f0'
                   }}>
                     <img 
-                      src={doctor.profileImg || 'https://via.placeholder.com/150?text=Doctor'} 
+                      src={doctor.profileImg } 
                       alt={doctor.user?.name || "Doctor"} 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/150?text=Doctor';
+                        e.currentTarget.src = '';
                       }}
                     />
                   </div>
                 </Col>
                 <Col xs={24} md={18}>
-                  {/* Content stays the same */}
+                <Title level={2} style={{ color: 'white', margin: 0 }}>
+                    {doctor.user?.name || "Dr. Unknown"}
+                  </Title>
+                  <Text style={{ color: 'white', display: 'block', marginTop: '8px', fontSize: '16px' }}>
+                    <MailOutlined style={{ marginRight: '8px' }} /> 
+                    {doctor.user?.email || "No email available"}
+                  </Text>
+                  <Text style={{ color: 'white', display: 'block', marginTop: '8px', fontSize: '16px' }}>
+                    <PhoneOutlined style={{ marginRight: '8px' }} /> 
+                    {doctor.user?.phone || "No phone available"}
+                  </Text>
                 </Col>
               </Row>
             </div>
