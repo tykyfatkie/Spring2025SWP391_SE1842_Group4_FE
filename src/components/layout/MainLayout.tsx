@@ -19,6 +19,8 @@ function MainLayout() {
   const isMyDoctorCreateProfilePage = location.pathname === '/create-doctor-profile'; 
 
   const isForgotPasswordPage = location.pathname === '/forgot-password'; 
+
+  const isUpdateDoctorProfile = location.pathname === '/update-doctor-profile'; 
   
   
   // Nếu đã đăng nhập và cố gắng truy cập trang auth, chuyển hướng về /home
@@ -34,7 +36,7 @@ function MainLayout() {
       }}
     >
       {/* Hiển thị header nếu không phải trang xác thực và không phải trang consultation response */}
-      {!isAuthPage && !isConsultationResponsePage && !isMyDoctorProfilePage && !isForgotPasswordPage && !isMyDoctorCreateProfilePage && <AppHeader /> }
+      {!isAuthPage && !isConsultationResponsePage && !isMyDoctorProfilePage && !isForgotPasswordPage && !isMyDoctorCreateProfilePage && !isUpdateDoctorProfile && <AppHeader /> }
       
       <Content
         style={{
