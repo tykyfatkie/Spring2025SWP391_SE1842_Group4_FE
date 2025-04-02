@@ -11,9 +11,11 @@ import {
   Layout,
   Typography,
   Row,
-  Col
+  Col,
+  Modal
 } from 'antd';
 import moment from 'moment';
+import axios from 'axios'; 
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar.tsx';
 import { CheckCircleOutlined, UserOutlined } from '@ant-design/icons';
@@ -25,20 +27,45 @@ const { Title, Paragraph, Text } = Typography;
 const CreateChild: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+  const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
   const navigate = useNavigate();
 
-  const saveProfile = async () => {
+  const token = localStorage.getItem('token');
+
+  const axiosInstance = axios.create({
+    baseURL: import.meta.env.VITE_API_ENDPOINT,
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : '',
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const saveProfile = async (values: any) => {
     setLoading(true);
-  
+
     const token = localStorage.getItem('token');
     if (!token) {
       message.error('Authentication failed. Please log in again.');
       return;
     }
-  
+
     try {
+      const formattedValues = {
+        name: values.name,
+        DoB: values.DoB ? values.DoB.format('YYYY-MM-DD') : undefined,
+        gender: Number(values.gender),
+      };
+
+      // Use the axiosInstance instead of direct axios
+      await axiosInstance.post(
+        `/children/create`,
+        formattedValues
+      );
+
       message.success('Child profile created successfully!');
-      resetForm();
+      form.resetFields();
+      // Redirect to child-manage page
       navigate('/child-manage');
     } catch (error: any) {
       console.error('Error saving profile:', error);
@@ -48,13 +75,37 @@ const CreateChild: React.FC = () => {
     }
   };
   
-  const resetForm = () => {
-    form.resetFields();
-  };
-
+  // Handler for cancel button
   const handleCancel = () => {
-    resetForm();
+    setIsCancelModalVisible(true);
+  };
+  
+  // Confirm cancellation
+  const confirmCancel = () => {
+    form.resetFields();
     navigate('/child-manage');
+    setIsCancelModalVisible(false);
+  };
+  
+  // Cancel the cancellation
+  const cancelCancel = () => {
+    setIsCancelModalVisible(false);
+  };
+  
+  // Handler for submit button
+  const handleFormSubmit = () => {
+    setIsConfirmModalVisible(true);
+  };
+  
+  // Confirm submission
+  const confirmSubmit = () => {
+    form.submit();
+    setIsConfirmModalVisible(false);
+  };
+  
+  // Cancel the submission
+  const cancelSubmit = () => {
+    setIsConfirmModalVisible(false);
   };
 
   return (
@@ -223,7 +274,7 @@ const CreateChild: React.FC = () => {
                     <Space size="middle">
                       <Button 
                         type="primary" 
-                        htmlType="submit" 
+                        onClick={handleFormSubmit}
                         loading={loading}
                         style={{
                           height: '45px',
@@ -325,6 +376,32 @@ const CreateChild: React.FC = () => {
           </Row>
         </Content>
       </Layout>
+
+      {/* Modal xác nhận tạo profile */}
+      <Modal
+        title="Confirm Creation"
+        open={isConfirmModalVisible}
+        onOk={confirmSubmit}
+        onCancel={cancelSubmit}
+        okText="Yes"
+        cancelText="No"
+      >
+        <p>Are you sure you want to create this profile?</p>
+        <p>Click Yes to confirm and create the child profile.</p>
+      </Modal>
+      
+      {/* Modal xác nhận hủy */}
+      <Modal
+        title="Confirm Cancellation"
+        open={isCancelModalVisible}
+        onOk={confirmCancel}
+        onCancel={cancelCancel}
+        okText="Yes"
+        cancelText="No"
+      >
+        <p>Are you sure you want to cancel?</p>
+        <p>Your changes will not be saved.</p>
+      </Modal>
     </Layout>
   );
 };
