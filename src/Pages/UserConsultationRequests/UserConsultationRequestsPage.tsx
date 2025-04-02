@@ -77,8 +77,6 @@ const UserConsultationRequests: React.FC = () => {
         }
       }
     } catch (error: any) {
-      console.error("Error fetching consultation requests:", error);
-      message.error("Failed to load consultation requests");
       setRequests([]);
     } finally {
       setLoading(false);
@@ -113,12 +111,10 @@ const UserConsultationRequests: React.FC = () => {
             message.success("Consultation request canceled successfully");
             fetchConsultationRequests();
           } catch (error: any) {
-            message.error("Failed to cancel the request");
           }
         },
       });
     } catch (error: any) {
-      message.error("An error occurred");
     }
   };
 
