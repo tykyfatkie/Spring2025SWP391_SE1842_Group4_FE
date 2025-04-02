@@ -13,13 +13,21 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle Google OAuth callback
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const token = query.get('token');
     const userId = query.get('userId');
     
-    if (token && userId) {
+    // Check if we're returning from Google OAuth flow
+    if (!token && !userId) {
+      // Retrieve the OAuth state from localStorage
+      const oauthState = localStorage.getItem('oauth_state');
+      
+      if (oauthState) {
+        verifyOAuthToken(oauthState);
+      }
+    } else if (token && userId) {
+      // Existing token handling logic
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
   
@@ -36,27 +44,72 @@ const LoginPage: React.FC = () => {
           } else if (userRole === "Doctor") {
             navigate("/my-doctor");
           } else {
-            navigate("/home");
+            navigate("/home"); 
           }
         }, 1500);
       } catch (error) {
         let errorMessage = "Error processing login information.";
-        
-        // Check if the error is an instance of AxiosError
         if (axios.isAxiosError(error)) {
-          // Safely check the response and data
           if (error.response && error.response.data) {
             errorMessage = error.response.data.message || errorMessage;
           }
         } else if (error instanceof Error) {
-          // Fallback to the error message from the Error instance
           errorMessage = error.message;
         }
-      
+     
         message.error(errorMessage);
       }
     }
   }, [location, navigate]);
+  
+  // New function to verify OAuth token
+  const verifyOAuthToken = async (oauthState: string) => {
+    setLoading(true);
+    
+    try {
+      // Call the verification API with the OAuth state
+      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/auth/verify-token`, {
+        params: { token: oauthState }
+      });
+      
+      if (response.status === 200) {
+        // Assuming the API returns the same structure as your login endpoint
+        const { accessToken, userId } = response.data.data || response.data;
+        
+        // Store token and user ID
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("userId", userId);
+        
+        // Clear the OAuth state as it's no longer needed
+        localStorage.removeItem('oauth_state');
+        
+        // Decode the token to get user role
+        const userData: any = jwtDecode(accessToken);
+        const userRole = userData.role;
+        localStorage.setItem("role", userRole);
+        
+        message.success("Google authentication verified successfully!");
+        
+        // Redirect based on user role
+        setTimeout(() => {
+          if (userRole === "Admin") {
+            navigate("/my-admin/users");
+          } else if (userRole === "Doctor") {
+            navigate("/my-doctor/consultation-response");
+          } else {
+            navigate("/home");
+          }
+        }, 1500);
+      }
+    } catch (error: any) {
+      console.error("OAuth verification failed:", error);
+      message.error(error.response?.data?.message || "OAuth verification failed. Please try again.");
+      // Clear the invalid OAuth state
+      localStorage.removeItem('oauth_state');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,17 +156,12 @@ const LoginPage: React.FC = () => {
   };
 
   const handleGoogleLogin = () => {
-    // Generate a random state for CSRF protection
     const state = Math.random().toString(36).substring(2);
     localStorage.setItem('oauth_state', state);
     
-    // Get the redirect URL from your environment variables or use a default
-    const redirectUri = `${window.location.origin}/login`; // Assuming your login page will handle the callback
+    const redirectUri = `${window.location.origin}/login`;
+    const googleLoginUrl = `${import.meta.env.VITE_API_ENDPOINT}/auth/google/login?redirect=${encodeURIComponent(redirectUri)}&state=${state}`;
     
-    // Construct the Google login URL
-    const googleLoginUrl = `${import.meta.env.VITE_API_ENDPOINT}/api/v1/auth/google/login?redirect=${encodeURIComponent(redirectUri)}&state=${state}`;
-    
-    // Redirect to Google login
     window.location.href = googleLoginUrl;
   };
 
