@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout, Typography, Form, Input, Button, message, Card, Alert, Upload } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { UploadOutlined } from '@ant-design/icons';
@@ -34,7 +34,13 @@ interface FormValues {
   profileImg: string;
 }
 
-const CreateDoctorProfile = () => {
+// Define interface for metadata object
+interface MetadataObject {
+  hospital?: string;
+  years?: string;
+}
+
+const UpdateDoctorProfile = () => {
   // Create state for form fields
   const [formValues, setFormValues] = useState<FormValues>({
     certificate: '',
@@ -51,10 +57,82 @@ const CreateDoctorProfile = () => {
   
   const [form] = Form.useForm<FormValues>();
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [uploadLoading, setUploadLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch doctor profile data when component mounts
+  useEffect(() => {
+    const fetchDoctorProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        if (!token || !userId) {
+          throw new Error("Unauthorized: Please log in");
+        }
+        
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (!result.data) {
+          throw new Error("No doctor profile data found");
+        }
+        
+        // Extract doctor data
+        const doctorData = Array.isArray(result.data) ? result.data[0] : result.data;
+        
+        // Parse metadata to get hospital and experience years
+        let metadataObj: MetadataObject = {};
+        try {
+          if (doctorData.metadata) {
+            metadataObj = JSON.parse(doctorData.metadata) as MetadataObject;
+          }
+        } catch (e) {
+          console.error("Error parsing metadata:", e);
+        }
+        
+        // Prepare form values from fetched data
+        const initialValues: FormValues = {
+          certificate: doctorData.certificate || '',
+          licenseNumber: doctorData.licenseNumber || '',
+          biography: doctorData.biography || '',
+          specialize: doctorData.specialize || '',
+          degrees: doctorData.degrees || '',
+          research: doctorData.research || '',
+          languages: doctorData.languages || '',
+          hospital: metadataObj.hospital || '',
+          experienceYears: metadataObj.years || '',
+          profileImg: doctorData.profileImg || '',
+        };
+        
+        // Update state and form
+        setFormValues(initialValues);
+        form.setFieldsValue(initialValues);
+        setImageUrl(initialValues.profileImg);
+        
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to fetch doctor profile";
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchDoctorProfile();
+  }, [form]);
 
   // Function to handle input changes
   const handleInputChange = (field: keyof FormValues, value: string) => {
@@ -145,7 +223,7 @@ const CreateDoctorProfile = () => {
     return true;
   };
 
-  const handleCreateProfile = async (values: FormValues) => {
+  const handleUpdateProfile = async (values: FormValues) => {
     // Merge values from form with our state
     const finalValues = {
       ...formValues,
@@ -156,58 +234,63 @@ const CreateDoctorProfile = () => {
     if (!validateFormData(finalValues)) {
       return;
     }
-
+  
     setSubmitting(true);
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
+      const doctorId = localStorage.getItem('doctorId');
+      
+      if (!token || !doctorId) {
         throw new Error("Unauthorized: Please log in");
       }
-
+  
       // Create metadata object in the format {"hospital":"Hanoi","years":"20"}
       const metadata = JSON.stringify({
         hospital: finalValues.hospital,
         years: finalValues.experienceYears
       });
-
+  
       // Prepare the profile data for API submission according to specified format
       const profileData = {
         certificate: finalValues.certificate,
         licenseNumber: finalValues.licenseNumber,
         biography: finalValues.biography,
-        metadata: metadata, // JSON string format as required
+        metadata: metadata,
         specialize: finalValues.specialize,
-        profileImg: imageUrl || finalValues.profileImg, // Use the uploaded image URL
+        profileImg: imageUrl || finalValues.profileImg,
         degrees: finalValues.degrees,
-        research: finalValues.research || '', // Handle empty research field
+        research: finalValues.research || '', // Make sure this is at least empty string
         languages: finalValues.languages
       };
-
-      console.log("Sending data to API:", profileData);
-
-      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/create`, {
-        method: 'POST',
+  
+      // Debug logs to inspect the data
+      console.log("Final values:", finalValues);
+      console.log("Profile data being sent:", profileData);
+  
+      // Use PUT method for updating the doctor profile
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/${doctorId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(profileData),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
       }
-
+  
       const result = await response.json();
       
-      // Store the doctor profile data in localStorage for easy access
+      // Store the updated doctor profile data in localStorage
       localStorage.setItem('doctorProfile', JSON.stringify(result.data));
       
-      message.success('Profile created successfully!');
+      message.success('Profile updated successfully!');
       navigate('/my-doctor');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create profile';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
       setError(errorMessage);
       message.error(errorMessage);
     } finally {
@@ -215,8 +298,25 @@ const CreateDoctorProfile = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Layout style={{ minHeight: '100vh', background: '#f5f7fa', margin: '-25px' }}>
+        <DoctorSidebar />
+        <Layout style={{ background: '#f5f7fa' }}>
+          <Content style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto' }}>
+            <Card>
+              <div style={{ textAlign: 'center', padding: '50px' }}>
+                <div>Loading profile data...</div>
+              </div>
+            </Card>
+          </Content>
+        </Layout>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
+    <Layout style={{ minHeight: '100vh', background: '#f5f7fa', margin: '-25px' }}>
       <DoctorSidebar />
       <Layout style={{ background: '#f5f7fa' }}>
         <Content style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -227,9 +327,9 @@ const CreateDoctorProfile = () => {
             marginBottom: '24px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
           }}>
-            <Title level={3} style={{ color: 'white', margin: 0 }}>Create Doctor Profile</Title>
+            <Title level={3} style={{ color: 'white', margin: 0 }}>Update Doctor Profile</Title>
             <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-              Create your professional profile to show your expertise to patients
+              Update your professional profile to show your expertise to patients
             </Text>
           </div>
 
@@ -249,7 +349,7 @@ const CreateDoctorProfile = () => {
             <Form 
               form={form} 
               layout="vertical" 
-              onFinish={handleCreateProfile}
+              onFinish={handleUpdateProfile}
               initialValues={formValues}
             >
               {/* Profile Image Section */}
@@ -406,7 +506,6 @@ const CreateDoctorProfile = () => {
 
               {/* Submit Button */}
               <div style={{ textAlign: 'center' }}>
-                
                 <Button 
                   type="primary" 
                   htmlType="submit" 
@@ -420,7 +519,7 @@ const CreateDoctorProfile = () => {
                     fontSize: '16px'
                   }}
                 >
-                  Create Profile
+                  Update Profile
                 </Button>
               </div>
             </Form>
@@ -431,4 +530,4 @@ const CreateDoctorProfile = () => {
   );
 };
 
-export default CreateDoctorProfile;
+export default UpdateDoctorProfile;

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Layout, Typography, Row, Col, Card, Tag, Spin, Alert, Button, Empty } from 'antd';
-import { CheckCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
+
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -176,6 +177,7 @@ const MyDoctorProfilePage: React.FC = () => {
         return JSON.parse(doctor.metadata);
       }
       return null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       return null;
     }
@@ -292,41 +294,49 @@ const MyDoctorProfilePage: React.FC = () => {
                     background: '#f0f0f0'
                   }}>
                     <img 
-                      src={doctor.profileImg || 'https://via.placeholder.com/150?text=Doctor'} 
+                      src={doctor.profileImg } 
                       alt={doctor.user?.name || "Doctor"} 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/150?text=Doctor';
+                        e.currentTarget.src = '';
                       }}
                     />
                   </div>
                 </Col>
                 <Col xs={24} md={18}>
-                  {/* Content stays the same */}
+                <Title level={2} style={{ color: 'white', margin: 0 }}>
+                    {doctor.user?.name || "Dr. Unknown"}
+                  </Title>
+                  <Text style={{ color: 'white', display: 'block', marginTop: '8px', fontSize: '16px' }}>
+                    <MailOutlined style={{ marginRight: '8px' }} /> 
+                    {doctor.user?.email || "No email available"}
+                  </Text>
+                  <Text style={{ color: 'white', display: 'block', marginTop: '8px', fontSize: '16px' }}>
+                    <PhoneOutlined style={{ marginRight: '8px' }} /> 
+                    {doctor.user?.phone || "No phone available"}
+                  </Text>
                 </Col>
               </Row>
             </div>
 
-            {/* Create Profile Button - Only shown if profile is incomplete */}
-            {!hasProfileData && (
-              <div style={{ padding: '20px 30px', textAlign: 'center' }}>
-                <Button 
-                  type="primary" 
-                  size="large"
-                  style={{ 
-                    borderRadius: '50px',
-                    padding: '0 30px',
-                    height: '44px',
-                    background: colors.primary.main,
-                    border: 'none',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                  }}
-                  onClick={() => navigate('/create-doctor-profile')}
-                >
-                  Create Profile
-                </Button>
-              </div>
-            )}
+            {/* Button Section - Create or Update Profile */}
+            <div style={{ padding: '20px 30px', textAlign: 'center' }}>
+              <Button 
+                type="primary" 
+                size="large"
+                style={{ 
+                  borderRadius: '50px',
+                  padding: '0 30px',
+                  height: '44px',
+                  background: colors.primary.main,
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                }}
+                onClick={() => navigate(hasProfileData ? '/update-doctor-profile' : '/create-doctor-profile')}
+              >
+                {hasProfileData ? 'Update Profile' : 'Create Profile'}
+              </Button>
+            </div>
           </Card>
 
           {/* Only show sections if profile data exists */}
