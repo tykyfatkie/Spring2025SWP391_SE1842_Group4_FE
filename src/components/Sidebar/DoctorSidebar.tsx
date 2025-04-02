@@ -3,8 +3,8 @@ import { Layout, Menu, Typography, Avatar, Divider } from 'antd';
 import { 
   UserOutlined, 
   MessageOutlined,
-  HomeOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  ArrowRightOutlined 
 } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -93,27 +93,26 @@ const DoctorSidebar: React.FC = () => {
     if (path.includes('appointments')) return 'appointments';
     if (path.includes('medical-records')) return 'medical-records';
     if (path.includes('profile')) return 'profile';
-    return 'dashboard';
+    return 'profile'; // Changed default from dashboard to profile
   };
 
-const siderStyle: React.CSSProperties = {
-  minHeight: '100vh',
-  background: 'linear-gradient(135deg, rgba(110, 0, 168, 0.95) 0%, rgba(185, 0, 209, 0.88) 100%)',
-  backdropFilter: 'blur(12px)',
-  WebkitBackdropFilter: 'blur(12px)',
-  borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-  position: 'relative' as const,
-  zIndex: 1000,
-};
-
+  // Updated sidebar style to match homepage gradient
+  const siderStyle: React.CSSProperties = {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, rgb(30, 58, 138) 0%, rgb(59, 130, 246) 100%)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+    position: 'relative' as const,
+    zIndex: 1000,
+  };
 
   const menuItemStyle = {
     margin: '8px 0',
     borderRadius: collapsed ? '50%' : '12px',
     transition: 'all 0.3s ease',
   };
-
 
   const doctorName = doctor?.user?.name || 'Dr. Unknown';
   const doctorSpecialty = doctor?.specialize || 'Doctor';
@@ -130,42 +129,59 @@ const siderStyle: React.CSSProperties = {
       breakpoint="lg"
       collapsedWidth={80}
     >
-      {/* Doctor Profile Section */}
+      {/* Doctor Profile Section with enhanced styling */}
       <div style={{ 
         padding: collapsed ? '16px 0' : '24px 16px', 
         textAlign: 'center',
         transition: 'all 0.3s ease'
       }}>
-        <Avatar 
-          size={collapsed ? 50 : 80} 
-          icon={<UserOutlined />} 
-          src={avatarUrl}
-          style={{ 
-            backgroundColor: '#fff', 
-            color: '#6e00a8',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-          }} 
-        />
+        <div style={{
+          width: collapsed ? '50px' : '100px',
+          height: collapsed ? '50px' : '100px',
+          borderRadius: '50%',
+          overflow: 'hidden',
+          margin: '0 auto',
+          border: '4px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+        }}>
+          <Avatar 
+            size={collapsed ? 42 : 92} 
+            icon={<UserOutlined />} 
+            src={avatarUrl}
+            style={{ 
+              backgroundColor: '#fff', 
+              color: '#1e3a8a',
+            }} 
+          />
+        </div>
         
         {!collapsed && (
           <div style={{ marginTop: 16 }}>
-            <Typography.Title level={5} style={{ color: '#fff', margin: 0 }}>
+            <Typography.Title level={5} style={{ color: '#fff', margin: 0, fontWeight: 600 }}>
               {loading ? 'Loading...' : doctorName}
             </Typography.Title>
-            <Text style={{ color: 'rgba(255, 255, 255, 0.65)' }}>
-              {loading ? '' : doctorSpecialty}
-            </Text>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.15)',
+              borderRadius: '20px',
+              padding: '4px 12px',
+              display: 'inline-block',
+              marginTop: '8px'
+            }}>
+              <Text style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px' }}>
+                {loading ? '' : doctorSpecialty}
+              </Text>
+            </div>
           </div>
         )}
       </div>
 
       <Divider style={{ 
-        margin: '0 16px 16px', 
+        margin: '8px 16px 16px', 
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
         display: collapsed ? 'none' : 'block'
       }} />
 
-      {/* Navigation Menu */}
+      {/* Navigation Menu - Updated styling */}
       <Menu 
         theme="dark" 
         mode="inline" 
@@ -173,81 +189,54 @@ const siderStyle: React.CSSProperties = {
         style={{ 
           fontSize: '16px', 
           background: 'transparent',
-          border: 'none' 
+          border: 'none',
+          padding: '0 8px'
         }}
       >
         <Menu.Item 
-          key="dashboard" 
-          icon={<HomeOutlined />} 
-          style={menuItemStyle}
-        >
-          <Link to="/my-doctor">Dashboard</Link>
-        </Menu.Item>
-
-        <Menu.Item 
-          key="consultation-response" 
-          icon={<MessageOutlined />}
-          style={menuItemStyle}
-        >
-          <Link to="/my-doctor/consultation-response">Consultation Response</Link>
-        </Menu.Item>
-
-
-{/* 
-        <Menu.Item 
-          key="consultation-request" 
-          icon={<FileTextOutlined />}
-          style={menuItemStyle}
-        >
-          <Link to="/my-doctor/consultation-request">Consultation Request</Link>
-        </Menu.Item>
-
-        <Menu.Item 
-          key="appointments" 
-          icon={<CalendarOutlined />}
-          style={menuItemStyle}
-        >
-          <Link to="/my-doctor/appointments">Appointments</Link>
-        </Menu.Item>
-
-        <Menu.Item 
-          key="medical-records" 
-          icon={<LineChartOutlined />}
-          style={menuItemStyle}
-        >
-          <Link to="/my-doctor/medical-records">Medical Records</Link>
-        </Menu.Item>
-
-        <Menu.Item 
           key="profile" 
-          icon={<UserOutlined />}
-          style={menuItemStyle}
+          icon={<UserOutlined />} 
+          style={{
+            ...menuItemStyle,
+            backgroundColor: getSelectedKey() === 'profile' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+            marginBottom: '8px',
+          }}
         >
           <Link to="/my-doctor">Profile</Link>
         </Menu.Item>
 
         <Menu.Item 
-          key="settings" 
-          icon={<SettingOutlined />}
-          style={menuItemStyle}
+          key="consultation-response" 
+          icon={<MessageOutlined />}
+          style={{
+            ...menuItemStyle,
+            backgroundColor: getSelectedKey() === 'consultation-response' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+            marginBottom: '8px',
+          }}
         >
-          <Link to="/my-doctor/settings">Settings</Link>
+          <Link to="/my-doctor/consultation-response">Consultation Response</Link>
         </Menu.Item>
-         */}
-
-
-        {/* Logout Menu Item placed at the bottom of the menu */}
+        
+        {/* Logout Menu Item - Moved right after consultation */}
         <Menu.Item 
           key="logout" 
           icon={<LogoutOutlined />} 
           onClick={handleLogout}
           style={{
             ...menuItemStyle,
-            marginTop: 'auto',
-            color: 'rgba(255, 255, 255, 0.8)'
+            color: 'rgba(255, 255, 255, 0.9)',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: collapsed ? '50%' : '12px',
+            marginBottom: '8px',
           }}
         >
-          Logout
+          {!collapsed && (
+            <>
+              Logout
+              <ArrowRightOutlined style={{ marginLeft: 'auto' }} />
+            </>
+          )}
         </Menu.Item>
       </Menu>
     </Sider>

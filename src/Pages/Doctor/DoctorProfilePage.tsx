@@ -21,28 +21,28 @@ const colors = {
   }
 };
 
-interface DoctorProfile {
-  id: string;
-  certificate: string | null;
-  licenseNumber: string | null;
-  biography: string | null;
-  metadata: string | null;
-  specialize: string | null;
-  profileImg: string;
-  status: number;
-  userId: string;
-  ratingAvg: number | null;
-  degrees: string | null;
-  research: string | null;
-  languages: string | null;
-  user?: {
-    name: string;
-    userName: string;
-    email: string;
-    phone?: string;
-    address?: string;
-  };
-}
+  interface DoctorProfile {
+    id: string;
+    certificate: string | null;
+    licenseNumber: string | null;
+    biography: string | null;
+    metadata: string | null;
+    specialize: string | null;
+    profileImg: string;
+    status: number;
+    userId: string;
+    ratingAvg: number | null;
+    degrees: string | null;
+    research: string | null;
+    languages: string | null;
+    user?: {
+      name: string;
+      userName: string;
+      email: string;
+      phone?: string;
+      address?: string;
+    };
+  }
 
 const DoctorProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

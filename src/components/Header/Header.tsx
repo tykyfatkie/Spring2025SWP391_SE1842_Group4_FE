@@ -27,7 +27,6 @@ const AppHeader: React.FC = () => {
     } else {
       if (path.includes("/home")) setSelectedKey("home");
       else if (path.includes("/contact-us")) setSelectedKey("contact");
-      else if (path.includes("/doctor")) setSelectedKey("doctor");
       else if (path.includes("/child-manage")) setSelectedKey("child");
     }
   }, [location]);
