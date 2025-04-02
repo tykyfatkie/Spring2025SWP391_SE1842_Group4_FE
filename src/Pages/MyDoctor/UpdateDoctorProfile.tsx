@@ -7,7 +7,6 @@ import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-// Main color variables to maintain consistency
 const colors = {
   primary: {
     light: '#3b82f6', // Light blue
@@ -20,7 +19,6 @@ const colors = {
   }
 };
 
-// Define interfaces for form values and potential API errors
 interface FormValues {
   certificate: string;
   licenseNumber: string;
@@ -63,7 +61,6 @@ const UpdateDoctorProfile = () => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch doctor profile data when component mounts
   useEffect(() => {
     const fetchDoctorProfile = async () => {
       try {
@@ -244,7 +241,6 @@ const UpdateDoctorProfile = () => {
         throw new Error("Unauthorized: Please log in");
       }
   
-      // Create metadata object in the format {"hospital":"Hanoi","years":"20"}
       const metadata = JSON.stringify({
         hospital: finalValues.hospital,
         years: finalValues.experienceYears
