@@ -37,8 +37,6 @@ const CreateChild: React.FC = () => {
     }
   
     try {
-  
-
       message.success('Child profile created successfully!');
       resetForm();
       navigate('/child-manage');
@@ -52,6 +50,11 @@ const CreateChild: React.FC = () => {
   
   const resetForm = () => {
     form.resetFields();
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    navigate('/child-manage');
   };
 
   return (
@@ -236,7 +239,7 @@ const CreateChild: React.FC = () => {
                         Create Profile
                       </Button>
                       <Button 
-                        onClick={resetForm}
+                        onClick={handleCancel}
                         style={{
                           height: '45px',
                           padding: '0 32px',

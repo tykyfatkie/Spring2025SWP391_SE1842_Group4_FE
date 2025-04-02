@@ -23,7 +23,6 @@ import DoctorsPage from "../Pages/Dashboard/Doctors";
 import React from "react";
 import ChildManage from "../Pages/ChildManage/ChildManage";
 import MyDoctorProfilePage from "../Pages/MyDoctor/MyDoctor";
-import UpdateDoctorProfile from "../Pages/MyDoctor/UpdateDoctorProfile";
 import PackagesPage from "../Pages/Dashboard/PackagePage";
 import PaymentSuccessPage from "../Pages/PaymentSuccess/PaymentReturn";
 import BMITrackingPage from "../Pages/Analytics/AnalyticsPage";
@@ -36,6 +35,7 @@ import PaymentSuccessful from "../Pages/Payment/PaymentSuccessful";
 import PaymentFailed from "../Pages/Payment/PaymentFailed";
 import RevenuePage from "../Pages/Dashboard/Revenue";
 import UserPackagePage from "../Pages/PremiumSubscription/UserPackagePage";
+import CreateDoctorProfile from "../Pages/MyDoctor/CreateDoctorProfile";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -64,8 +64,8 @@ const routes: LayoutRoute[] = [
       { path: "/child-analytics", component: ProtectedComponent(BMITrackingPage, ["User"]) },
       { path: "/doctor", component: ProtectedComponent(DoctorPage, ["User", "Doctor"]) },
       { path: "/doctor/:id", component: ProtectedComponent(DoctorProfilePage, ["User"]) },
+      { path: "/create-doctor-profile", component: ProtectedComponent(CreateDoctorProfile, [ "Doctor"]) },
       { path: "/my-doctor", component: ProtectedComponent(MyDoctorProfilePage, [ "Doctor"]) },
-      { path: "/update-doctor-profile", component: ProtectedComponent(UpdateDoctorProfile, [ "Doctor"]) },
       { path: "/profile", component: ProtectedComponent(ParentProfilePage, ["User", "Doctor"]) },
       { path: "/child-manage", component: ProtectedComponent(ChildManage, ["User"]) },
       { path: "/manage-profile", component: ProtectedComponent(ManageUserProfile, ["User", "Doctor"]) },

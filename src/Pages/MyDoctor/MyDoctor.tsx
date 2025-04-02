@@ -1,22 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Typography, Row, Col, Card, Tag, Spin, Alert, Button, Tabs, Rate } from 'antd';
-import { EnvironmentOutlined, PhoneOutlined, MailOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { Layout, Typography, Row, Col, Card, Tag, Spin, Alert, Button, Empty } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
 
 const { Content } = Layout;
-const { Title, Text, Paragraph } = Typography;
-const { TabPane } = Tabs;
+const { Title, Text } = Typography;
+
+// Main color variables to maintain consistency
+const colors = {
+  primary: {
+    light: '#3b82f6', // Light blue
+    main: '#1e3a8a',  // Dark blue
+    gradient: 'linear-gradient(135deg, rgb(30, 58, 138) 0%, rgb(59, 130, 246) 100%)'
+  },
+  secondary: {
+    light: '#f0f2f5', // Light background
+    main: '#ffffff'   // White
+  }
+};
 
 interface DoctorProfile {
-  certificate: string;
-  licenseNumber: string;
-  biography: string;
-  metadata: string;
-  specialize: string;
+  id: string;
+  certificate: string | null;
+  licenseNumber: string | null;
+  biography: string | null;
+  metadata: string | null;
+  specialize: string | null;
   profileImg: string;
   status: number;
   userId: string;
+  ratingAvg: number | null;
+  degrees: string | null;
+  research: string | null;
+  languages: string | null;
   hospital?: string;
   user?: {
     name: string;
@@ -27,13 +44,20 @@ interface DoctorProfile {
   };
 }
 
+interface Metadata {
+  years?: string;
+  specialization?: string;
+  hospital?: string;
+  [key: string]: any;
+}
+
 const MyDoctorProfilePage: React.FC = () => {
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchDoctorProfile = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -42,9 +66,38 @@ const MyDoctorProfilePage: React.FC = () => {
           throw new Error("Unauthorized: Please log in");
         }
   
-        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${userId}`, {
+        // Try fetching from doctor endpoint
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Cache-Control': 'no-cache',
+            },
+          });
+  
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data) {
+              // Check if data is an array
+              if (Array.isArray(result.data) && result.data.length > 0) {
+                setDoctor(result.data[0]);
+              } else {
+                setDoctor(result.data);
+              }
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error("Error fetching from doctor profile endpoint:", e);
+          // Continue with fallback method
+        }
+  
+        // Fallback: Try fetching from users endpoint
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
           },
         });
   
@@ -52,14 +105,63 @@ const MyDoctorProfilePage: React.FC = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
   
-        const result = await response.json();
-        if (!result.data) {
-          throw new Error("No doctor profile found");
+        const userData = await response.json();
+          
+        // Extract doctor data from user data
+        let doctorData: DoctorProfile | null = null;
+        
+        if (userData.data) {
+          const user = userData.data;
+          
+          if (user.doctor) {
+            // User object has a nested doctor object
+            doctorData = {
+              ...user.doctor,
+              user: {
+                name: user.name,
+                userName: user.userName,
+                email: user.email,
+                phone: user.phone,
+                address: user.address
+              },
+              profileImg: user.profileImg || user.avatar || "",
+              id: user.id
+            };
+          } else {
+            // Create doctor profile from user data
+            doctorData = {
+              id: user.id,
+              userId: user.id,
+              certificate: null,
+              licenseNumber: null,
+              biography: null,
+              metadata: user.metadata || "{}",
+              specialize: null,
+              profileImg: user.profileImg || user.avatar || "",
+              status: 1,
+              ratingAvg: null,
+              degrees: null,
+              research: null,
+              languages: null,
+              user: {
+                name: user.name,
+                userName: user.userName,
+                email: user.email,
+                phone: user.phone,
+                address: user.address
+              }
+            };
+          }
         }
   
-        setDoctor(result.data);
-      } catch (error: any) {
-        setError(error.message);
+        if (!doctorData) {
+          throw new Error("Could not retrieve doctor information");
+        }
+  
+        setDoctor(doctorData);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -68,7 +170,7 @@ const MyDoctorProfilePage: React.FC = () => {
     fetchDoctorProfile();
   }, []);
   
-  const getMetadata = () => {
+  const getMetadata = (): Metadata | null => {
     try {
       if (doctor?.metadata) {
         return JSON.parse(doctor.metadata);
@@ -83,10 +185,15 @@ const MyDoctorProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout style={{ minHeight: '100vh', marginLeft: '-25px' }}>
+      <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
         <DoctorSidebar />
-        <Layout>
-          <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Layout style={{ background: '#f5f7fa' }}>
+          <Content style={{ 
+            padding: '30px', 
+            maxWidth: '1200px', 
+            margin: '0 auto',
+            marginBottom: '30px'
+          }}>
             <Spin size="large" />
           </Content>
         </Layout>
@@ -96,10 +203,15 @@ const MyDoctorProfilePage: React.FC = () => {
 
   if (error || !doctor) {
     return (
-      <Layout style={{ minHeight: '100vh', marginLeft: '-25px' }}>
+      <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
         <DoctorSidebar />
-        <Layout>
-          <Content style={{ padding: '20px' }}>
+        <Layout style={{ background: '#f5f7fa' }}>
+          <Content style={{ 
+            padding: '30px', 
+            maxWidth: '1200px', 
+            margin: '0 auto',
+            marginBottom: '30px'
+          }}>
             <Alert
               message="Error retrieving doctor information"
               description={error || "Doctor information not found"}
@@ -113,147 +225,303 @@ const MyDoctorProfilePage: React.FC = () => {
     );
   }
 
-  const degrees = metadata?.years ? [`${metadata.years} years of experience`] : ["Doctor of Medicine", "Master of Medicine"];
-  const certificates = [doctor.certificate || "Specialty certificate"];
-  const research = ["Clinical research", "Scientific publications"];
-  const languages = ["Vietnamese", "English"];
-  const specializations = doctor.specialize ? [doctor.specialize] : ["General Medicine"];
+  // Parse data from API without hardcoding default values
+  const degreesArray = doctor.degrees ? doctor.degrees.split(',').map(item => item.trim()) : [];
+  const experienceYears = metadata?.years ? parseInt(metadata.years) : 0;
+  
+  const certificatesArray = doctor.certificate ? doctor.certificate.split(',').map(item => item.trim()) : [];
+  
+  const researchArray = doctor.research ? doctor.research.split(',').map(item => item.trim()) : [];
+  
+  const languagesArray = doctor.languages ? doctor.languages.split(',').map(item => item.trim()) : [];
+  
+  const specializationsArray = doctor.specialize ? doctor.specialize.split(',').map(item => item.trim()) : [];
 
-  const hospital = metadata?.hospital || doctor.hospital || "Hospital";
+  // Get hospital information
+  const hospital = metadata?.hospital || doctor.hospital || "";
+
+  // Check if profile has any meaningful data
+  const hasProfileData = !!(
+    doctor.degrees || 
+    doctor.certificate || 
+    doctor.research || 
+    doctor.languages || 
+    doctor.specialize
+  );
 
   return (
-    <Layout style={{ minHeight: '100vh', marginLeft: '-25px', marginTop:'-24px'}}>
+    <Layout style={{ minHeight: '100vh', marginLeft: '-25px', marginTop: '-24px', marginBottom: '-24px', background: '#f5f7fa' }}>
       <DoctorSidebar />
-      <Layout>
+      <Layout style={{ background: '#f5f7fa' }}>
         <Content style={{ 
-          padding: '20px', 
+          padding: '30px', 
           maxWidth: '1995px', 
           margin: '0 auto',
-          marginBottom: '50px'
+          marginBottom: '30px'
         }}>
-          <Card style={{ marginTop: '24px' }}>
-            <Row gutter={24}>
-              <Col span={8}>
-                <img 
-                  src={doctor.profileImg} 
-                  alt={doctor.user?.name || "Doctor"} 
-                  style={{ width: '100%', borderRadius: '8px' }}
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/300x400?text=Doctor+Image';
-                  }}
-                />
+          {/* Profile Header Card with Blue Gradient */}
+          <Card 
+            style={{ 
+              marginTop: '24px', 
+              borderRadius: '20px',
+              overflow: 'hidden',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)'
+            }}
+            bodyStyle={{ padding: 0 }}
+          >
+
+            {/* Header with Gradient */}
+            <div style={{ 
+              background: colors.primary.gradient,
+              padding: '30px',
+              color: 'white'
+            }}>
+              <Row gutter={24} align="middle" justify="start">
+                <Col xs={24} md={6} style={{ textAlign: 'center', marginBottom: '20px' }}>
+                  <div style={{ 
+                    width: '150px', 
+                    height: '150px', 
+                    margin: '0 auto',
+                    borderRadius: '50%',
+                    border: '5px solid white',
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    background: '#f0f0f0'
+                  }}>
+                    <img 
+                      src={doctor.profileImg || 'https://via.placeholder.com/150?text=Doctor'} 
+                      alt={doctor.user?.name || "Doctor"} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://via.placeholder.com/150?text=Doctor';
+                      }}
+                    />
+                  </div>
+                </Col>
+                <Col xs={24} md={18}>
+                  {/* Content stays the same */}
+                </Col>
+              </Row>
+            </div>
+
+            {/* Create Profile Button - Only shown if profile is incomplete */}
+            {!hasProfileData && (
+              <div style={{ padding: '20px 30px', textAlign: 'center' }}>
                 <Button 
                   type="primary" 
-                  block 
-                  style={{ marginTop: '16px' }}
-                  onClick={() => navigate('/update-doctor-profile')}
+                  size="large"
+                  style={{ 
+                    borderRadius: '50px',
+                    padding: '0 30px',
+                    height: '44px',
+                    background: colors.primary.main,
+                    border: 'none',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                  onClick={() => navigate('/create-doctor-profile')}
                 >
-                  Update Profile
+                  Create Profile
                 </Button>
-              </Col>
-              <Col span={16}>
-                <Title level={2}>{doctor.user?.name || doctor.biography}</Title>
-                <Rate disabled defaultValue={4.5} style={{ fontSize: '16px' }} />
-                <Text style={{ marginLeft: '8px' }}>(My Rating)</Text>
-                
-                <Row style={{ marginTop: '16px' }}>
-                  <Col span={24}>
-                    <Tag color="blue">{doctor.specialize || "Specialist"}</Tag>
-                    <Tag color="green">{metadata?.years ? `${metadata.years} years of experience` : "Experienced doctor"}</Tag>
-                  </Col>
-                </Row>
-
-                <Paragraph style={{ marginTop: '16px' }}>
-                  <ul>
-                    <li><EnvironmentOutlined /> Clinic: {hospital || "Not updated"}</li>
-                    <li><PhoneOutlined /> Phone: {doctor.user?.phone || "Not updated"}</li>
-                    <li><MailOutlined /> Email: {doctor.user?.email || "Not updated"}</li>
-                    <li><ClockCircleOutlined /> Working hours: 8:00 AM - 5:00 PM (Monday - Saturday)</li>
-                  </ul>
-                </Paragraph>
-              </Col>
-            </Row>
-
-            <Tabs defaultActiveKey="1" style={{ marginTop: '24px' }}>
-              <TabPane tab="General Information" key="1">
-                <Title level={4}>Degrees & Certifications</Title>
-                <Row gutter={[24, 24]}>
-                  <Col span={12}>
-                    <Card title="Education" size="small">
-                      {degrees.map((degree, index) => (
-                        <p key={index}>• {degree}</p>
-                      ))}
-                    </Card>
-                  </Col>
-                  <Col span={12}>
-                    <Card title="Specialty Certifications" size="small">
-                      {certificates.map((cert, index) => (
-                        <p key={index}>• {cert}</p>
-                      ))}
-                    </Card>
-                  </Col>
-                </Row>
-
-                <Title level={4} style={{ marginTop: '24px' }}>Specializations</Title>
-                <Row gutter={[24, 24]}>
-                  <Col span={12}>
-                    <Card title="Specialized Fields" size="small">
-                      {specializations.map((spec, index) => (
-                        <Tag color="blue" key={index} style={{ margin: '4px' }}>
-                          {spec}
-                        </Tag>
-                      ))}
-                    </Card>
-                  </Col>
-                  <Col span={12}>
-                    <Card title="Languages" size="small">
-                      {languages.map((lang, index) => (
-                        <Tag color="green" key={index} style={{ margin: '4px' }}>
-                          {lang}
-                        </Tag>
-                      ))}
-                    </Card>
-                  </Col>
-                </Row>
-
-                <Title level={4} style={{ marginTop: '24px' }}>Research & Publications</Title>
-                <Card size="small">
-                  {research.map((item, index) => (
-                    <p key={index}>• {item}</p>
-                  ))}
-                </Card>
-              </TabPane>
-
-              <TabPane tab="Appointment Schedule" key="2">
-                <Title level={4}>Weekly Appointment Schedule</Title>
-                <Row gutter={[16, 16]}>
-                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
-                    <Col span={8} key={day}>
-                      <Card title={day} size="small">
-                        <p>Morning: 8:00 AM - 12:00 PM</p>
-                        <p>Afternoon: 1:30 PM - 5:00 PM</p>
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
-              </TabPane>
-
-              <TabPane tab="My Patients" key="3">
-                <Row gutter={[16, 16]}>
-                  <Col span={24}>
-                    <Card title="Recent Patients">
-                      <Alert
-                        message="No recent patients"
-                        description="Your patient list will appear here."
-                        type="info"
-                        showIcon
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-              </TabPane>
-            </Tabs>
+              </div>
+            )}
           </Card>
+
+          {/* Only show sections if profile data exists */}
+          {hasProfileData && (
+            <>
+              {/* Degrees & Certificates Section */}
+              {(degreesArray.length > 0 || certificatesArray.length > 0) && (
+                <Card 
+                  title={<Title level={4} style={{ margin: 0 }}>Degrees & Certificates</Title>}
+                  style={{ 
+                    marginTop: '24px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  <Row gutter={[24, 24]}>
+                    {degreesArray.length > 0 && (
+                      <Col xs={24} md={12}>
+                        <Card 
+                          title="Education" 
+                          type="inner"
+                          style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}
+                        >
+                          <ul style={{ paddingLeft: '20px' }}>
+                            {degreesArray.map((degree, index) => (
+                              <li key={index} style={{ margin: '8px 0' }}>
+                                {degree}
+                              </li>
+                            ))}
+                          </ul>
+                        </Card>
+                      </Col>
+                    )}
+                    {certificatesArray.length > 0 && (
+                      <Col xs={24} md={degreesArray.length > 0 ? 12 : 24}>
+                        <Card 
+                          title="Professional Certificates" 
+                          type="inner"
+                          style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}
+                        >
+                          <ul style={{ paddingLeft: '20px' }}>
+                            {certificatesArray.map((cert, index) => (
+                              <li key={index} style={{ margin: '8px 0' }}>
+                                {cert}
+                              </li>
+                            ))}
+                          </ul>
+                        </Card>
+                      </Col>
+                    )}
+                  </Row>
+                </Card>
+              )}
+
+              {/* Expertise Section */}
+              {(specializationsArray.length > 0 || languagesArray.length > 0) && (
+                <Card 
+                  title={<Title level={4} style={{ margin: 0 }}>Expertise</Title>}
+                  style={{ 
+                    marginTop: '24px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  <Row gutter={[24, 24]}>
+                    {specializationsArray.length > 0 && (
+                      <Col xs={24} md={12}>
+                        <Card 
+                          title="Specialization Areas" 
+                          type="inner"
+                          style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}
+                        >
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {specializationsArray.map((spec, index) => (
+                              <Tag 
+                                color="blue" 
+                                key={index} 
+                                style={{ 
+                                  margin: '4px',
+                                  padding: '6px 15px',
+                                  borderRadius: '20px',
+                                  fontSize: '14px'
+                                }}
+                              >
+                                {spec}
+                              </Tag>
+                            ))}
+                          </div>
+                        </Card>
+                      </Col>
+                    )}
+                    {languagesArray.length > 0 && (
+                      <Col xs={24} md={specializationsArray.length > 0 ? 12 : 24}>
+                        <Card 
+                          title="Languages" 
+                          type="inner"
+                          style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}
+                        >
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {languagesArray.map((lang, index) => (
+                              <Tag 
+                                color="green" 
+                                key={index} 
+                                style={{ 
+                                  margin: '4px',
+                                  padding: '6px 15px',
+                                  borderRadius: '20px',
+                                  fontSize: '14px'
+                                }}
+                              >
+                                {lang}
+                              </Tag>
+                            ))}
+                          </div>
+                        </Card>
+                      </Col>
+                    )}
+                  </Row>
+                </Card>
+              )}
+
+              {/* Research & Publications Section */}
+              {researchArray.length > 0 && (
+                <Card 
+                  title={<Title level={4} style={{ margin: 0 }}>Research & Publications</Title>}
+                  style={{ 
+                    marginTop: '24px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  <ul style={{ paddingLeft: '20px' }}>
+                    {researchArray.map((item, index) => (
+                      <li key={index} style={{ margin: '12px 0' }}>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+
+              {/* Work Experience Section */}
+              {experienceYears > 0 && hospital && (
+                <Card 
+                  title={<Title level={4} style={{ margin: 0 }}>Work Experience</Title>}
+                  style={{ 
+                    marginTop: '24px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  <div style={{ padding: '10px' }}>
+                    {/* Only display work experience if we have years and hospital data */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '15px' }}>
+                      <div style={{ color: '#1890ff', marginRight: '10px', marginTop: '3px', fontSize: '16px' }}>
+                        <CheckCircleOutlined />
+                      </div>
+                      <Text>
+                        {new Date().getFullYear() - experienceYears} - {new Date().getFullYear()}: Doctor at {hospital}
+                      </Text>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '15px' }}>
+                      <div style={{ color: '#1890ff', marginRight: '10px', marginTop: '3px', fontSize: '16px' }}>
+                        <CheckCircleOutlined />
+                      </div>
+                      <Text>Professional experience of {experienceYears} years</Text>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            </>
+          )}
+
+          {/* If no profile data, show empty state */}
+          {!hasProfileData && (
+            <Card 
+              style={{ 
+                marginTop: '24px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                textAlign: 'center',
+                padding: '40px 0'
+              }}
+            >
+              <Empty
+                description="No profile information available"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+              <div style={{ marginTop: '20px' }}>
+                <Text type="secondary">
+                  Please create your profile to provide your medical qualifications and expertise
+                </Text>
+              </div>
+            </Card>
+          )}
         </Content>
       </Layout>
     </Layout>
