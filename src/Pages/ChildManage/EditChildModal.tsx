@@ -1,10 +1,9 @@
 import React from "react";
-import { Modal, Form, Input, DatePicker, Select, Typography } from "antd";
+import { Modal, Form, Input, Typography } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import moment from "moment";
 
 const { Text } = Typography;
-const { Option } = Select;
 
 interface EditChildModalProps {
   visible: boolean;
@@ -93,25 +92,6 @@ const EditChildModal: React.FC<EditChildModalProps> = ({
           rules={[{ required: true, message: "Please enter child's name" }]}
         >
           <Input placeholder="Enter child's name" style={inputStyle} />
-        </Form.Item>
-
-        <Form.Item 
-          name="dob" 
-          label={<Text strong style={labelStyle}>Date of Birth</Text>} 
-          rules={[{ required: true, message: "Please select date of birth" }]}
-        >
-          <DatePicker style={{ ...inputStyle, width: "100%" }} format="YYYY-MM-DD" />
-        </Form.Item>
-
-        <Form.Item 
-          name="gender" 
-          label={<Text strong style={labelStyle}>Gender</Text>} 
-          rules={[{ required: true, message: "Please select gender" }]}
-        >
-          <Select placeholder="Select gender" style={{ borderRadius: '8px' }}>
-            <Option value={0}>Male</Option>
-            <Option value={1}>Female</Option>
-          </Select>
         </Form.Item>
       </Form>
     </Modal>

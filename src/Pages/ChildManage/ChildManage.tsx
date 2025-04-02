@@ -21,6 +21,7 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import CollapsibleHeader from "./CollapsibleHeader";
 import ChildProfilesLayout from "./ChildProfilesLayout";
 import EditChildModal from "./EditChildModal";
+import DeleteChildModal from "./DeleteChildModal";
 
 const { Content } = Layout;
 
@@ -34,6 +35,9 @@ const ChildManage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("active");
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
+  const [deletingChild, setDeletingChild] = useState<any>(null);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   useEffect(() => {
     fetchChildren();
@@ -62,6 +66,7 @@ const ChildManage: React.FC = () => {
         setChildren(response.data.data);
       }
     } catch (error: any) {
+      console.error("Failed to fetch children:", error.message);
     } finally {
       setLoading(false);
     }
@@ -90,12 +95,12 @@ const ChildManage: React.FC = () => {
         setArchivedChildren(response.data.data);
       }
     } catch (error: any) {
+      console.error("Failed to fetch children:", error.message);
     } finally {
       setArchivedLoading(false);
     }
   };
 
-  // Hàm tính tuổi theo tháng
   const calculateAgeInMonths = (birthDate: string) => {
     if (!birthDate || !moment(birthDate, "YYYY-MM-DD", true).isValid()) {
       return "N/A";
@@ -114,8 +119,6 @@ const ChildManage: React.FC = () => {
 
     form.setFieldsValue({
       name: child.name,
-      dob: moment(child.doB),
-      gender: child.gender,
     });
   };
 
@@ -123,20 +126,20 @@ const ChildManage: React.FC = () => {
     try {
       const values = await form.validateFields();
       const token = localStorage.getItem("token");
-
+  
       if (!token) {
         return;
       }
-
+  
       const formattedValues = {
         name: values.name?.trim(),
-        dob: values.dob ? moment(values.dob).format("YYYY-MM-DD") : undefined,
-        gender: values.gender,
+        dob: editingChild.doB, // Giữ nguyên giá trị cũ
+        gender: editingChild.gender, // Giữ nguyên giá trị cũ
         weight: editingChild.weight, 
         height: editingChild.height, 
         notes: editingChild.notes || "", 
       };
-
+  
       const response = await axios.put(
         `${import.meta.env.VITE_API_ENDPOINT}/children/update/${editingChild.id}`,
         formattedValues,
@@ -147,57 +150,84 @@ const ChildManage: React.FC = () => {
           },
         }
       );
-
+  
       if (response.status === 200) {
         message.success("Child updated successfully!");
         fetchChildren();
         setEditModalVisible(false);
       }
-    } catch (error: any) {
+    } catch (error: any) {  
+      console.error("Failed to update child:", error.message);
     }
   };
 
-  const handleDeleteChild = async (childId: string) => {
+  const performDeleteChild = async (childId: string, token: string) => {
+    console.log("Starting delete operation for child ID:", childId);
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        return;
+      setLoading(true);
+      message.loading({ content: "Deleting...", key: "deleteLoading" });
+      
+      const deleteUrl = `${import.meta.env.VITE_API_ENDPOINT}/children/delete/${childId}`;
+      console.log("Delete URL:", deleteUrl);
+      
+      const response = await axios.delete(
+        deleteUrl,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      console.log("Delete API response:", response);
+      
+      if (response.status === 200) {
+        message.success({ content: "Deleted successfully!", key: "deleteLoading" });
+        // Refresh the data after successful deletion
+        if (activeTab === "active") {
+          await fetchChildren();
+        } else {
+          await fetchArchivedChildren();
+        }
+      } else {
+        message.error({ content: "Failed to delete. Please try again.", key: "deleteLoading" });
       }
-
-      Modal.confirm({
-        title: "Are you sure you want to delete this child's record?",
-        content: "This action cannot be undone.",
-        okText: "Yes, Delete",
-        okType: "danger",
-        cancelText: "Cancel",
-        onOk: async () => {
-          setLoading(true);
-          try {
-            const response = await axios.delete(
-              `${import.meta.env.VITE_API_ENDPOINT}/children/delete/${childId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-            if (response.status === 200) {
-              message.success("Child deleted successfully");
-              if (activeTab === "active") {
-                fetchChildren();
-              } else {
-                fetchArchivedChildren();
-              }
-            }
-          } catch (error: any) {
-          } finally {
-            setLoading(false);
-          }
-        },
-      });
     } catch (error: any) {
+      console.error("Delete API error:", error);
+      message.error({ 
+        content: `Error: ${error.response?.data?.message || error.message || "Unknown error"}`, 
+        key: "deleteLoading" 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteChild = (childId: string) => {
+    const childToDelete = children.find(child => child.id === childId) || 
+                          archivedChildren.find(child => child.id === childId);
+    
+    setDeletingChild(childToDelete);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingChild) return;
+    
+    setDeleteLoading(true);
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+      message.error("You need to log in again!");
+      navigate("/login");
+      return;
+    }
+    
+    try {
+      await performDeleteChild(deletingChild.id, token);
+      setDeleteModalVisible(false);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -214,6 +244,9 @@ const ChildManage: React.FC = () => {
         content: "Are you sure you want to hide this child's record? You can unhide it later if needed.",
         okText: "Yes, Hide",
         cancelText: "Cancel",
+        zIndex: 1050,
+        mask: true,
+        maskClosable: false,
         onOk: async () => {
           try {
             await axios.post(
@@ -235,10 +268,12 @@ const ChildManage: React.FC = () => {
               children.find(child => child.id === childId),
             ]);
           } catch (error: any) {
+            console.error("Failed to hide child:", error.message);
           }
         },
       });
-    } catch (error: any) {
+    } catch (error: any) {  
+      console.error("Failed to process hide child:", error.message);
     }
   };
   
@@ -255,6 +290,9 @@ const ChildManage: React.FC = () => {
         content: "Are you sure you want to unhide this child's record?",
         okText: "Yes, Unhide",
         cancelText: "Cancel",
+        zIndex: 1050,
+        mask: true,
+        maskClosable: false,
         onOk: async () => {
           try {
             await axios.post(
@@ -278,10 +316,12 @@ const ChildManage: React.FC = () => {
               archivedChildren.find(child => child.id === childId),
             ]);
           } catch (error: any) {
+            console.error("Failed to unhide child:", error.message);
           }
         },
       });
     } catch (error: any) {
+      console.error("Failed to process unhide child:", error.message);
     }
   };
   
@@ -299,7 +339,6 @@ const ChildManage: React.FC = () => {
   const navigateToBMITracking = (childId: string) => {
     navigate(`/child-analytics?childId=${childId}`);
   };
-
 
   const activeColumns = [
     {
@@ -366,9 +405,9 @@ const ChildManage: React.FC = () => {
             }}
           />
           <Button 
+            danger
             icon={<DeleteOutlined />} 
-            onClick={() => handleDeleteChild(record.id)} 
-            danger 
+            onClick={() => handleDeleteChild(record.id)}
             style={{
               borderRadius: '8px',
               height: '38px',
@@ -379,20 +418,20 @@ const ChildManage: React.FC = () => {
             }}
           />
           {/* BMI View Button */}
-        <Button 
-          icon={<LineChartOutlined />} 
-          onClick={() => navigateToBMITracking(record.id)} 
-          type="primary"
-          title="View BMI"
-          style={{
-            borderRadius: '8px',
-            height: '38px',
-            background: '#1e3a8a',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        />
+          <Button 
+            icon={<LineChartOutlined />} 
+            onClick={() => navigateToBMITracking(record.id)} 
+            type="primary"
+            title="View BMI"
+            style={{
+              borderRadius: '8px',
+              height: '38px',
+              background: '#1e3a8a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          />
         </Space>
       ),
     },
@@ -450,7 +489,10 @@ const ChildManage: React.FC = () => {
           />
           <Button 
             icon={<DeleteOutlined />} 
-            onClick={() => handleDeleteChild(record.id)} 
+            onClick={() => {
+              console.log("Delete button clicked for child ID:", record.id);
+              handleDeleteChild(record.id);
+            }} 
             danger 
             style={{
               borderRadius: '8px',
@@ -498,27 +540,35 @@ const ChildManage: React.FC = () => {
           defaultCollapsed={false}
         />
 
-    <ChildProfilesLayout
-            activeTab={activeTab}
-            handleTabChange={handleTabChange}
-            loading={loading}
-            archivedLoading={archivedLoading}
-            children={children}
-            archivedChildren={archivedChildren}
-            activeColumns={activeColumns}
-            archivedColumns={archivedColumns}
-            navigateToCreateChild={navigateToCreateChild}
-          />
+        <ChildProfilesLayout
+          activeTab={activeTab}
+          handleTabChange={handleTabChange}
+          loading={loading}
+          archivedLoading={archivedLoading}
+          children={children}
+          archivedChildren={archivedChildren}
+          activeColumns={activeColumns}
+          archivedColumns={archivedColumns}
+          navigateToCreateChild={navigateToCreateChild}
+        />
 
-    <EditChildModal
-      visible={editModalVisible}
-      onCancel={() => setEditModalVisible(false)}
-      onUpdate={handleUpdateChild}
-      form={form}
-      initialValues={editingChild}
-    />
+        <EditChildModal
+          visible={editModalVisible}
+          onCancel={() => setEditModalVisible(false)}
+          onUpdate={handleUpdateChild}
+          form={form}
+          initialValues={editingChild}
+        />
         </Content>
       </Layout>
+
+      <DeleteChildModal
+        visible={deleteModalVisible}
+        onCancel={() => setDeleteModalVisible(false)}
+        onDelete={confirmDelete}
+        loading={deleteLoading}
+        childName={deletingChild?.name}
+      />
     </Layout>
   );
 };
