@@ -8,7 +8,6 @@ import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-// Main color variables to maintain consistency
 const colors = {
   primary: {
     light: '#3b82f6', // Light blue
@@ -90,11 +89,9 @@ const MyDoctorProfilePage: React.FC = () => {
             }
           }
         } catch (e) {
-          console.error("Error fetching from doctor profile endpoint:", e);
-          // Continue with fallback method
+          console.error(e);
         }
   
-        // Fallback: Try fetching from users endpoint
         const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -108,7 +105,6 @@ const MyDoctorProfilePage: React.FC = () => {
   
         const userData = await response.json();
           
-        // Extract doctor data from user data
         let doctorData: DoctorProfile | null = null;
         
         if (userData.data) {
