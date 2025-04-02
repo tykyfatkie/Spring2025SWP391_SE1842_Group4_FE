@@ -17,6 +17,12 @@ interface Doctor {
   metadata: string;
   specialize: string;
   status: number;
+  profileImg?: string;
+  userId?: string;
+  ratingsAvg?: number;
+  degrees?: string;
+  research?: string;
+  languages?: string;
 }
 
 interface User {
@@ -39,7 +45,6 @@ interface UploadResponse {
 
 // Constants
 const DEFAULT_PLACEHOLDER = '/assets/doctor-placeholder.png';
-const DOCTOR_ROLE_ID = '00000000-0000-0000-0000-000000000003';
 const ACCEPTED_FILE_TYPES = [
   'image/jpeg',
   'image/jpg',
@@ -113,81 +118,53 @@ const DoctorPage: React.FC = () => {
     throw new Error("Could not find doctors array in API response.");
   };
 
-  // Fetch doctor profile data
-  const fetchDoctorProfile = async (doctorId: string, token: string): Promise<User | null> => {
-    try {
-      const profileResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${doctorId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Cache-Control': 'no-cache',
-        },
-      });
-      
-      if (!profileResponse.ok) return null;
-      
-      const profileData = await profileResponse.json();
-      
-      if (profileData?.data?.length > 0) {
-        return profileData.data[0];
-      }
-      
-      return null;
-    } catch (error) {
-      console.error(`Error fetching doctor profile for ${doctorId}:`, error);
-      return null;
-    }
-  };
-
-  // Fetch all doctors
+  // Fetch all doctors - Updated to use the new API endpoint
   const fetchDoctors = useCallback(async () => {
     try {
       const token = getToken();
       
-      const userResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/all?RoleIds=${DOCTOR_ROLE_ID}`, {
+      const doctorResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/all`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Cache-Control': 'no-cache', 
+          'Cache-Control': 'no-cache',
+          'Accept': '*/*'
         },
       });
   
-      if (!userResponse.ok) {
-        throw new Error(`HTTP error! Status: ${userResponse.status}`);
+      if (!doctorResponse.ok) {
+        throw new Error(`HTTP error! Status: ${doctorResponse.status}`);
       }
   
-      const userData = await userResponse.json();
-      const doctorUsers = extractDoctorsFromResponse(userData);
+      const doctorData = await doctorResponse.json();
+      const doctorsList = extractDoctorsFromResponse(doctorData);
       
-      // Enrich with doctor profile data
-      const enrichedDoctors: User[] = [];
-      
-      for (const doctor of doctorUsers) {
-        // Store the original userId before enrichment
-        const userId = doctor.id;
+      // Map the response to match the expected structure
+      const formattedDoctors = doctorsList.map((doctor: any) => {
+        // Extract userId from the doctor object if available
+        const userId = doctor.userId || doctor.id;
         
-        const profileData = await fetchDoctorProfile(doctor.id, token);
-        
-        if (profileData) {
-          // Merge the detailed profile with basic user data
-          enrichedDoctors.push({
-            ...doctor,
-            ...profileData,
-            userId: userId, // Keep track of the original userId
-            // Keep the user info if it exists
-            user: {
-              ...doctor,
-              ...(profileData.user || {})
-            }
-          });
-        } else {
-          // Ensure userId is saved even without profile data
-          enrichedDoctors.push({
-            ...doctor,
-            userId: userId
-          });
-        }
-      }
+        return {
+          id: doctor.id,
+          name: doctor.name,
+          email: doctor.email,
+          profileImg: doctor.profileImg,
+          userId: userId,
+          doctor: {
+            id: doctor.id,
+            certificate: doctor.certificate,
+            licenseNumber: doctor.licenseNumber,
+            biography: doctor.biography,
+            metadata: doctor.metadata,
+            specialize: doctor.specialize,
+            status: doctor.status
+          },
+          specialize: doctor.specialize,
+          licenseNumber: doctor.licenseNumber,
+          metadata: doctor.metadata
+        };
+      });
       
-      setDoctors(enrichedDoctors);
+      setDoctors(formattedDoctors);
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -349,14 +326,14 @@ const DoctorPage: React.FC = () => {
       
       const allFileUrls = await uploadPendingFiles();
 
+
       const requestData = {
-        doctorReceiveId: selectedDoctorId,
         title: 'Consultation Request',
         description: messageText,
-        attachments: JSON.stringify(allFileUrls) 
+        attachments: JSON.stringify(allFileUrls)
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send`, {
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send?doctorReceiveId=${selectedDoctorId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -407,13 +384,21 @@ const DoctorPage: React.FC = () => {
     return false; // Prevent auto upload
   };
 
-  const handleMessageClick = (event: React.MouseEvent, doctorId: string) => {
+  const handleMessageClick = (event: React.MouseEvent, doctor: User) => {
     event.stopPropagation();
-    setSelectedDoctorId(doctorId);
+    // Always use userId instead of id
+    const userIdToUse = doctor.userId || doctor.doctor?.userId;
+    
+    if (!userIdToUse) {
+      message.error("Unable to message this doctor: missing user ID");
+      return;
+    }
+    
+    setSelectedDoctorId(userIdToUse);
     setIsModalVisible(true);
   };
 
-  // Modified: Updated to use the stored userId
+  // Navigate to doctor profile
   const navigateToDoctorProfile = (doctor: User) => {
     // Always use the original userId for navigation
     const userId = doctor.userId || doctor.id;
@@ -421,8 +406,6 @@ const DoctorPage: React.FC = () => {
     if (userId) {
       navigate(`/doctor/${userId}`);
     } else {
-      console.error("User ID not found");
-      // Fallback if no userId
       if (doctor.doctor?.id) {
         navigate(`/doctor/${doctor.doctor.id}`);
       } else {
@@ -482,7 +465,6 @@ const DoctorPage: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Decorative elements */}
         <div style={{
           position: 'absolute',
           width: '300px',
@@ -558,7 +540,6 @@ const DoctorPage: React.FC = () => {
             key="view" 
             type="primary" 
             icon={<EyeOutlined />}
-            // Modified: Pass entire doctor object to the navigation function
             onClick={() => navigateToDoctorProfile(doctor)}
             style={{
               margin: '0 8px',
@@ -569,14 +550,14 @@ const DoctorPage: React.FC = () => {
             View Profile
           </Button>,
           <Button 
-            key="contact"
-            onClick={(e) => handleMessageClick(e, doctor.doctor?.id || doctor.id)}
-            style={{
-              margin: '0 8px'
-            }}
-          >
-            Contact
-          </Button>
+          key="contact"
+          onClick={(e) => handleMessageClick(e, doctor)}
+          style={{
+            margin: '0 8px'
+          }}
+        >
+          Contact
+        </Button>
         ]}
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: '#1e3a8a', opacity: 0.7 }} />
