@@ -54,11 +54,12 @@ const UsersPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isChildrenLoading, setIsChildrenLoading] = useState<boolean>(false);
   const [searchKeyword, setSearchKeyword] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
   const [filterStatus, setFilterStatus] = useState<number>(0);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
 
   // ============ API CALLS ============
   const fetchUsers = async () => {
@@ -67,10 +68,10 @@ const UsersPage = () => {
       const token = localStorage.getItem("token");
       const params = {
         SearchKeyword: searchKeyword || undefined,
-        Page: page - 1,
-        PageSize: pageSize,
         Status: filterStatus,
         RoleIds: "00000000-0000-0000-0000-000000000004",
+        Page: page,
+        PageSize: pageSize
       };
 
       const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/users/all`, {
@@ -80,7 +81,9 @@ const UsersPage = () => {
         },
       });
 
+      // Update users and total count
       setUsers(response.data.data.data || []);
+      setTotalUsers(response.data.data.totalRecords || 0);
     } catch (error) {
       message.error("Failed to fetch users");
     } finally {
@@ -107,7 +110,7 @@ const UsersPage = () => {
   // ============ SIDE EFFECTS ============
   useEffect(() => {
     fetchUsers();
-  }, [page, filterStatus]);
+  }, [filterStatus, page, pageSize]);
 
   // ============ HANDLERS ============
   const resetChildrenData = () => {
@@ -142,6 +145,11 @@ const UsersPage = () => {
     } catch (error) {
       // Silent error handling
     }
+  };
+
+  const handleSearch = () => {
+    setPage(0); // Reset to first page when searching
+    fetchUsers();
   };
 
   // ============ HELPER FUNCTIONS ============
@@ -290,7 +298,10 @@ const UsersPage = () => {
             <Space size="middle">
               <Button 
                 type={filterStatus === 0 ? "primary" : "default"} 
-                onClick={() => setFilterStatus(0)}
+                onClick={() => {
+                  setFilterStatus(0);
+                  setPage(0); // Reset to first page when changing filter
+                }}
                 icon={<CheckCircleOutlined />}
                 style={{ 
                   borderRadius: '50px', 
@@ -302,7 +313,10 @@ const UsersPage = () => {
               </Button>
               <Button 
                 type={filterStatus === 1 ? "primary" : "default"} 
-                onClick={() => setFilterStatus(1)}
+                onClick={() => {
+                  setFilterStatus(1);
+                  setPage(0); // Reset to first page when changing filter
+                }}
                 icon={<CloseCircleOutlined />}
                 style={{ 
                   borderRadius: '50px',
@@ -320,6 +334,7 @@ const UsersPage = () => {
                 placeholder="Search users..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
+                onPressEnter={handleSearch}
                 style={{ 
                   width: 'calc(100% - 40px)',
                   borderTopLeftRadius: '50px',
@@ -332,7 +347,7 @@ const UsersPage = () => {
               />
               <Button 
                 type="primary" 
-                onClick={fetchUsers}
+                onClick={handleSearch}
                 icon={<FilterOutlined />}
                 style={{ 
                   width: '40px',
@@ -369,11 +384,31 @@ const UsersPage = () => {
             dataSource={users}
             rowKey="id"
             pagination={{
-              current: page,
+              // Removing the pagination display elements
+              current: page + 1,
               pageSize: pageSize,
-              onChange: (newPage) => setPage(newPage),
-              showSizeChanger: false,
-              style: { marginTop: 16 }
+              total: totalUsers,
+              onChange: (newPage, newPageSize) => {
+                if (newPageSize !== pageSize) {
+                  setPageSize(newPageSize || 10);
+                  setPage(0); // Reset to first page when changing page size
+                } else {
+                  setPage(newPage - 1); // Convert back to 0-based indexing
+                }
+              },
+              showSizeChanger: true,
+              // Remove the showTotal property to eliminate the "1-10 of 10 users" text
+              // showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
+              style: { marginTop: 16 },
+              // Hide the page numbers (including the "1" button)
+              itemRender: (_, type) => {
+                // Return null for page and prev/next buttons to hide them
+                if (type === 'page' || type === 'prev' || type === 'next') {
+                  return null;
+                }
+                // Still render other elements like the page size changer
+                return undefined;
+              }
             }}
           />
         )}

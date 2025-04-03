@@ -1,5 +1,5 @@
-import { Layout, Row, Col, Typography, Space, Button, Divider, Input, Form as AntForm } from 'antd';
-import { FacebookOutlined, TwitterOutlined, InstagramOutlined, YoutubeOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined, SendOutlined } from '@ant-design/icons';
+import { Layout, Row, Col, Typography, Space, Divider, Form as AntForm } from 'antd';
+import { MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 
 const { Footer } = Layout;
@@ -50,59 +50,7 @@ const AppFooter = () => {
             <Paragraph style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '16px', lineHeight: '1.6', marginBottom: '24px' }}>
               Track and monitor children's health and development with reliable information from trusted sources. Our platform provides scientifically backed tools for parents and healthcare professionals.
             </Paragraph>
-            <Space size="middle" style={{ marginBottom: '24px' }}>
-              <Button 
-                type="text" 
-                shape="circle" 
-                icon={<FacebookOutlined style={{ fontSize: '20px', color: 'white' }} />} 
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.1)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  width: '40px', 
-                  height: '40px' 
-                }} 
-              />
-              <Button 
-                type="text" 
-                shape="circle" 
-                icon={<TwitterOutlined style={{ fontSize: '20px', color: 'white' }} />} 
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.1)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  width: '40px', 
-                  height: '40px' 
-                }} 
-              />
-              <Button 
-                type="text" 
-                shape="circle" 
-                icon={<InstagramOutlined style={{ fontSize: '20px', color: 'white' }} />} 
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.1)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  width: '40px', 
-                  height: '40px' 
-                }} 
-              />
-              <Button 
-                type="text" 
-                shape="circle" 
-                icon={<YoutubeOutlined style={{ fontSize: '20px', color: 'white' }} />} 
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.1)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  width: '40px', 
-                  height: '40px' 
-                }} 
-              />
+            <Space size="middle" style={{ marginBottom: '24px' }}>              
             </Space>
           </div>
         </Col>
@@ -205,27 +153,7 @@ const AppFooter = () => {
           </Paragraph>
           <AntForm>
             <Space.Compact style={{ width: '100%' }}>
-              <Input 
-                placeholder="Your email address" 
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.1)', 
-                  borderColor: 'rgba(255, 255, 255, 0.2)',
-                  borderRight: 'none',
-                  color: 'white',
-                  height: '44px',
-                  borderRadius: '8px 0 0 8px',
-                }} 
-              />
-              <Button 
-                type="primary" 
-                icon={<SendOutlined />} 
-                style={{ 
-                  background: '#3b82f6', 
-                  border: 'none',
-                  height: '44px',
-                  borderRadius: '0 8px 8px 0',
-                }}
-              />
+                       
             </Space.Compact>
           </AntForm>
         </Col>

@@ -158,17 +158,6 @@ const RegisterPage: React.FC = () => {
             <button type="submit" className="login__button">Sign Up</button>
           </form>
 
-          <div className="login__social">
-            <p className="login__social-title">Or register with</p>
-            <div className="login__social-links">
-              <button className="login__social-button google">
-                <img src="src/assets/img/icon-google.svg" alt="Google" /> Google
-              </button>
-              <button className="login__social-button facebook">
-                <img src="src/assets/img/icon-facebook.svg" alt="Facebook" /> Facebook
-              </button>
-            </div>
-          </div>
 
           <p className="login__switch">
             Already have an account? <button id="registerButtonLogin" onClick={() => navigate("/login")}>Log In</button>

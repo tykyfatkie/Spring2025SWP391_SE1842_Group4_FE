@@ -189,7 +189,7 @@ const PackagesPage = () => {
     switch (status) {
       case 1: return <Tag color="#4ade80" style={{ borderRadius: '12px', padding: '2px 12px' }}>Active</Tag>;
       case 0: return <Tag color="#f87171" style={{ borderRadius: '12px', padding: '2px 12px' }}>Inactive</Tag>;
-      default: return <Tag color="#9ca3af" style={{ borderRadius: '12px', padding: '2px 12px' }}>Unknown</Tag>;
+      default: return <Tag color="#9ca3af" style={{ borderRadius: '12px', padding: '2px 12px' }}>Delete</Tag>;
     }
   };
 

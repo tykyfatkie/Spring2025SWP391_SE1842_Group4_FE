@@ -118,7 +118,32 @@ const DoctorPage: React.FC = () => {
     throw new Error("Could not find doctors array in API response.");
   };
 
-  // Fetch all doctors - Updated to use the new API endpoint
+  // NEW FUNCTION: Fetch doctor name from profile API
+  const fetchDoctorName = async (userId: string): Promise<string> => {
+    try {
+      const token = getToken();
+      const profileResponse = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache',
+          'Accept': '*/*'
+        },
+      });
+      
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        if (profileData.data && Array.isArray(profileData.data) && profileData.data.length > 0) {
+          return profileData.data[0].user?.name || "Unknown Doctor";
+        }
+      }
+      return "Unknown Doctor";
+    } catch (error) {
+      console.error("Error fetching doctor name:", error);
+      return "Unknown Doctor";
+    }
+  };
+
+  // Fetch all doctors - Updated to fetch names when needed
   const fetchDoctors = useCallback(async () => {
     try {
       const token = getToken();
@@ -137,15 +162,42 @@ const DoctorPage: React.FC = () => {
   
       const doctorData = await doctorResponse.json();
       const doctorsList = extractDoctorsFromResponse(doctorData);
-      
-      // Map the response to match the expected structure
-      const formattedDoctors = doctorsList.map((doctor: any) => {
+
+      // Process each doctor to ensure they have names
+      const doctorsWithNames = await Promise.all(doctorsList.map(async (doctor: any) => {
         // Extract userId from the doctor object if available
         const userId = doctor.userId || doctor.id;
         
+        // Check if name exists
+        if (!doctor.name && !doctor.user?.name) {
+          // Name not available, fetch from profile API
+          const name = await fetchDoctorName(userId);
+          
+          return {
+            id: doctor.id,
+            name: name,
+            email: doctor.email,
+            profileImg: doctor.profileImg,
+            userId: userId,
+            doctor: {
+              id: doctor.id,
+              certificate: doctor.certificate,
+              licenseNumber: doctor.licenseNumber,
+              biography: doctor.biography,
+              metadata: doctor.metadata,
+              specialize: doctor.specialize,
+              status: doctor.status
+            },
+            specialize: doctor.specialize,
+            licenseNumber: doctor.licenseNumber,
+            metadata: doctor.metadata
+          };
+        }
+        
+        // Name already available
         return {
           id: doctor.id,
-          name: doctor.name,
+          name: doctor.name || doctor.user?.name || "Unknown Doctor",
           email: doctor.email,
           profileImg: doctor.profileImg,
           userId: userId,
@@ -162,9 +214,9 @@ const DoctorPage: React.FC = () => {
           licenseNumber: doctor.licenseNumber,
           metadata: doctor.metadata
         };
-      });
+      }));
       
-      setDoctors(formattedDoctors);
+      setDoctors(doctorsWithNames);
     } catch (error: any) {
       setError(error.message);
     } finally {

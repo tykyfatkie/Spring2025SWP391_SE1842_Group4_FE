@@ -81,7 +81,7 @@ const AboutPage: React.FC = () => {
                   fontWeight: 600,
                   boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
                 }}
-                onClick={() => navigate("/contact")}
+                onClick={() => navigate("/contact-us")}
               >
                 Contact Us
               </Button>
