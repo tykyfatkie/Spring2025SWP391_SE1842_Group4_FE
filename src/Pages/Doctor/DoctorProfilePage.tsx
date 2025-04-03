@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline, Spin, Alert } from 'antd';
-import { UserOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline, Spin, Alert, Modal, Form, Input, Upload, message } from 'antd';
+import { UserOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined, ArrowRightOutlined, UploadOutlined, SendOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
+import { UploadFile, UploadChangeParam } from 'antd/es/upload/interface';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -21,34 +22,64 @@ const colors = {
   }
 };
 
-  interface DoctorProfile {
-    id: string;
-    certificate: string | null;
-    licenseNumber: string | null;
-    biography: string | null;
-    metadata: string | null;
-    specialize: string | null;
-    profileImg: string;
-    status: number;
-    userId: string;
-    ratingAvg: number | null;
-    degrees: string | null;
-    research: string | null;
-    languages: string | null;
-    user?: {
-      name: string;
-      userName: string;
-      email: string;
-      phone?: string;
-      address?: string;
-    };
-  }
+interface DoctorProfile {
+  id: string;
+  certificate: string | null;
+  licenseNumber: string | null;
+  biography: string | null;
+  metadata: string | null;
+  specialize: string | null;
+  profileImg: string;
+  status: number;
+  userId: string;
+  ratingAvg: number | null;
+  degrees: string | null;
+  research: string | null;
+  languages: string | null;
+  user?: {
+    name: string;
+    userName: string;
+    email: string;
+    phone?: string;
+    address?: string;
+  };
+}
+
+interface UploadResponse {
+  url: string;
+}
+
+// Constants
+const ACCEPTED_FILE_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'application/pdf'
+];
 
 const DoctorProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Contact Modal States
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [messageText, setMessageText] = useState<string>('');
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploadedFileUrls, setUploadedFileUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [sendingMessage, setSendingMessage] = useState<boolean>(false);
+
+  // Fetch the token from local storage
+  const getToken = (): string => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found");
+    }
+    return token;
+  };
 
   useEffect(() => {
     const fetchDoctorProfile = async () => {
@@ -57,10 +88,7 @@ const DoctorProfilePage: React.FC = () => {
           throw new Error("Doctor ID is required");
         }
 
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found");
-        }
+        const token = getToken();
 
         // First, try to fetch using the doctor-specific endpoint
         try {
@@ -170,6 +198,268 @@ const DoctorProfilePage: React.FC = () => {
       return null;
     }
   };
+
+  // Contact Modal Functions
+  const handleContactClick = () => {
+    if (!doctor || !doctor.userId) {
+      message.error("Unable to contact this doctor: missing user ID");
+      return;
+    }
+    
+    setIsModalVisible(true);
+  };
+
+  // File handling functions
+  const isFileTypeAccepted = (file: File): boolean => {
+    const isAccepted = ACCEPTED_FILE_TYPES.includes(file.type);
+    if (!isAccepted) {
+      message.error(`File type ${file.type} is not supported. Please upload JPG, PNG, GIF or PDF files.`);
+    }
+    return isAccepted;
+  };
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': '*/*'
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      const responseText = await response.text();
+      throw new Error(`Upload failed with status: ${response.status}. Response: ${responseText.substring(0, 500)}`);
+    }
+
+    const data: UploadResponse = await response.json();
+    
+    if (data?.url) {
+      return data.url;
+    }
+    
+    throw new Error("Invalid response format from upload API");
+  };
+
+  const uploadPendingFiles = async (): Promise<string[]> => {
+    const pendingFiles = fileList.filter(fileItem => 
+      fileItem.originFileObj && !fileItem.url && fileItem.status !== 'error'
+    );
+    
+    if (pendingFiles.length === 0) {
+      return [...uploadedFileUrls];
+    }
+
+    try {
+      setUploading(true);
+      
+      const newUrls: string[] = [];
+      const allUrls = [...uploadedFileUrls];
+      const updatedFileList = [...fileList];
+      
+      for (const fileItem of pendingFiles) {
+        try {
+          if (!fileItem.originFileObj) continue;
+          
+          const url = await uploadFile(fileItem.originFileObj);
+          newUrls.push(url);
+          allUrls.push(url);
+          
+          // Update file item status
+          const index = updatedFileList.findIndex(item => item.uid === fileItem.uid);
+          if (index !== -1) {
+            updatedFileList[index] = {
+              ...updatedFileList[index],
+              url,
+              status: 'done'
+            };
+          }
+        } catch (error: any) {
+          setError(error instanceof Error ? error.message : String(error));
+        }
+      }
+      
+      setFileList(updatedFileList);
+      setUploadedFileUrls(allUrls);
+      
+      return allUrls;
+    } catch (error: any) {
+      message.error(`Error uploading files: ${error.message}`);
+      return [...uploadedFileUrls];
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Event handlers for contact modal
+  const handleUploadFiles = async () => {
+    if (fileList.length === 0) {
+      message.info('No files selected for upload');
+      return;
+    }
+
+    message.loading('Uploading files...', 0);
+    const urls = await uploadPendingFiles();
+    message.destroy();
+    
+    if (urls.length > 0) {
+      message.success(`Successfully uploaded ${urls.length} file(s)`);
+    }
+  };
+
+  const handleSendMessage = async (): Promise<void> => {
+    try {
+      if (!doctor || !doctor.userId) {
+        message.error('Cannot send message: missing doctor ID');
+        return;
+      }
+      
+      const token = getToken();
+  
+      if (!messageText.trim()) {
+        message.error('Please enter a message');
+        return;
+      }
+
+      setSendingMessage(true);
+      
+      const messageLoadingKey = 'sendingMessage';
+      message.loading({ content: 'Uploading files and sending message...', key: messageLoadingKey });
+      
+      const allFileUrls = await uploadPendingFiles();
+
+      const requestData = {
+        title: 'Consultation Request',
+        description: messageText,
+        attachments: JSON.stringify(allFileUrls)
+      };
+
+      const doctorIdToUse = doctor.userId;
+
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/request/send?doctorReceiveId=${doctorIdToUse}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData),
+      });
+  
+      if (!response.ok) {
+        const responseText = await response.text();
+        throw new Error(`Failed to send message: ${responseText}`);
+      }
+  
+      message.success({ content: 'Message sent successfully!', key: messageLoadingKey });
+      resetFormState();
+    } catch (error: any) {
+      message.error(`Failed to send message: ${error.message}`);
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const resetFormState = () => {
+    setIsModalVisible(false);
+    setMessageText('');
+    setFileList([]);
+    setUploadedFileUrls([]);
+  };
+
+  const handleFileChange = (info: UploadChangeParam<UploadFile>) => {
+    const validFiles = info.fileList.filter((file) => {
+      if (file.status === 'done' || file.status === 'uploading') {
+        return true;
+      }
+      
+      return file.originFileObj && ACCEPTED_FILE_TYPES.includes(file.originFileObj.type);
+    });
+    
+    setFileList(validFiles);
+  };
+
+  const handleBeforeUpload = (file: File) => {
+    const isValid = isFileTypeAccepted(file);
+    if (!isValid) {
+      return Upload.LIST_IGNORE;
+    }
+    
+    return false; // Prevent auto upload
+  };
+
+  // Render Message Modal
+  const renderMessageModal = () => (
+    <Modal
+      title={<div style={{ color: colors.primary.main, fontSize: '20px', fontWeight: 600 }}>Send Message to Doctor</div>}
+      open={isModalVisible}
+      onCancel={() => setIsModalVisible(false)}
+      width={600}
+      style={{ borderRadius: '16px' }}
+      bodyStyle={{ padding: '24px' }}
+      footer={[
+        <Button key="cancel" onClick={() => setIsModalVisible(false)}>
+          Cancel
+        </Button>,
+        <Button 
+          key="upload" 
+          onClick={handleUploadFiles} 
+          loading={uploading} 
+          icon={<UploadOutlined />}
+        >
+          Upload Files
+        </Button>,
+        <Button
+          key="send"
+          type="primary"
+          icon={<SendOutlined />}
+          loading={sendingMessage}
+          onClick={handleSendMessage}
+          style={{
+            background: colors.primary.main,
+            borderColor: colors.primary.main
+          }}
+        >
+          Send Message
+        </Button>
+      ]}
+    >
+      <Form
+        layout="vertical"
+        onFinish={handleSendMessage}
+      >
+        <Form.Item
+          label="Message"
+          name="message"
+          rules={[{ required: true, message: 'Please enter your message' }]}
+        >
+          <Input.TextArea
+            rows={4}
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            style={{ borderRadius: '8px' }}
+          />
+        </Form.Item>
+        
+        <Form.Item
+          label="Attachment(s)"
+        >
+          <Upload
+            fileList={fileList}
+            onChange={handleFileChange}
+            beforeUpload={handleBeforeUpload}
+            multiple
+          >
+            <Button icon={<UploadOutlined />}>Select Files</Button>
+          </Upload>
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
 
   const metadata = getMetadata();
 
@@ -312,6 +602,8 @@ const DoctorProfilePage: React.FC = () => {
                   border: 'none',
                   boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)'
                 }}
+                onClick={handleContactClick}
+                icon={<SendOutlined style={{ marginRight: '8px' }} />}
               >
                 Contact <ArrowRightOutlined style={{ marginLeft: '8px' }} />
               </Button>
@@ -509,10 +801,13 @@ const DoctorProfilePage: React.FC = () => {
                 ))}
               </Row>
             </TabPane>
-
           </Tabs>
         </Card>
       </Content>
+      
+      {/* Contact Modal */}
+      {renderMessageModal()}
+      
       <AppFooter />
     </Layout>
   );
