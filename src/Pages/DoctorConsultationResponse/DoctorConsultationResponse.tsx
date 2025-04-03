@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Typography, Table, Spin, Button, message, Card, Tag, Row, Col, Alert, Space, Image, Modal, Tabs } from 'antd';
+import { Layout, Typography, Table, Spin, Button, message, Card, Row, Col, Alert, Space, Image, Modal, Tabs } from 'antd';
 import { MessageOutlined, ClockCircleOutlined, CheckCircleOutlined, FileOutlined, PaperClipOutlined, EyeOutlined } from '@ant-design/icons';
 import axiosInstance from '../../utils/axiosInstance';
 import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';

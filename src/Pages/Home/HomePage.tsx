@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Typography, Button, Card, Row, Col, Space, Statistic } from 'antd';
+import { Layout, Typography, Button, Card, Row, Col, Space } from 'antd';
 import AppFooter from '../../components/Footer/Footer';
 import { SmileOutlined, HeartOutlined, StarOutlined, UserOutlined, CheckCircleOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import DoctorsSection from '../../components/Doctor section/DoctorsSection ';
@@ -88,12 +88,7 @@ const Homepage: React.FC = () => {
     },
   ];
 
-  const statistics = [
-    { title: "Happy Parents", value: "15,000+", icon: <SmileOutlined /> },
-    { title: "Health Professionals", value: "500+", icon: <UserOutlined /> },
-    { title: "Children Tracked", value: "25,000+", icon: <HeartOutlined /> },
-    { title: "Positive Reviews", value: "10,000+", icon: <StarOutlined /> }
-  ];
+
 
 
   return (
@@ -232,27 +227,7 @@ const Homepage: React.FC = () => {
               position: 'relative',
             }}
           >
-            <div style={{
-              position: 'absolute',
-              bottom: '30px',
-              right: '30px',
-              background: 'rgba(255, 255, 255, 0.9)',
-              padding: '16px 24px',
-              borderRadius: '8px',
-              boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
-              maxWidth: '280px',
-            }}>
-              <Text style={{ color: '#1e3a8a', fontWeight: 600, fontSize: '16px' }}>
-                "Scientifically proven to help parents make informed decisions about their child's health."
-              </Text>
-              <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'gray' }} />
-                <div style={{ marginLeft: '12px' }}>
-                  <Text style={{ fontSize: '14px', fontWeight: 600 }}>Dr. John Doe</Text>
-                  <Text style={{ fontSize: '12px', color: 'gray' }}>Pediatrician</Text>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
         {/* Features Section */}
@@ -273,28 +248,7 @@ const Homepage: React.FC = () => {
             </Col>
           ))}
         </Row>
-        {/* Statistics Section */}
-        <Row gutter={[16, 24]} justify="center" style={{ padding: '48px 12px', backgroundColor: '#f0f2f5' }}>
-          {statistics.map((stat, index) => (
-            <Col key={index} xs={24} sm={12} md={6}>
-              <Card
-                variant="outlined"
-                style={{
-                  borderRadius: '20px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-                  textAlign: 'center',
-                }}
-              >
-                <Statistic
-                  title={stat.title}
-                  value={stat.value}
-                  valueStyle={{ fontSize: '32px', fontWeight: 600 }}
-                  prefix={stat.icon}
-                />
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        
         {/* Doctors Section */}
         <DoctorsSection doctors={doctors} loading={loading} error={error} />
       </Content>

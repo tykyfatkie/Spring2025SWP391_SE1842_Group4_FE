@@ -222,12 +222,6 @@ const LoginPage: React.FC = () => {
               <a onClick={handleGoogleLogin} className="login__social-link" style={{ cursor: "pointer" }}>
                 <img src="src/assets/img/icon-google.svg" alt="Google" className="login__social-img" />
               </a>
-              <a href="" className="login__social-link">
-                <img src="src/assets/img/icon-facebook.svg" alt="Facebook" className="login__social-img" />
-              </a>
-              <a href="" className="login__social-link">
-                <img src="src/assets/img/icon-apple.svg" alt="Apple" className="login__social-img" />
-              </a>
             </div>
           </div>
 

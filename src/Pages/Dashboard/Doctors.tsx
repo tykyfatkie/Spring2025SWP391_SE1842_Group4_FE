@@ -20,10 +20,8 @@ import {
   UserOutlined, 
   SearchOutlined, 
   EyeOutlined, 
-  ExclamationCircleOutlined, 
   PlusOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined,
   FilterOutlined
 } from "@ant-design/icons";
 import axios from "axios";
@@ -37,7 +35,7 @@ interface Doctor {
   email: string;
   phone?: string;
   avatar?: string;
-  status: DoctorStatus; // Change from number to DoctorStatus
+  status: DoctorStatus;
 }
 
 interface NewDoctorForm {
@@ -55,8 +53,6 @@ const DoctorsPage = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchKeyword, setSearchKeyword] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
   const [filterStatus, setFilterStatus] = useState<number>(0);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
@@ -74,8 +70,9 @@ const DoctorsPage = () => {
       const token = localStorage.getItem("token");
       const params = {
         SearchKeyword: searchKeyword || undefined,
-        Page: page - 1,
-        PageSize: pageSize,
+        // Removed pagination parameters to get all doctors
+        // Set a large value for PageSize to get all doctors
+        PageSize: 1000,
         Status: filterStatus,
         RoleIds: DOCTOR_ROLE_ID,
       };
@@ -129,7 +126,7 @@ const DoctorsPage = () => {
   // ============ SIDE EFFECTS ============
   useEffect(() => {
     fetchDoctors();
-  }, [page, filterStatus]);
+  }, [filterStatus]); // Removed page dependency since we're not using pagination
 
   // ============ HANDLERS ============
   const showAddDoctorModal = () => {
@@ -152,25 +149,6 @@ const DoctorsPage = () => {
     setIsDoctorDetailModalVisible(true);
   };
 
-  const handleDeactivateDoctor = async (doctorId: string) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.patch(
-        `${import.meta.env.VITE_API_ENDPOINT}/users/status/${doctorId}`,
-        { status: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (response.data?.success) {
-        message.success("Doctor deactivated successfully");
-        fetchDoctors();
-      } else {
-        message.error("Failed to deactivate doctor");
-      }
-    } catch (error: any) {
-      message.error("Failed to deactivate doctor: " + (error.response?.data?.message || error.message));
-    }
-  };
 
   // ============ HELPER FUNCTIONS ============
   const getStatusTag = (status: DoctorStatus) => {
@@ -237,15 +215,6 @@ const DoctorsPage = () => {
             }}
             shape="circle"
           />
-          {record.status === 0 && (
-            <Button
-              icon={<CloseCircleOutlined />}
-              onClick={() => handleDeactivateDoctor(record.id)}
-              danger
-              shape="circle"
-              style={{ borderRadius: '50px' }}
-            />
-          )}
         </Space>
       )
     }
@@ -316,30 +285,8 @@ const DoctorsPage = () => {
               >
                 Active Doctors
               </Button>
-              <Button 
-                type={filterStatus === 1 ? "primary" : "default"} 
-                onClick={() => setFilterStatus(1)}
-                icon={<CloseCircleOutlined />}
-                style={{ 
-                  borderRadius: '50px',
-                  backgroundColor: filterStatus === 1 ? '#3b82f6' : '#f3f4f6',
-                  borderColor: filterStatus === 1 ? '#3b82f6' : '#d1d5db',
-                }}
-              >
-                Inactive Doctors
-              </Button>
-              <Button 
-                type={filterStatus === 4 ? "primary" : "default"} 
-                onClick={() => setFilterStatus(4)}
-                icon={<ExclamationCircleOutlined />}
-                style={{ 
-                  borderRadius: '50px',
-                  backgroundColor: filterStatus === 4 ? '#3b82f6' : '#f3f4f6',
-                  borderColor: filterStatus === 4 ? '#3b82f6' : '#d1d5db',
-                }}
-              >
-                Not Verified
-              </Button>
+
+
             </Space>
           </Col>
           <Col span={8}>
@@ -396,13 +343,7 @@ const DoctorsPage = () => {
             columns={columns}
             dataSource={doctors}
             rowKey="id"
-            pagination={{
-              current: page,
-              pageSize: pageSize,
-              onChange: (newPage) => setPage(newPage),
-              showSizeChanger: false,
-              style: { marginTop: 16 }
-            }}
+            pagination={false} // Removed pagination
           />
         )}
       </Card>
