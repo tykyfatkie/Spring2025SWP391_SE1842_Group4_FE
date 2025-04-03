@@ -153,15 +153,15 @@ const UserConsultationRequests: React.FC = () => {
       const profileMap: Record<string, DoctorProfile> = {};
       validProfiles.forEach(item => {
         if (item) {
-          // Access the name from the user object if it exists
-          const profile = item.profile;
-          const userName = profile.user?.name || profile.user?.fullName;
+          // API returns an array, so we need to access the first item
+          const profile = Array.isArray(item.profile) ? item.profile[0] : item.profile;
           
+          // Access the name directly from user object
           profileMap[item.id] = {
             id: item.id,
-            fullName: userName || profile.fullName || `Doctor ${item.id.substring(0, 6)}`,
-            specialty: profile.specialty,
-            avatarUrl: profile.avatarUrl || profile.user?.avatar
+            fullName: profile.user?.name || `Doctor ${item.id.substring(0, 6)}`,
+            specialty: profile.specialize || profile.specialize,
+            avatarUrl: profile.profileImg || profile.user?.avatar
           };
           
           console.log(`Extracted name for doctor ${item.id}:`, profileMap[item.id].fullName);
