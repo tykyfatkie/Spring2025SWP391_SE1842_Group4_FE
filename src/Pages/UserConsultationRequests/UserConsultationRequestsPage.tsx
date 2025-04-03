@@ -238,15 +238,19 @@ const UserConsultationRequests: React.FC = () => {
     setSelectedRequest(null);
   };
 
-  // Convert numeric status to string representation
+
   const getStatusText = (status: number): string => {
+    // Check if status is undefined or null
+    if (status === undefined || status === null) {
+      return "Unknown";
+    }
+    
     switch(status) {
-      case 1: return "Pending";
-      case 2: return "Approved";
-      case 3: return "Rejected";
-      case 4: return "Canceled";
-      case 5: return "Archived";
-      default: return "Unknown";
+      case 0: return "Approved";  // Assuming 0 might be Pending based on enum index
+      case 1: return "Rejected"; // If Approve is at index 0 in your enum
+      case 2: return "Pending"; // If Reject is at index 1 in your enum
+      case 3: return "Archived";  // If Pending is at index 2 in your enum
+      default: return "Canceled";
     }
   };
 
@@ -276,20 +280,17 @@ const UserConsultationRequests: React.FC = () => {
         const displayText = getStatusText(status);
         
         switch(status) {
-          case 2: // Approved
+          case 0: // Approved
             color = "#52c41a"; // Green
             break;
-          case 1: // Pending
+          case 2: // Pending
             color = "#faad14"; // Yellow/Orange
             break;
-          case 3: // Rejected
+          case 1: // Rejected
             color = "#f5222d"; // Red
             break;
-          case 5: // Archived
+          case 3: // Archived
             color = "#8c8c8c"; // Gray
-            break;
-          case 4: // Canceled
-            color = "#d9d9d9"; // Light Gray
             break;
         }
         
