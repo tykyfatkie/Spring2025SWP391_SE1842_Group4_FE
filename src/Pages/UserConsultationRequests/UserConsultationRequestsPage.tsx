@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Layout, Table, Button, Space, Modal, message } from "antd";
+import { Layout, Table, Button, Space, Modal, message, Tabs } from "antd";
 import axiosInstance from "../../utils/axiosInstance";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import CollapsibleHeader from "../ChildManage/CollapsibleHeader";
 
 const { Content } = Layout;
+const { TabPane } = Tabs;
 
 const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/request/my-request`;
 const DOCTOR_PROFILE_API = `${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile`;
+const RESPONSE_API_URL = `${import.meta.env.VITE_API_ENDPOINT}/response/request`;
 
 // Define interface for consultation request based on actual API response
 interface ConsultationRequest {
@@ -32,12 +34,25 @@ interface DoctorProfile {
   avatarUrl?: string;
 }
 
+// Interface for consultation response
+interface ConsultationResponse {
+  requestId: string;
+  doctorId: string;
+  responseDate: string;
+  title: string;
+  content: string;
+  attachments: string[];
+  consultationStatus?: number;
+}
+
 const UserConsultationRequests: React.FC = () => {
   const [requests, setRequests] = useState<ConsultationRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [detailsModalVisible, setDetailsModalVisible] = useState<boolean>(false);
   const [selectedRequest, setSelectedRequest] = useState<ConsultationRequest | null>(null);
   const [doctorProfiles, setDoctorProfiles] = useState<Record<string, DoctorProfile>>({});
+  const [consultationResponse, setConsultationResponse] = useState<ConsultationResponse | null>(null);
+  const [loadingResponse, setLoadingResponse] = useState<boolean>(false);
 
   useEffect(() => {
     fetchConsultationRequests();
@@ -114,6 +129,64 @@ const UserConsultationRequests: React.FC = () => {
       message.error("Failed to load consultation requests");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchConsultationResponse = async (requestId: string) => {
+    setLoadingResponse(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoadingResponse(false);
+        return;
+      }
+
+      // Call the consultation response API
+      const response = await axiosInstance.get(`${RESPONSE_API_URL}-${requestId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Response API data:", response.data);
+
+      if (response.data && response.data.data) {
+        // Get the response data from the API
+        const responseData = response.data.data;
+        
+        // Create a formatted response object
+        const formattedResponse: ConsultationResponse = {
+          requestId: responseData.requestId || "",
+          doctorId: responseData.doctorId || "",
+          responseDate: responseData.responseDate || responseData.createdAt || "",
+          title: responseData.title || "Consultation Response",
+          content: responseData.content || "No content provided.",
+          attachments: [],
+        };
+
+        // Parse attachments if they exist
+        try {
+          if (typeof responseData.attachments === 'string') {
+            formattedResponse.attachments = JSON.parse(responseData.attachments);
+          } else if (Array.isArray(responseData.attachments)) {
+            formattedResponse.attachments = responseData.attachments;
+          }
+        } catch (e) {
+          console.error("Error parsing response attachments:", e);
+        }
+
+        // Set the response data
+        setConsultationResponse(formattedResponse);
+      } else {
+        setConsultationResponse(null);
+        console.log("No response data available or request not yet responded to");
+      }
+    } catch (error: any) {
+      console.error("Error fetching consultation response:", error);
+      setConsultationResponse(null);
+      // Don't show error message as the doctor might not have responded yet
+    } finally {
+      setLoadingResponse(false);
     }
   };
 
@@ -228,16 +301,18 @@ const UserConsultationRequests: React.FC = () => {
     }
   };
 
-  const showDetailsModal = (request: ConsultationRequest) => {
+  const showDetailsModal = async (request: ConsultationRequest) => {
     setSelectedRequest(request);
     setDetailsModalVisible(true);
+    // Fetch consultation response when opening details modal
+    await fetchConsultationResponse(request.id);
   };
 
   const handleDetailsModalClose = () => {
     setDetailsModalVisible(false);
     setSelectedRequest(null);
+    setConsultationResponse(null);
   };
-
 
   const getStatusText = (status: number): string => {
     // Check if status is undefined or null
@@ -364,6 +439,77 @@ const UserConsultationRequests: React.FC = () => {
     </div>
   );
 
+  // Function to render doctor response content
+  const renderDoctorResponse = () => {
+    if (loadingResponse) {
+      return <div style={{ textAlign: "center", padding: "20px" }}>Loading doctor's response...</div>;
+    }
+
+    if (!consultationResponse) {
+      return (
+        <div style={{ 
+          padding: "40px 20px", 
+          textAlign: "center", 
+          background: "#f9f9f9", 
+          borderRadius: "8px" 
+        }}>
+          <p>No response received from the doctor yet.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div style={{ marginBottom: "16px" }}>
+          <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Response from Doctor</h3>
+          <p><strong>Date:</strong> {new Date(consultationResponse.responseDate).toLocaleString()}</p>
+          <p><strong>Title:</strong> {consultationResponse.title}</p>
+        </div>
+
+        <div style={{ marginBottom: "16px" }}>
+          <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Content</h3>
+          <div style={{ 
+            padding: "12px", 
+            background: "#f0f7ff", 
+            borderRadius: "8px",
+            minHeight: "100px"
+          }}>
+            {consultationResponse.content}
+          </div>
+        </div>
+
+        {consultationResponse.attachments && consultationResponse.attachments.length > 0 && (
+          <div>
+            <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Response Attachments</h3>
+            <ul style={{ listStyleType: "none", padding: 0 }}>
+              {consultationResponse.attachments.map((attachment, index) => (
+                <li key={index} style={{ marginBottom: "8px" }}>
+                  <a 
+                    href={attachment} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "8px 12px",
+                      background: "#e6f7ff",
+                      borderRadius: "4px",
+                      color: "#1890ff",
+                      textDecoration: "none"
+                    }}
+                  >
+                    <span>Response Attachment {index + 1}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Layout style={{ minHeight: "100vh", margin: "-25px", background: "white", marginRight: "25px" }}>
       <Layout>
@@ -395,68 +541,75 @@ const UserConsultationRequests: React.FC = () => {
                 Close
               </Button>
             ]}
-            width={600}
+            width={800}
           >
             {selectedRequest && (
-              <div>
-                <div style={{ marginBottom: "16px" }}>
-                  <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Request Information</h3>
-                  <p><strong>Request ID:</strong> {selectedRequest.id}</p>
-                  <p><strong>Status:</strong> <span style={{ 
-                    color: selectedRequest.status === 2 ? "#52c41a" : 
-                          selectedRequest.status === 1 ? "#faad14" : 
-                          selectedRequest.status === 3 ? "#f5222d" : 
-                          selectedRequest.status === 5 ? "#8c8c8c" : 
-                          selectedRequest.status === 4 ? "#d9d9d9" : "#000000"
-                  }}>{getStatusText(selectedRequest.status)}</span></p>
-                  <p><strong>Date:</strong> {new Date(selectedRequest.requestDate).toLocaleString()}</p>
-                  <p><strong>Doctor:</strong> {
-                    doctorProfiles[selectedRequest.doctorReceiveId]?.fullName || 
-                    selectedRequest.doctorName
-                  }</p>
-                </div>
-
-                <div style={{ marginBottom: "16px" }}>
-                  <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Description</h3>
-                  <div style={{ 
-                    padding: "12px", 
-                    background: "#f9f9f9", 
-                    borderRadius: "8px",
-                    minHeight: "100px"
-                  }}>
-                    {selectedRequest.description || "No description provided."}
-                  </div>
-                </div>
-
-                {selectedRequest.attachments && selectedRequest.attachments.length > 0 && (
+              <Tabs defaultActiveKey="request">
+                <TabPane tab="Request Details" key="request">
                   <div>
-                    <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Attachments</h3>
-                    <ul style={{ listStyleType: "none", padding: 0 }}>
-                      {selectedRequest.attachments.map((attachment, index) => (
-                        <li key={index} style={{ marginBottom: "8px" }}>
-                          <a 
-                            href={attachment} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              padding: "8px 12px",
-                              background: "#f0f5ff",
-                              borderRadius: "4px",
-                              color: "#1e3a8a",
-                              textDecoration: "none"
-                            }}
-                          >
-                            <span>Attachment {index + 1}</span>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                    <div style={{ marginBottom: "16px" }}>
+                      <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Request Information</h3>
+                      <p><strong>Request ID:</strong> {selectedRequest.id}</p>
+                      <p><strong>Status:</strong> <span style={{ 
+                        color: selectedRequest.status === 2 ? "#52c41a" : 
+                              selectedRequest.status === 1 ? "#faad14" : 
+                              selectedRequest.status === 3 ? "#f5222d" : 
+                              selectedRequest.status === 5 ? "#8c8c8c" : 
+                              selectedRequest.status === 4 ? "#d9d9d9" : "#000000"
+                      }}>{getStatusText(selectedRequest.status)}</span></p>
+                      <p><strong>Date:</strong> {new Date(selectedRequest.requestDate).toLocaleString()}</p>
+                      <p><strong>Doctor:</strong> {
+                        doctorProfiles[selectedRequest.doctorReceiveId]?.fullName || 
+                        selectedRequest.doctorName
+                      }</p>
+                    </div>
+
+                    <div style={{ marginBottom: "16px" }}>
+                      <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Description</h3>
+                      <div style={{ 
+                        padding: "12px", 
+                        background: "#f9f9f9", 
+                        borderRadius: "8px",
+                        minHeight: "100px"
+                      }}>
+                        {selectedRequest.description || "No description provided."}
+                      </div>
+                    </div>
+
+                    {selectedRequest.attachments && selectedRequest.attachments.length > 0 && (
+                      <div>
+                        <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Attachments</h3>
+                        <ul style={{ listStyleType: "none", padding: 0 }}>
+                          {selectedRequest.attachments.map((attachment, index) => (
+                            <li key={index} style={{ marginBottom: "8px" }}>
+                              <a 
+                                href={attachment} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  padding: "8px 12px",
+                                  background: "#f0f5ff",
+                                  borderRadius: "4px",
+                                  color: "#1e3a8a",
+                                  textDecoration: "none"
+                                }}
+                              >
+                                <span>Attachment {index + 1}</span>
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </TabPane>
+                <TabPane tab="Doctor's Response" key="response">
+                  {renderDoctorResponse()}
+                </TabPane>
+              </Tabs>
             )}
           </Modal>
         </Content>
