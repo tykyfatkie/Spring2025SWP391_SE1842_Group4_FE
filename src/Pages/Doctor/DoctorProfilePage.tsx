@@ -9,16 +9,16 @@ const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
 
-// Main color variables to maintain consistency
+
 const colors = {
   primary: {
-    light: '#3b82f6', // Light blue
-    main: '#1e3a8a',  // Dark blue
+    light: '#3b82f6', 
+    main: '#1e3a8a',  
     gradient: 'linear-gradient(135deg, rgb(30, 58, 138) 0%, rgb(59, 130, 246) 100%)'
   },
   secondary: {
-    light: '#f0f2f5', // Light background
-    main: '#ffffff'   // White
+    light: '#f0f2f5', 
+    main: '#ffffff'  
   }
 };
 
@@ -49,7 +49,6 @@ interface UploadResponse {
   url: string;
 }
 
-// Constants
 const ACCEPTED_FILE_TYPES = [
   'image/jpeg',
   'image/jpg',
@@ -64,7 +63,7 @@ const DoctorProfilePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Contact Modal States
+
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [messageText, setMessageText] = useState<string>('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -72,7 +71,7 @@ const DoctorProfilePage: React.FC = () => {
   const [uploading, setUploading] = useState<boolean>(false);
   const [sendingMessage, setSendingMessage] = useState<boolean>(false);
 
-  // Fetch the token from local storage
+
   const getToken = (): string => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -90,7 +89,7 @@ const DoctorProfilePage: React.FC = () => {
 
         const token = getToken();
 
-        // First, try to fetch using the doctor-specific endpoint
+
         try {
           const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${id}`, {
             headers: {
@@ -109,10 +108,9 @@ const DoctorProfilePage: React.FC = () => {
           }
         } catch (e) {
           console.error("Error fetching from doctor profile endpoint:", e);
-          // Continue to fallback method
+
         }
 
-        // Fallback: Try to fetch from the users endpoint
         const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -126,14 +124,12 @@ const DoctorProfilePage: React.FC = () => {
 
         const userData = await response.json();
         
-        // Extract doctor data from user data
         let doctorData: DoctorProfile | null = null;
         
         if (userData.data) {
           const user = userData.data;
           
           if (user.doctor) {
-            // User object has a nested doctor object
             doctorData = {
               ...user.doctor,
               user: {
@@ -147,7 +143,7 @@ const DoctorProfilePage: React.FC = () => {
               id: user.id
             };
           } else {
-            // Create doctor profile from user data
+
             doctorData = {
               id: user.id,
               userId: user.id,
@@ -199,7 +195,7 @@ const DoctorProfilePage: React.FC = () => {
     }
   };
 
-  // Contact Modal Functions
+
   const handleContactClick = () => {
     if (!doctor || !doctor.userId) {
       message.error("Unable to contact this doctor: missing user ID");
@@ -209,7 +205,6 @@ const DoctorProfilePage: React.FC = () => {
     setIsModalVisible(true);
   };
 
-  // File handling functions
   const isFileTypeAccepted = (file: File): boolean => {
     const isAccepted = ACCEPTED_FILE_TYPES.includes(file.type);
     if (!isAccepted) {
@@ -270,7 +265,6 @@ const DoctorProfilePage: React.FC = () => {
           newUrls.push(url);
           allUrls.push(url);
           
-          // Update file item status
           const index = updatedFileList.findIndex(item => item.uid === fileItem.uid);
           if (index !== -1) {
             updatedFileList[index] = {
@@ -296,7 +290,6 @@ const DoctorProfilePage: React.FC = () => {
     }
   };
 
-  // Event handlers for contact modal
   const handleUploadFiles = async () => {
     if (fileList.length === 0) {
       message.info('No files selected for upload');
@@ -389,10 +382,9 @@ const DoctorProfilePage: React.FC = () => {
       return Upload.LIST_IGNORE;
     }
     
-    return false; // Prevent auto upload
+    return false; 
   };
 
-  // Render Message Modal
   const renderMessageModal = () => (
     <Modal
       title={<div style={{ color: colors.primary.main, fontSize: '20px', fontWeight: 600 }}>Send Message to Doctor</div>}

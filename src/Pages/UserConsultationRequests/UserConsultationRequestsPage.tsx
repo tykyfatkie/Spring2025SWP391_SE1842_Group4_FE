@@ -9,9 +9,9 @@ const { TabPane } = Tabs;
 
 const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/request/my-request`;
 const DOCTOR_PROFILE_API = `${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile`;
-const RESPONSE_API_URL = `${import.meta.env.VITE_API_ENDPOINT}/response/request`;
+const RESPONSE_API_URL = `${import.meta.env.VITE_API_ENDPOINT}/response/request-`;
 
-// Define interface for consultation request based on actual API response
+
 interface ConsultationRequest {
   id: string;
   title: string;
@@ -23,10 +23,9 @@ interface ConsultationRequest {
   createdAt: string;
   updatedAt: string;
   attachments: string[];
-  doctorName: string; // Will be populated from doctor profile API
+  doctorName: string; 
 }
 
-// Interface for doctor profile data
 interface DoctorProfile {
   id: string;
   fullName: string;
@@ -34,13 +33,12 @@ interface DoctorProfile {
   avatarUrl?: string;
 }
 
-// Interface for consultation response
 interface ConsultationResponse {
   requestId: string;
   doctorId: string;
   responseDate: string;
   title: string;
-  content: string;
+  content: any;
   attachments: string[];
   consultationStatus?: number;
 }
@@ -141,8 +139,7 @@ const UserConsultationRequests: React.FC = () => {
         return;
       }
 
-      // Call the consultation response API
-      const response = await axiosInstance.get(`${RESPONSE_API_URL}-${requestId}`, {
+      const response = await axiosInstance.get(`${RESPONSE_API_URL}${requestId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -154,11 +151,11 @@ const UserConsultationRequests: React.FC = () => {
         // Get the response data from the API
         const responseData = response.data.data;
         
-        // Create a formatted response object
+        // Create a formatted response object with proper null/undefined checks
         const formattedResponse: ConsultationResponse = {
           requestId: responseData.requestId || "",
           doctorId: responseData.doctorId || "",
-          responseDate: responseData.responseDate || responseData.createdAt || "",
+          responseDate: responseData.responseDate || responseData.createdAt || new Date().toISOString(),
           title: responseData.title || "Consultation Response",
           content: responseData.content || "No content provided.",
           attachments: [],
@@ -175,6 +172,7 @@ const UserConsultationRequests: React.FC = () => {
           console.error("Error parsing response attachments:", e);
         }
 
+        console.log("Formatted response:", formattedResponse);
         // Set the response data
         setConsultationResponse(formattedResponse);
       } else {
@@ -321,10 +319,10 @@ const UserConsultationRequests: React.FC = () => {
     }
     
     switch(status) {
-      case 0: return "Approved";  // Assuming 0 might be Pending based on enum index
-      case 1: return "Rejected"; // If Approve is at index 0 in your enum
-      case 2: return "Pending"; // If Reject is at index 1 in your enum
-      case 3: return "Archived";  // If Pending is at index 2 in your enum
+      case 0: return "Approved";
+      case 1: return "Rejected";
+      case 2: return "Pending";
+      case 3: return "Archived";
       default: return "Canceled";
     }
   };
@@ -389,7 +387,7 @@ const UserConsultationRequests: React.FC = () => {
       width: "20%", // Set width for actions
       render: (_: any, record: ConsultationRequest) => (
         <Space>
-          {record.status === 1 && ( // Only show cancel button for Pending requests
+          {record.status === 2 && ( // Only show cancel button for Pending requests (status 2)
             <Button
               danger
               onClick={() => handleCancelRequest(record.id)}
@@ -474,7 +472,9 @@ const UserConsultationRequests: React.FC = () => {
             borderRadius: "8px",
             minHeight: "100px"
           }}>
-            {consultationResponse.content}
+            {consultationResponse.content && consultationResponse.content !== "No content provided." 
+            ? consultationResponse.content 
+            : <em>No content provided.</em>}
           </div>
         </div>
 
@@ -551,11 +551,11 @@ const UserConsultationRequests: React.FC = () => {
                       <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Request Information</h3>
                       <p><strong>Request ID:</strong> {selectedRequest.id}</p>
                       <p><strong>Status:</strong> <span style={{ 
-                        color: selectedRequest.status === 2 ? "#52c41a" : 
-                              selectedRequest.status === 1 ? "#faad14" : 
-                              selectedRequest.status === 3 ? "#f5222d" : 
-                              selectedRequest.status === 5 ? "#8c8c8c" : 
-                              selectedRequest.status === 4 ? "#d9d9d9" : "#000000"
+                        color: selectedRequest.status === 0 ? "#52c41a" : 
+                              selectedRequest.status === 2 ? "#faad14" : 
+                              selectedRequest.status === 1 ? "#f5222d" : 
+                              selectedRequest.status === 3 ? "#8c8c8c" : 
+                              "#000000"
                       }}>{getStatusText(selectedRequest.status)}</span></p>
                       <p><strong>Date:</strong> {new Date(selectedRequest.requestDate).toLocaleString()}</p>
                       <p><strong>Doctor:</strong> {

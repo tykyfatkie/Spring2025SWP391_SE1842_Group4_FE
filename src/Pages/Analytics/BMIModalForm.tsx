@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, Row, Col, message } from 'antd';
+import { Modal, Form, Input, Row, Col, message, DatePicker } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
@@ -37,7 +37,7 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
   const showConfirmation = async () => {
     try {
       const values = await form.validateFields();
-      values.doY = moment().format('YYYY-MM-DD');
+      values.doY = values.doY ? values.doY.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD'); // Ensure a value is picked
       values.childId = selectedChildData?.id || selectedChildData?.childId;
       values.gender = selectedChildData?.gender;
       
@@ -143,11 +143,12 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
           <Form.Item 
             name="doY" 
             label="BMI Record Date"
+            rules={[{ required: true, message: "Please select a BMI record date!" }]}
           >
-            <Input 
-              disabled 
-              style={{ background: '#f8fafc' }} 
-              value={moment().format('YYYY-MM-DD')}
+            <DatePicker 
+              format="YYYY-MM-DD" 
+              disabledDate={(current) => current && current.isAfter(moment())}  
+              style={{ width: '100%' }} 
             />
           </Form.Item>
 
@@ -156,8 +157,7 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
               <Form.Item 
                 name="height" 
                 label="Height (cm)" 
-                rules={[{ required: true, message: "Please enter height!" }]}
-              >
+                rules={[{ required: true, message: "Please enter height!" }]}>
                 <Input type="number" placeholder="Enter height" step="0.1" />
               </Form.Item>
             </Col>
@@ -165,8 +165,7 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
               <Form.Item 
                 name="weight" 
                 label="Weight (kg)" 
-                rules={[{ required: true, message: "Please enter weight!" }]}
-              >
+                rules={[{ required: true, message: "Please enter weight!" }]}>
                 <Input type="number" placeholder="Enter weight" step="0.1" />
               </Form.Item>
             </Col>
