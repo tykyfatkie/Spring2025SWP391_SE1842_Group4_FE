@@ -198,13 +198,13 @@ const BMITrackingPage: React.FC = () => {
       }
   
       const payload = {
-        childId: selectedChild,
-        height: Number(values.height),
-        weight: Number(values.weight),
-        gender: selectedChildData.gender,
-        notes: values.notes?.trim() || "",
-        doY: values.doY,
-      };
+  childId: selectedChild,
+  height: Number(values.height),
+  weight: Number(values.weight),
+  gender: selectedChildData.gender,
+  notes: values.notes?.trim() || "",
+  createdAt: values.doY ? new Date(values.doY).toISOString() : new Date().toISOString(),
+};
   
       console.log("BMI Save Payload:", payload);
       
@@ -295,12 +295,14 @@ const BMITrackingPage: React.FC = () => {
           </Col>
 
           <Col xs={24} md={16}>
-          <BMIHistoryCard 
+          <BMIHistoryCard
             selectedChild={selectedChild}
+            selectedGender={selectedChildData?.gender === 0 ? 'female' : 'male'}
             fetchingBMI={fetchingBMI}
             chartData={chartData}
             handleOpenBmiModal={handleOpenBmiModal}
             onDateRangeChange={handleDateRangeChange}
+            selectedChildDOB={selectedChildData?.doB} // Pass the DOB here
           />
         </Col>
           </Row>
@@ -308,9 +310,11 @@ const BMITrackingPage: React.FC = () => {
           {/* BMI Details Card - Always display when child is selected, even if there's no data */}
           <BMIDetailsCard 
             selectedChild={selectedChild}
+            selectedGender={selectedChildData?.gender === 0 ? 'female' : 'male'}
             chartData={chartData}
             fetchingBMI={fetchingBMI}
             handleOpenBmiModal={handleOpenBmiModal}
+            selectedChildDOB={selectedChildData?.doB} // Add this line to pass the DOB
           />
         </Content>
       </Layout>

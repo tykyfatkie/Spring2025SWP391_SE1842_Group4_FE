@@ -675,52 +675,6 @@ const ParentProfilePage: React.FC = () => {
                 )}
               </Card>
 
-              {/* Developmental Milestones or Additional Section */}
-              <Card 
-                style={{ 
-                  marginBottom: '24px', 
-                  borderRadius: '16px', 
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-                  border: 'none'
-                }}
-                title={
-                  <div style={{ padding: '8px 0' }}>
-                    <div style={{ 
-                      display: 'inline-block', 
-                      padding: '6px 14px',
-                      background: 'rgba(30, 58, 138, 0.1)',
-                      borderRadius: '20px',
-                      marginBottom: '8px'
-                    }}>
-                      <span style={{ color: '#1e3a8a', fontWeight: '600', fontSize: '13px' }}>DEVELOPMENT</span>
-                    </div>
-                    <Title level={4} style={{ margin: '8px 0 0 0', color: '#1e3a8a' }}>Developmental Milestones</Title>
-                  </div>
-                }
-                bodyStyle={{ padding: '24px' }}
-              >
-                <div style={{ textAlign: 'center', padding: '30px 20px' }}>
-                  <Title level={4} style={{ color: '#6b7280', fontWeight: 'normal', marginBottom: '24px' }}>
-                    Track important developmental milestones in your child's growth journey.
-                  </Title>
-                  <Button 
-                    type="primary"
-                    size="large"
-                    style={{ 
-                      background: '#1e3a8a',
-                      border: 'none',
-                      borderRadius: '8px',
-                      height: '44px',
-                      fontWeight: 600,
-                      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
-                      paddingLeft: '24px',
-                      paddingRight: '24px'
-                    }}
-                  >
-                    View Milestones
-                  </Button>
-                </div>
-              </Card>
             </Col>
 
             <Col xs={24} lg={8}>

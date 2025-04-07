@@ -52,6 +52,18 @@ const whoBmiReferenceData: { male: ReferenceDataByAge; female: ReferenceDataByAg
   }
 };
 
+// Z-score offsets from the details card
+const whoZScoreOffsets = {
+  severelyUnderweight: -3,  
+  underweight: -2,          
+  normal: {                 
+    min: -2,
+    max: 1
+  },
+  overweight: 2,            
+  obese: 3                 
+};
+
 // Function to calculate WHO BMI reference value based on age and gender
 const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
   const referenceData = whoBmiReferenceData[gender];
@@ -79,6 +91,7 @@ const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'ma
   return lowerBMI + ratio * (upperBMI - lowerBMI);
 };
 
+// Updated to match BMIDetailsCard
 const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
   median: number;
   underweight: number;
@@ -87,42 +100,53 @@ const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'):
 } => {
   const median = getWhoBmiReference(ageInMonths, gender);
   
-
   const estimatedSD = median * 0.1;  
   
   return {
     median,
-    underweight: median - (2 * estimatedSD), // -2 SD
-    overweight: median + (1 * estimatedSD),  // +1 SD
-    obese: median + (2 * estimatedSD)        // +2 SD
+    underweight: median + (whoZScoreOffsets.underweight * estimatedSD),
+    overweight: median + (whoZScoreOffsets.overweight * estimatedSD),
+    obese: median + (whoZScoreOffsets.obese * estimatedSD)
   };
 };
 
+// Updated to match BMIDetailsCard
 const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): { 
   label: string; 
-  color: string 
+  color: string;
+  whoBmiReference?: number;
+  whoBmiRange?: string;
 } => {
   const references = getWhoZScoreReferences(ageInMonths, gender);
+  const whoBmiReference = references.median;
   
   if (bmi < references.underweight) {
     return { 
       label: 'Underweight', 
-      color: '#91caff'  // Blue
+      color: '#91caff',  // Blue
+      whoBmiReference,
+      whoBmiRange: `< ${references.underweight.toFixed(1)}`
     };
   } else if (bmi >= references.obese) {
     return { 
       label: 'Obese', 
-      color: '#ff4d4f'  // Red
+      color: '#ff4d4f',  // Red
+      whoBmiReference,
+      whoBmiRange: `≥ ${references.obese.toFixed(1)}`
     };
   } else if (bmi >= references.overweight) {
     return { 
       label: 'Overweight', 
-      color: '#faad14'  // Yellow/Orange
+      color: '#faad14',  // Yellow/Orange
+      whoBmiReference,
+      whoBmiRange: `${references.overweight.toFixed(1)}-${references.obese.toFixed(1)}`
     };
   } else {
     return { 
       label: 'Normal', 
-      color: '#52c41a'  // Green
+      color: '#52c41a',  // Green
+      whoBmiReference,
+      whoBmiRange: `${references.underweight.toFixed(1)}-${references.overweight.toFixed(1)}`
     };
   }
 };
@@ -221,17 +245,19 @@ const BMIPDFExport: React.FC<BMIPDFExportProps> = ({ childData, bmiRecords }) =>
           const gender = childData.gender === 0 ? 'male' : 'female';
           const category = getWHOBmiCategory(record.bmi, ageInMonths, gender);
           
+          // Added WHO reference column to match details table
           return [
             formatDate(record.date),
             record.weight.toFixed(1),
             record.height.toFixed(1),
             record.bmi.toFixed(1),
+            category.whoBmiReference?.toFixed(1) || '-',
             category.label
           ];
         });
         
         autoTable(doc, {
-          head: [['Date', 'Weight (kg)', 'Height (cm)', 'BMI', 'Status']],
+          head: [['Date', 'Weight (kg)', 'Height (cm)', 'BMI', 'WHO Ref.', 'Status']],
           body: tableData,
           startY: 85, 
           theme: 'grid',
