@@ -38,7 +38,7 @@ interface ConsultationResponse {
   doctorId: string;
   responseDate: string;
   title: string;
-  content: any;
+  content: string;
   attachments: string[];
   consultationStatus?: number;
 }
@@ -73,14 +73,9 @@ const UserConsultationRequests: React.FC = () => {
   
       console.log("API Response:", response.data);
       
-      // Handle the nested data structure from the API response
       if (response.data && response.data.data && response.data.data.data) {
-        // Access the deeply nested data array
-        const responseData = response.data.data.data;
-        
-        // Map the data to match our component's expected structure
+        const responseData = response.data.data.data;     
         const formattedRequests = responseData.map((item: any) => {
-          // Parse attachments from string to array
           let parsedAttachments = [];
           try {
             if (typeof item.attachments === 'string') {
@@ -89,27 +84,26 @@ const UserConsultationRequests: React.FC = () => {
               parsedAttachments = item.attachments;
             }
           } catch (e) {
-            console.error("Error parsing attachments:", e);
+            console.error(e);
           }
           
           return {
             id: item.id || "",
             title: item.title || "Consultation Request",
             description: item.description || "",
-            status: typeof item.status === 'number' ? item.status : 1, // Default to pending if not a number
+            status: typeof item.status === 'number' ? item.status : 1, 
             userRequestId: item.userRequestId || "",
             doctorReceiveId: item.doctorReceiveId || "",
             requestDate: item.requestDate || item.createdAt,
             createdAt: item.createdAt || "",
             updatedAt: item.updatedAt || "",
             attachments: parsedAttachments,
-            doctorName: `Doctor ${item.doctorReceiveId?.substring(0, 6) || ""}` // Default name, will be updated
+            doctorName: `Doctor ${item.doctorReceiveId?.substring(0, 6) || ""}` 
           };
         });
         
         setRequests(formattedRequests);
         
-        // Fetch doctor profiles for all doctor IDs
         const doctorIds = formattedRequests
         .map((req: ConsultationRequest) => req.doctorReceiveId)
         .filter((id: string) => id && id.length > 0);
@@ -119,12 +113,9 @@ const UserConsultationRequests: React.FC = () => {
         
       } else {
         setRequests([]);
-        console.error("Unexpected response format:", response.data);
       }
     } catch (error: any) {
-      console.error("Error fetching consultation requests:", error);
       setRequests([]);
-      message.error("Failed to load consultation requests");
     } finally {
       setLoading(false);
     }
@@ -148,10 +139,8 @@ const UserConsultationRequests: React.FC = () => {
       console.log("Response API data:", response.data);
 
       if (response.data && response.data.data) {
-        // Get the response data from the API
         const responseData = response.data.data;
         
-        // Create a formatted response object with proper null/undefined checks
         const formattedResponse: ConsultationResponse = {
           requestId: responseData.requestId || "",
           doctorId: responseData.doctorId || "",
@@ -159,6 +148,7 @@ const UserConsultationRequests: React.FC = () => {
           title: responseData.title || "Consultation Response",
           content: responseData.content || "No content provided.",
           attachments: [],
+          consultationStatus: responseData.status,
         };
 
         // Parse attachments if they exist
@@ -180,9 +170,7 @@ const UserConsultationRequests: React.FC = () => {
         console.log("No response data available or request not yet responded to");
       }
     } catch (error: any) {
-      console.error("Error fetching consultation response:", error);
       setConsultationResponse(null);
-      // Don't show error message as the doctor might not have responded yet
     } finally {
       setLoadingResponse(false);
     }
@@ -203,7 +191,6 @@ const UserConsultationRequests: React.FC = () => {
           
           console.log(`Full doctor profile response for ${doctorId}:`, response.data);
           
-          // Check if the API response contains doctor data
           if (response.data && response.data.data) {
             return {
               id: doctorId,
@@ -241,7 +228,6 @@ const UserConsultationRequests: React.FC = () => {
       
       setDoctorProfiles(profileMap);
       
-      // Create a completely new array for the updated requests
       const updatedRequests = requests.map(request => {
         const doctorProfile = profileMap[request.doctorReceiveId];
         if (doctorProfile) {
@@ -261,48 +247,9 @@ const UserConsultationRequests: React.FC = () => {
     }
   };
 
-  const handleCancelRequest = async (requestId: string | number) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
-      }
-
-      Modal.confirm({
-        title: "Cancel Consultation Request",
-        content: "Are you sure you want to cancel this consultation request?",
-        okText: "Yes, Cancel",
-        okType: "danger",
-        cancelText: "No",
-        onOk: async () => {
-          try {
-            await axiosInstance.put(
-              `${import.meta.env.VITE_API_ENDPOINT}/request/cancel/${requestId}`,
-              {},
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-            message.success("Consultation request canceled successfully");
-            fetchConsultationRequests();
-          } catch (error: any) {
-            console.error("Error canceling request:", error);
-            message.error("Failed to cancel consultation request");
-          }
-        },
-      });
-    } catch (error: any) {
-      console.error("Error in cancel request flow:", error);
-    }
-  };
-
   const showDetailsModal = async (request: ConsultationRequest) => {
     setSelectedRequest(request);
     setDetailsModalVisible(true);
-    // Fetch consultation response when opening details modal
     await fetchConsultationResponse(request.id);
   };
 
@@ -313,7 +260,6 @@ const UserConsultationRequests: React.FC = () => {
   };
 
   const getStatusText = (status: number): string => {
-    // Check if status is undefined or null
     if (status === undefined || status === null) {
       return "Unknown";
     }
@@ -332,7 +278,7 @@ const UserConsultationRequests: React.FC = () => {
       title: "Request ID",
       dataIndex: "id",
       key: "id",
-      width: "15%", // Smaller width for ID
+      width: "15%", 
     },
     {
       title: "Doctor",
@@ -347,23 +293,23 @@ const UserConsultationRequests: React.FC = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: "15%", // Set width for status
+      width: "15%", 
       render: (status: number) => {
         let color = "#000000";
         const displayText = getStatusText(status);
         
         switch(status) {
           case 0: // Approved
-            color = "#52c41a"; // Green
+            color = "#52c41a";
             break;
           case 2: // Pending
-            color = "#faad14"; // Yellow/Orange
+            color = "#faad14";
             break;
           case 1: // Rejected
-            color = "#f5222d"; // Red
+            color = "#f5222d"; 
             break;
           case 3: // Archived
-            color = "#8c8c8c"; // Gray
+            color = "#8c8c8c"; 
             break;
         }
         
@@ -374,34 +320,26 @@ const UserConsultationRequests: React.FC = () => {
       title: "Date",
       dataIndex: "requestDate",
       key: "requestDate",
-      width: "20%", // Set width for date
+      width: "20%", 
       render: (date: string) => {
-        // Format the date nicely
-        const formattedDate = date ? new Date(date).toLocaleString() : "Unknown";
+        const formattedDate = date ? new Date(date).toLocaleString('vi-VN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }) : "Unknown";
         return <span>{formattedDate}</span>;
       }
     },
     {
       title: "Actions",
       key: "actions",
-      width: "20%", // Set width for actions
+      width: "20%", 
       render: (_: any, record: ConsultationRequest) => (
         <Space>
-          {record.status === 2 && ( // Only show cancel button for Pending requests (status 2)
-            <Button
-              danger
-              onClick={() => handleCancelRequest(record.id)}
-              style={{
-                borderRadius: "8px",
-                height: "38px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              Cancel
-            </Button>
-          )}
+          {/* Cancel button removed as requested */}
           <Button
             type="primary"
             onClick={() => showDetailsModal(record)}
@@ -456,11 +394,34 @@ const UserConsultationRequests: React.FC = () => {
       );
     }
 
+
+    const renderContent = () => {
+      const content = consultationResponse.content;
+      
+      if (content === null || content === undefined) {
+        return <div>No content provided.</div>;
+      }
+      
+      if (typeof content === 'object' && content !== null) {
+        return <pre>{JSON.stringify(content, null, 2)}</pre>;
+      }
+      
+      return <div style={{ whiteSpace: 'pre-wrap' }}>{content}</div>;
+    };
+
     return (
       <div>
         <div style={{ marginBottom: "16px" }}>
           <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Response from Doctor</h3>
-          <p><strong>Date:</strong> {new Date(consultationResponse.responseDate).toLocaleString()}</p>
+          <p><strong>Date:</strong> {consultationResponse.responseDate ? 
+            new Date(consultationResponse.responseDate).toLocaleString('vi-VN', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            }) : 'Unknown'}</p>
           <p><strong>Title:</strong> {consultationResponse.title}</p>
         </div>
 
@@ -472,9 +433,7 @@ const UserConsultationRequests: React.FC = () => {
             borderRadius: "8px",
             minHeight: "100px"
           }}>
-            {consultationResponse.content && consultationResponse.content !== "No content provided." 
-            ? consultationResponse.content 
-            : <em>No content provided.</em>}
+            {renderContent()}
           </div>
         </div>
 
@@ -518,11 +477,11 @@ const UserConsultationRequests: React.FC = () => {
           <CollapsibleHeader
             title="Consultation Requests"
             subtitle="MANAGE REQUESTS"
-            description="View and manage all your consultation requests. Track the status of your requests and cancel pending requests if needed."
+            description="View and manage all your consultation requests. Track the status of your requests and view consultation details."
             features={[
               "View all consultation requests",
-              "Cancel pending requests",
-              "See consultation details"
+              "See consultation details",
+              "Read doctor responses"
             ]}
             defaultCollapsed={false}
           />
@@ -557,7 +516,14 @@ const UserConsultationRequests: React.FC = () => {
                               selectedRequest.status === 3 ? "#8c8c8c" : 
                               "#000000"
                       }}>{getStatusText(selectedRequest.status)}</span></p>
-                      <p><strong>Date:</strong> {new Date(selectedRequest.requestDate).toLocaleString()}</p>
+                      <p><strong>Date:</strong> {new Date(selectedRequest.requestDate).toLocaleString('vi-VN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                      })}</p>
                       <p><strong>Doctor:</strong> {
                         doctorProfiles[selectedRequest.doctorReceiveId]?.fullName || 
                         selectedRequest.doctorName
