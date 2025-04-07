@@ -44,8 +44,8 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
       
       // Convert Moment object to string format for API
       processedValues.doY = values.doY 
-        ? values.doY.format('YYYY-MM-DD') 
-        : moment().format('YYYY-MM-DD');
+        ? values.doY.toISOString()  // Use toISOString() instead of format()
+        : new Date().toISOString();
       
       processedValues.childId = selectedChildData?.id || selectedChildData?.childId;
       processedValues.gender = selectedChildData?.gender;
@@ -160,7 +160,15 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
           >
             <DatePicker 
               format="YYYY-MM-DD" 
-              disabledDate={(current) => current && current > moment()}  
+              disabledDate={(current) => {
+                // Không cho phép chọn ngày trong tương lai
+                const today = moment().endOf('day');
+                // Không cho phép chọn ngày trước ngày sinh của trẻ
+                const birthDate = moment(selectedChildData?.doB, "YYYY-MM-DD");
+                
+                // Trả về true nếu ngày bị vô hiệu hóa (không chọn được)
+                return current && (current > today || current < birthDate);
+              }}
               style={{ width: '100%' }} 
             />
           </Form.Item>

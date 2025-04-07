@@ -10,6 +10,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 interface BMIHistoryCardProps {
+  // existing props
   selectedChild: string | null;
   selectedGender?: 'male' | 'female'; 
   fetchingBMI: boolean;
@@ -24,6 +25,7 @@ interface BMIHistoryCardProps {
   }>;
   handleOpenBmiModal: () => void;
   onDateRangeChange: (startDate?: string, endDate?: string) => void;
+  selectedChildDOB?: string; 
 }
 
 interface BMIReferenceData {
@@ -141,13 +143,16 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
   fetchingBMI, 
   chartData, 
   handleOpenBmiModal,
-  onDateRangeChange
+  onDateRangeChange,
+  selectedChildDOB
 }) => {
   const [displayMode, setDisplayMode] = useState<'day' | 'month' | 'year'>('day');
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
   const [originalData, setOriginalData] = useState(chartData);
   const [filteredData, setFilteredData] = useState(chartData);
   const [isFiltered, setIsFiltered] = useState(false);
+  
+  // Rest of the component
 
   useEffect(() => {
     console.log("New chart data received from API:", chartData);
@@ -199,9 +204,9 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     return null;
   };
 
-  const calculateAgeInMonths = (dateTime: string): number => {
+  const calculateAgeInMonths = (dateTime: string, dateOfBirth: string): number => {
     const measurementDate = moment(dateTime);
-    const childDOB = moment().subtract(14, 'months'); 
+    const childDOB = moment(dateOfBirth);
     
     return measurementDate.diff(childDOB, 'months');
   };
@@ -222,7 +227,8 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
         break;
     }
     
-    const ageInMonths = item.ageInMonths || calculateAgeInMonths(item.dateTime);
+    const ageInMonths = item.ageInMonths || 
+    (selectedChildDOB ? calculateAgeInMonths(item.dateTime, selectedChildDOB) : 0);
     
     const whoBmi = getWhoBmiReference(ageInMonths, selectedGender);
     
@@ -333,7 +339,7 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
 
   const latestRecord = chartData.length > 0 ? chartData[chartData.length - 1] : null;
   const latestBMI = latestRecord ? latestRecord.bmi : null;
-  const latestAgeInMonths = latestRecord ? (latestRecord.ageInMonths || calculateAgeInMonths(latestRecord.dateTime)) : null;
+  const latestAgeInMonths = latestRecord ? (latestRecord.ageInMonths || (selectedChildDOB ? calculateAgeInMonths(latestRecord.dateTime, selectedChildDOB) : 0)) : null;
   const bmiWarning = (latestBMI && latestAgeInMonths) ? getBMIWarning(latestBMI, latestAgeInMonths) : null;
 
   const renderBMICategories = () => (
