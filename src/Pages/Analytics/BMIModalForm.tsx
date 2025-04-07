@@ -37,11 +37,21 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
   const showConfirmation = async () => {
     try {
       const values = await form.validateFields();
-      values.doY = values.doY ? values.doY.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD'); // Ensure a value is picked
-      values.childId = selectedChildData?.id || selectedChildData?.childId;
-      values.gender = selectedChildData?.gender;
+      console.log("Form values before processing:", values); // Debug log
       
-      setFormValues(values);
+      // Clone values to avoid reference issues
+      const processedValues = { ...values };
+      
+      // Convert Moment object to string format for API
+      processedValues.doY = values.doY 
+        ? values.doY.format('YYYY-MM-DD') 
+        : moment().format('YYYY-MM-DD');
+      
+      processedValues.childId = selectedChildData?.id || selectedChildData?.childId;
+      processedValues.gender = selectedChildData?.gender;
+      
+      console.log("Processed values:", processedValues); // Debug log
+      setFormValues(processedValues);
       setConfirmVisible(true);
     } catch (validationError) {
       console.log("Validation failed:", validationError);
@@ -55,12 +65,14 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
   const handleConfirmOk = async () => {
     try {
       setSubmitting(true);
+      console.log("Submitting values:", formValues); // Debug log
       
       try {
         await onSave(formValues);
         message.success(`BMI record for ${selectedChildData?.name} has been saved successfully!`);
         setConfirmVisible(false);
         onCancel();
+        // Reset form after all operations are complete
         form.resetFields();
       } catch (error: any) {
         console.error("Full error:", error);
@@ -85,8 +97,9 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
   
   React.useEffect(() => {
     if (visible) {
+      // Set default date as a Moment object
       form.setFieldsValue({
-        doY: moment().format('YYYY-MM-DD')
+        doY: moment() // Use moment object directly
       });
     }
   }, [visible, form]);
@@ -147,7 +160,7 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
           >
             <DatePicker 
               format="YYYY-MM-DD" 
-              disabledDate={(current) => current && current.isAfter(moment())}  
+              disabledDate={(current) => current && current > moment()}  
               style={{ width: '100%' }} 
             />
           </Form.Item>
@@ -184,6 +197,9 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
         okButtonProps={{ style: { background: '#1e3a8a' }, loading: submitting }}
       >
         <p>Are you sure you want to save this BMI record for {selectedChildData?.name}?</p>
+        <p>Date: {formValues?.doY}</p>
+        <p>Height: {formValues?.height} cm</p>
+        <p>Weight: {formValues?.weight} kg</p>
       </Modal>
     </>
   );
