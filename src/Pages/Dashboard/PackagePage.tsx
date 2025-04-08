@@ -40,6 +40,9 @@ interface Package {
 }
 
 const PackagesPage = () => {
+  // Initialize message API with useMessage hook
+  const [messageApi, contextHolder] = message.useMessage();
+  
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
@@ -73,10 +76,10 @@ const PackagesPage = () => {
       if (response.data && response.data.data) {
         setPackages(response.data.data);
       } else {
-        message.error("Unexpected data format from server.");
+        messageApi.error("Unexpected data format from server.");
       }
     } catch (error) {
-      message.error("Failed to fetch packages.");
+      messageApi.error("Failed to fetch packages.");
     } finally {
       setLoading(false);
     }
@@ -122,12 +125,12 @@ const PackagesPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      message.success("Package created successfully!");
+      messageApi.success("Package created successfully!");
       form.resetFields();
       setIsModalVisible(false);
       fetchPackages();
     } catch (error: any) {
-      message.error("Failed to create package: " + (error.response?.data?.message || error.message));
+      messageApi.error("Failed to create package: " + (error.response?.data?.message || error.message));
     } finally {
       setSubmitting(false);
     }
@@ -156,13 +159,13 @@ const PackagesPage = () => {
         }
       );
   
-      message.success("Package updated successfully!");
+      messageApi.success("Package updated successfully!");
       editForm.resetFields();
       setIsEditModalVisible(false);
       setCurrentPackage(null);
       fetchPackages();
     } catch (error: any) {
-      message.error("Failed to update package: " + (error.response?.data?.message || error.message));
+      messageApi.error("Failed to update package: " + (error.response?.data?.message || error.message));
     } finally {
       setSubmitting(false);
     }
@@ -177,10 +180,10 @@ const PackagesPage = () => {
         params: { packageId: id }
       });
 
-      message.success("Package deleted successfully!");
+      messageApi.success("Package deleted successfully!");
       fetchPackages();
     } catch (error: any) {
-      message.error("Failed to delete package: " + (error.response?.data?.message || error.message));
+      messageApi.error("Failed to delete package: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -283,6 +286,9 @@ const PackagesPage = () => {
       width: '100%', 
       overflow: 'hidden' 
     }}>
+      {/* Add the contextHolder at the top of your component */}
+      {contextHolder}
+      
       {/* Header Section */}
       <Row align="middle" style={{ marginBottom: 24 }}>
         <Col span={16}>

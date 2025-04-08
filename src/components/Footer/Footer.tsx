@@ -117,11 +117,11 @@ const AppFooter = () => {
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <MailOutlined style={{ color: '#3b82f6', marginRight: '12px', fontSize: '16px', marginTop: '4px' }} />
-              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>info@childgrowth.com</Text>
+              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>support@childgrowth.com</Text>
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <EnvironmentOutlined style={{ color: '#3b82f6', marginRight: '12px', fontSize: '16px', marginTop: '4px' }} />
-              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Km10, Nguyen Trai Street, Ha Dong District, Hanoi, Vietnam</Text>
+              <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>123 Growth Street, Health City, HC 12345</Text>
             </div>
           </Space>
         </Col>

@@ -97,9 +97,8 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
   
   React.useEffect(() => {
     if (visible) {
-      // Set default date as a Moment object
       form.setFieldsValue({
-        doY: moment() // Use moment object directly
+        doY: moment() 
       });
     }
   }, [visible, form]);

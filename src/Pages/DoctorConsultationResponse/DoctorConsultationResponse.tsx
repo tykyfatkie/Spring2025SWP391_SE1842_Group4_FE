@@ -9,7 +9,6 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
-// Main color variables to maintain consistency
 const colors = {
   primary: {
     light: '#3b82f6', // Light blue
@@ -91,7 +90,7 @@ const DoctorConsultationResponse: React.FC = () => {
           total: response.data.totalCount || formattedRequests.length
         });
   
-        console.log("Formatted Requests:", formattedRequests); // Debugging log
+        console.log("Formatted Requests:", formattedRequests);
       } else {
         setError('No requests found');
         setAllRequests([]);
@@ -100,7 +99,6 @@ const DoctorConsultationResponse: React.FC = () => {
       }
     } catch (error: any) {
       setError('Failed to fetch requests. Please try again.');
-      console.error('Error fetching requests:', error);
     } finally {
       setLoading(false);
     }
@@ -212,7 +210,6 @@ const DoctorConsultationResponse: React.FC = () => {
     return 'file';
   };
 
-  // Function to render file attachments
   const renderAttachments = (attachments: string) => {
     if (!attachments) return null;
     
@@ -266,7 +263,6 @@ const DoctorConsultationResponse: React.FC = () => {
     );
   };
 
-  // Common column definition for both tables
   const getCommonColumns = () => [
     {
       title: 'Title',

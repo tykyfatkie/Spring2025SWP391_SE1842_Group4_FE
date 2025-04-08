@@ -2,20 +2,14 @@ import React, { useState, useEffect } from "react";
 import "./LoginPage.css";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Spin, Modal } from "antd";
-import { jwtDecode } from "jwt-decode";
+import { Spin, message } from "antd";
+import { jwtDecode } from "jwt-decode"; 
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loginModal, setLoginModal] = useState({
-    visible: false,
-    title: "",
-    content: "",
-    type: "success" as "success" | "error" | "info"
-  });
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,11 +36,10 @@ const LoginPage: React.FC = () => {
         const userRole = userData.role;
         localStorage.setItem("role", userRole);
 
-        // Show success modal for Google login
-        showLoginNotification("Login Successful", "You have successfully logged in with Google!", "success");
+        // Enhanced success message with user role information
+        message.success(`Welcome! You have successfully logged in with Google as ${userRole}!`, 3);
   
         setTimeout(() => {
-          setLoginModal(prev => ({ ...prev, visible: false }));
           if (userRole === "Admin") {
             navigate("/my-admin");
           } else if (userRole === "Doctor") {
@@ -65,19 +58,10 @@ const LoginPage: React.FC = () => {
           errorMessage = error.message;
         }
      
-        showLoginNotification("Login Failed", errorMessage, "error");
+        message.error(errorMessage);
       }
     }
   }, [location, navigate]);
-  
-  const showLoginNotification = (title: string, content: string, type: "success" | "error" | "info") => {
-    setLoginModal({
-      visible: true,
-      title,
-      content,
-      type
-    });
-  };
 
   // New function to verify OAuth token
   const verifyOAuthToken = async (oauthState: string) => {
@@ -105,11 +89,11 @@ const LoginPage: React.FC = () => {
         const userRole = userData.role;
         localStorage.setItem("role", userRole);
         
-        showLoginNotification("Google Authentication Verified", "Your Google authentication was verified successfully!", "success");
+        // Enhanced success message with user role information
+        message.success(`Welcome! Your Google authentication was verified successfully! You are logged in as ${userRole}.`, 3);
         
         // Redirect based on user role
         setTimeout(() => {
-          setLoginModal(prev => ({ ...prev, visible: false }));
           if (userRole === "Admin") {
             navigate("/my-admin/users");
           } else if (userRole === "Doctor") {
@@ -121,7 +105,7 @@ const LoginPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error("OAuth verification failed:", error);
-      showLoginNotification("Authentication Failed", error.response?.data?.message || "OAuth verification failed. Please try again.", "error");
+      message.error(error.response?.data?.message || "OAuth verification failed. Please try again.");
       // Clear the invalid OAuth state
       localStorage.removeItem('oauth_state');
     } finally {
@@ -150,11 +134,32 @@ const LoginPage: React.FC = () => {
         const userRole = userData.role;
         localStorage.setItem("role", userRole);
 
-        // Show success modal
-        showLoginNotification("Login Successful", `Welcome back! You've successfully logged in.`, "success");
+        // Enhanced success message with name if available and user role
+        const userName = userData.name || "";
+        const welcomeMessage = userName 
+          ? `Welcome back, ${userName}! You've successfully logged in as ${userRole}.`
+          : `Welcome back! You've successfully logged in as ${userRole}.`;
+        
+        // Show enhanced success message with longer duration (3 seconds)
+        message.success(welcomeMessage, 3);
 
+        // Overlay notification for better visibility
+        const notificationContainer = document.createElement('div');
+        notificationContainer.className = 'login-success-notification';
+        notificationContainer.innerHTML = `
+          <div class="login-success-content">
+            <i class="ri-check-line success-icon"></i>
+            <p>${welcomeMessage}</p>
+          </div>
+        `;
+        document.body.appendChild(notificationContainer);
+
+        // Remove notification after redirect
         setTimeout(() => {
-          setLoginModal(prev => ({ ...prev, visible: false }));
+          if (document.body.contains(notificationContainer)) {
+            document.body.removeChild(notificationContainer);
+          }
+          
           if (userRole === "Admin") {
             navigate("/my-admin/users");
           } else if (userRole === "Doctor") {
@@ -165,7 +170,7 @@ const LoginPage: React.FC = () => {
         }, 1500);
       }
     } catch (error: any) {
-      showLoginNotification("Login Failed", error.response?.data?.message || "Login failed. Please check your credentials and try again.", "error");
+      message.error(error.response?.data?.message || "Login failed. Please check your credentials and try again.");
     } finally {
       setLoading(false);
     }
@@ -254,26 +259,6 @@ const LoginPage: React.FC = () => {
       <div className="login__background">
         <img src="src/assets/img/child1.jpg" alt="Background" className="login__bg" style={{ display: "block" }} />
       </div>
-
-      {/* Login Notification Modal */}
-      <Modal
-        open={loginModal.visible}
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {loginModal.type === 'success' && <i className="ri-checkbox-circle-fill" style={{ color: '#52c41a', fontSize: '20px' }} />}
-            {loginModal.type === 'error' && <i className="ri-close-circle-fill" style={{ color: '#f5222d', fontSize: '20px' }} />}
-            {loginModal.type === 'info' && <i className="ri-information-fill" style={{ color: '#1890ff', fontSize: '20px' }} />}
-            <span>{loginModal.title}</span>
-          </div>
-        }
-        footer={null}
-        closable={true}
-        onCancel={() => setLoginModal(prev => ({ ...prev, visible: false }))}
-        centered
-        maskClosable
-      >
-        <p>{loginModal.content}</p>
-      </Modal>
     </div>
   );
 };

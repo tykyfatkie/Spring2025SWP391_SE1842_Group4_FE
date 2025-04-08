@@ -168,7 +168,7 @@ const ContactPage: React.FC = () => {
                   <Title level={3} style={{ fontSize: '22px', marginBottom: '16px', color: '#1e3a8a', fontWeight: 600 }}>
                     Call Us
                   </Title>
-                  <Text style={{ color: '#4b5563', fontSize: '16px' }}>+1 (555) 123-4567</Text>
+                  <Text style={{ color: '#4b5563', fontSize: '16px' }}>+(84) 123 456 789</Text>
                 </Space>
               </Card>
             </Col>
