@@ -35,9 +35,9 @@ interface DoctorProfile {
 interface ConsultationResponse {
   requestId: string;
   doctorId: string;
-  responseDate: string;
-  title: string;
-  content: string;
+  responseDate: any;
+  title: any;
+  content: any;
   attachments: string[];
   consultationStatus?: number;
   updatedAt?: string; 
@@ -70,8 +70,6 @@ const UserConsultationRequests: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-  
-      console.log("API Response:", response.data);
       
       if (response.data && response.data.data && response.data.data.data) {
         const responseData = response.data.data.data;     
@@ -84,7 +82,6 @@ const UserConsultationRequests: React.FC = () => {
               parsedAttachments = item.attachments;
             }
           } catch (e) {
-            console.error(e);
           }
           
           return {
@@ -136,43 +133,41 @@ const UserConsultationRequests: React.FC = () => {
         },
       });
   
-      console.log("Full response API data:", response);
-      console.log("Response data structure:", JSON.stringify(response.data, null, 2));
-  
-      if (response.data && response.data.data) {
-        const responseData = response.data.data;
+      // Check if the response has the paginated structure
+      if (response.data && 
+          response.data.data && 
+          Array.isArray(response.data.data.data) && 
+          response.data.data.data.length > 0) {
         
-        // console.log("Response date:", responseData.responseDate);
-        // console.log("Response updatedAt:", responseData.updatedAt);
-        // console.log("Response title:", responseData.title);
+        // Get the first item from the array
+        const responseData = response.data.data.data[0];
         
         const formattedResponse: ConsultationResponse = {
           requestId: responseData.requestId || "",
           doctorId: responseData.doctorId || "",
-          responseDate: responseData.responseDate || responseData.createdAt || new Date().toISOString(),
-          title: responseData.title || "Consultation Response",
-          content: responseData.content || "No content provided.",
+          responseDate: responseData.responseDate || responseData.createdAt || "",
+          title: responseData.title || "",
+          content: responseData.content || "",
           attachments: [],
-          consultationStatus: responseData.status,
-          updatedAt: responseData.updatedAt || "",
+          consultationStatus: responseData.status
         };
   
+        // Handle attachments if they exist
         try {
-          if (typeof responseData.attachments === 'string') {
+          if (typeof responseData.attachments === 'string' && responseData.attachments) {
             formattedResponse.attachments = JSON.parse(responseData.attachments);
           } else if (Array.isArray(responseData.attachments)) {
             formattedResponse.attachments = responseData.attachments;
           }
         } catch (e) {
-          console.error("Error parsing response attachments:", e);
+          formattedResponse.attachments = [];
         }
-
+  
         setConsultationResponse(formattedResponse);
       } else {
         setConsultationResponse(null);
-        console.log("No response data available or request not yet responded to");
       }
-    } catch (error: any) {
+    } catch (error) {
       setConsultationResponse(null);
     } finally {
       setLoadingResponse(false);
@@ -190,9 +185,7 @@ const UserConsultationRequests: React.FC = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          });
-          
-          console.log(`Full doctor profile response for ${doctorId}:`, response.data);
+          });       
           
           if (response.data && response.data.data) {
             return {
@@ -202,7 +195,6 @@ const UserConsultationRequests: React.FC = () => {
           }
           return null;
         } catch (error) {
-          console.error(`Error fetching doctor profile for ${doctorId}:`, error);
           return null;
         }
       });
@@ -223,9 +215,7 @@ const UserConsultationRequests: React.FC = () => {
             fullName: profile.user?.name || `Doctor ${item.id.substring(0, 6)}`,
             specialty: profile.specialize || profile.specialize,
             avatarUrl: profile.profileImg || profile.user?.avatar
-          };
-          
-          console.log(`Extracted name for doctor ${item.id}:`, profileMap[item.id].fullName);
+          };    
         }
       });
       
@@ -240,13 +230,10 @@ const UserConsultationRequests: React.FC = () => {
           };
         }
         return request;
-      });
-      
-      console.log("Updated requests with doctor names:", updatedRequests);
+      });   
       setRequests(updatedRequests);
       
     } catch (error) {
-      console.error("Error fetching doctor profiles:", error);
     }
   };
 
@@ -396,9 +383,9 @@ const UserConsultationRequests: React.FC = () => {
     }
 
     const renderContent = () => {
-      const content = consultationResponse.content;
+      const content = consultationResponse?.content;
       
-      if (content === null || content === undefined) {
+      if (content === null || content === undefined || content === "") {
         return <div>No content provided.</div>;
       }
       
