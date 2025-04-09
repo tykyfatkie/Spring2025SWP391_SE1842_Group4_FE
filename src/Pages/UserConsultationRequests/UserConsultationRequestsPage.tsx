@@ -11,7 +11,6 @@ const API_BASE_URL = `${import.meta.env.VITE_API_ENDPOINT}/request/my-request`;
 const DOCTOR_PROFILE_API = `${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile`;
 const RESPONSE_API_URL = `${import.meta.env.VITE_API_ENDPOINT}/response/request-`;
 
-
 interface ConsultationRequest {
   id: string;
   title: string;
@@ -41,6 +40,7 @@ interface ConsultationResponse {
   content: string;
   attachments: string[];
   consultationStatus?: number;
+  updatedAt?: string; // Added updatedAt field
 }
 
 const UserConsultationRequests: React.FC = () => {
@@ -129,17 +129,22 @@ const UserConsultationRequests: React.FC = () => {
         setLoadingResponse(false);
         return;
       }
-
+  
       const response = await axiosInstance.get(`${RESPONSE_API_URL}${requestId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log("Response API data:", response.data);
-
+  
+      console.log("Full response API data:", response);
+      console.log("Response data structure:", JSON.stringify(response.data, null, 2));
+  
       if (response.data && response.data.data) {
         const responseData = response.data.data;
+        
+        // console.log("Response date:", responseData.responseDate);
+        // console.log("Response updatedAt:", responseData.updatedAt);
+        // console.log("Response title:", responseData.title);
         
         const formattedResponse: ConsultationResponse = {
           requestId: responseData.requestId || "",
@@ -149,9 +154,9 @@ const UserConsultationRequests: React.FC = () => {
           content: responseData.content || "No content provided.",
           attachments: [],
           consultationStatus: responseData.status,
+          updatedAt: responseData.updatedAt || "",
         };
-
-        // Parse attachments if they exist
+  
         try {
           if (typeof responseData.attachments === 'string') {
             formattedResponse.attachments = JSON.parse(responseData.attachments);
@@ -162,8 +167,6 @@ const UserConsultationRequests: React.FC = () => {
           console.error("Error parsing response attachments:", e);
         }
 
-        console.log("Formatted response:", formattedResponse);
-        // Set the response data
         setConsultationResponse(formattedResponse);
       } else {
         setConsultationResponse(null);
@@ -394,7 +397,6 @@ const UserConsultationRequests: React.FC = () => {
       );
     }
 
-
     const renderContent = () => {
       const content = consultationResponse.content;
       
@@ -413,7 +415,15 @@ const UserConsultationRequests: React.FC = () => {
       <div>
         <div style={{ marginBottom: "16px" }}>
           <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>Response from Doctor</h3>
-          <p><strong>Date:</strong> {consultationResponse.responseDate ? 
+          <p><strong>Date:</strong> {consultationResponse.updatedAt ? 
+            new Date(consultationResponse.updatedAt).toLocaleString('vi-VN', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            }) : consultationResponse.responseDate ?
             new Date(consultationResponse.responseDate).toLocaleString('vi-VN', {
               year: 'numeric',
               month: '2-digit',
@@ -516,7 +526,7 @@ const UserConsultationRequests: React.FC = () => {
                               selectedRequest.status === 3 ? "#8c8c8c" : 
                               "#000000"
                       }}>{getStatusText(selectedRequest.status)}</span></p>
-                      <p><strong>Date:</strong> {new Date(selectedRequest.requestDate).toLocaleString('vi-VN', {
+                      <p><strong>Date:</strong> {new Date(selectedRequest.updatedAt || selectedRequest.requestDate).toLocaleString('vi-VN', {
                         year: 'numeric',
                         month: '2-digit',
                         day: '2-digit',
