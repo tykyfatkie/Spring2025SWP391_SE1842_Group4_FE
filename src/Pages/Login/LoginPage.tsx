@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./LoginPage.css";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Spin, message, notification } from "antd";
+import { Spin, message } from "antd";
 import { jwtDecode } from "jwt-decode"; 
 
 const LoginPage: React.FC = () => {
@@ -20,30 +20,19 @@ const LoginPage: React.FC = () => {
     try {
       const userData: any = jwtDecode(token);
       const userRole = userData.role;
-      const userName = userData.name || "";
       
       localStorage.setItem("role", userRole);
 
-      const welcomeMessage = userName 
-        ? `Welcome back, ${userName}! You've successfully logged in as ${userRole}.`
-        : `Welcome back! You've successfully logged in as ${userRole}.`;
+      // Removed notification.success here
 
-      notification.success({
-        message: "Login Successful",
-        description: welcomeMessage,
-        duration: 1,
-        placement: "topRight"
-      });
-
-      setTimeout(() => {
-        if (userRole === "Admin") {
-          navigate("/my-admin/users");
-        } else if (userRole === "Doctor") {
-          navigate("/my-doctor/consultation-response");
-        } else {
-          navigate("/home"); 
-        }
-      }, 1500);
+      // Navigate immediately without delay
+      if (userRole === "Admin") {
+        navigate("/my-admin/users");
+      } else if (userRole === "Doctor") {
+        navigate("/my-doctor/consultation-response");
+      } else {
+        navigate("/home"); 
+      }
     } catch (error) {
       let errorMessage = "Error processing login information.";
       if (axios.isAxiosError(error)) {
