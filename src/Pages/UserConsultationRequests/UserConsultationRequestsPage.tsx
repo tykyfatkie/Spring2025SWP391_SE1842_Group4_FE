@@ -40,7 +40,7 @@ interface ConsultationResponse {
   content: string;
   attachments: string[];
   consultationStatus?: number;
-  updatedAt?: string; // Added updatedAt field
+  updatedAt?: string; 
 }
 
 const UserConsultationRequests: React.FC = () => {
@@ -342,7 +342,6 @@ const UserConsultationRequests: React.FC = () => {
       width: "20%", 
       render: (_: any, record: ConsultationRequest) => (
         <Space>
-          {/* Cancel button removed as requested */}
           <Button
             type="primary"
             onClick={() => showDetailsModal(record)}
@@ -378,7 +377,6 @@ const UserConsultationRequests: React.FC = () => {
     </div>
   );
 
-  // Function to render doctor response content
   const renderDoctorResponse = () => {
     if (loadingResponse) {
       return <div style={{ textAlign: "center", padding: "20px" }}>Loading doctor's response...</div>;
@@ -500,7 +498,6 @@ const UserConsultationRequests: React.FC = () => {
             <RequestsTable />
           </div>
 
-          {/* Details Modal */}
           <Modal
             title="Consultation Request Details"
             open={detailsModalVisible}
