@@ -297,7 +297,7 @@ const BMITrackingPage: React.FC = () => {
           <Col xs={24} md={16}>
           <BMIHistoryCard
             selectedChild={selectedChild}
-            selectedGender={selectedChildData?.gender === 0 ? 'female' : 'male'}
+            selectedGender={selectedChildData?.gender === 0 ? 'male' : 'female'}
             fetchingBMI={fetchingBMI}
             chartData={chartData}
             handleOpenBmiModal={handleOpenBmiModal}

@@ -52,8 +52,8 @@ const calculateAgeInMonths = (dateOfBirth: string): number => {
 // Helper function to get gender label
 const getGenderLabel = (genderCode: number): string => {
   switch(genderCode) {
-    case 0: return 'Female';
-    case 1: return 'Male';
+    case 0: return 'Male';
+    case 1: return 'Female';
     default: return 'Unknown';
   }
 };
