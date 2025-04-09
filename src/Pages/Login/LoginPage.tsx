@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./LoginPage.css";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Spin, message } from "antd";
+import { Spin, message, notification } from "antd";
 import { jwtDecode } from "jwt-decode"; 
 
 const LoginPage: React.FC = () => {
@@ -13,100 +13,83 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleSuccessfulLogin = (token: string, userId: string) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("userId", userId);
+
+    try {
+      const userData: any = jwtDecode(token);
+      const userRole = userData.role;
+      const userName = userData.name || "";
+      
+      localStorage.setItem("role", userRole);
+
+      const welcomeMessage = userName 
+        ? `Welcome back, ${userName}! You've successfully logged in as ${userRole}.`
+        : `Welcome back! You've successfully logged in as ${userRole}.`;
+
+      notification.success({
+        message: "Login Successful",
+        description: welcomeMessage,
+        duration: 1,
+        placement: "topRight"
+      });
+
+      setTimeout(() => {
+        if (userRole === "Admin") {
+          navigate("/my-admin/users");
+        } else if (userRole === "Doctor") {
+          navigate("/my-doctor/consultation-response");
+        } else {
+          navigate("/home"); 
+        }
+      }, 1500);
+    } catch (error) {
+      let errorMessage = "Error processing login information.";
+      if (axios.isAxiosError(error)) {
+        if (error.response && error.response.data) {
+          errorMessage = error.response.data.message || errorMessage;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+   
+      message.error(errorMessage);
+    }
+  };
+
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const token = query.get('token');
     const userId = query.get('userId');
     
-    // Check if we're returning from Google OAuth flow
     if (!token && !userId) {
-      // Retrieve the OAuth state from localStorage
       const oauthState = localStorage.getItem('oauth_state');
       
       if (oauthState) {
         verifyOAuthToken(oauthState);
       }
     } else if (token && userId) {
-      // Existing token handling logic
-      localStorage.setItem("token", token);
-      localStorage.setItem("userId", userId);
-  
-      try {
-        const userData: any = jwtDecode(token);
-        const userRole = userData.role;
-        localStorage.setItem("role", userRole);
-
-        // Enhanced success message with user role information
-        message.success(`Welcome! You have successfully logged in with Google as ${userRole}!`, 3);
-  
-        setTimeout(() => {
-          if (userRole === "Admin") {
-            navigate("/my-admin");
-          } else if (userRole === "Doctor") {
-            navigate("/my-doctor");
-          } else {
-            navigate("/home"); 
-          }
-        }, 1500);
-      } catch (error) {
-        let errorMessage = "Error processing login information.";
-        if (axios.isAxiosError(error)) {
-          if (error.response && error.response.data) {
-            errorMessage = error.response.data.message || errorMessage;
-          }
-        } else if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-     
-        message.error(errorMessage);
-      }
+      handleSuccessfulLogin(token, userId);
     }
   }, [location, navigate]);
 
-  // New function to verify OAuth token
   const verifyOAuthToken = async (oauthState: string) => {
     setLoading(true);
     
     try {
-      // Call the verification API with the OAuth state
       const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}/auth/verify-token`, {
         params: { token: oauthState }
       });
       
       if (response.status === 200) {
-        // Assuming the API returns the same structure as your login endpoint
         const { accessToken, userId } = response.data.data || response.data;
-        
-        // Store token and user ID
-        localStorage.setItem("token", accessToken);
-        localStorage.setItem("userId", userId);
-        
-        // Clear the OAuth state as it's no longer needed
         localStorage.removeItem('oauth_state');
-        
-        // Decode the token to get user role
-        const userData: any = jwtDecode(accessToken);
-        const userRole = userData.role;
-        localStorage.setItem("role", userRole);
-        
-        // Enhanced success message with user role information
-        message.success(`Welcome! Your Google authentication was verified successfully! You are logged in as ${userRole}.`, 3);
-        
-        // Redirect based on user role
-        setTimeout(() => {
-          if (userRole === "Admin") {
-            navigate("/my-admin/users");
-          } else if (userRole === "Doctor") {
-            navigate("/my-doctor/consultation-response");
-          } else {
-            navigate("/home");
-          }
-        }, 1500);
+        handleSuccessfulLogin(accessToken, userId);
       }
     } catch (error: any) {
       console.error("OAuth verification failed:", error);
       message.error(error.response?.data?.message || "OAuth verification failed. Please try again.");
-      // Clear the invalid OAuth state
       localStorage.removeItem('oauth_state');
     } finally {
       setLoading(false);
@@ -125,49 +108,7 @@ const LoginPage: React.FC = () => {
 
       if (response.status === 200) {
         const { accessToken, userId } = response.data.data;
-        
-        // Store token and user ID
-        localStorage.setItem("token", accessToken);
-        localStorage.setItem("userId", userId);
-
-        const userData: any = jwtDecode(accessToken);
-        const userRole = userData.role;
-        localStorage.setItem("role", userRole);
-
-        // Enhanced success message with name if available and user role
-        const userName = userData.name || "";
-        const welcomeMessage = userName 
-          ? `Welcome back, ${userName}! You've successfully logged in as ${userRole}.`
-          : `Welcome back! You've successfully logged in as ${userRole}.`;
-        
-        // Show enhanced success message with longer duration (3 seconds)
-        message.success(welcomeMessage, 3);
-
-        // Overlay notification for better visibility
-        const notificationContainer = document.createElement('div');
-        notificationContainer.className = 'login-success-notification';
-        notificationContainer.innerHTML = `
-          <div class="login-success-content">
-            <i class="ri-check-line success-icon"></i>
-            <p>${welcomeMessage}</p>
-          </div>
-        `;
-        document.body.appendChild(notificationContainer);
-
-        // Remove notification after redirect
-        setTimeout(() => {
-          if (document.body.contains(notificationContainer)) {
-            document.body.removeChild(notificationContainer);
-          }
-          
-          if (userRole === "Admin") {
-            navigate("/my-admin/users");
-          } else if (userRole === "Doctor") {
-            navigate("/my-doctor/consultation-response");
-          } else {
-            navigate("/home");
-          }
-        }, 1500);
+        handleSuccessfulLogin(accessToken, userId);
       }
     } catch (error: any) {
       message.error(error.response?.data?.message || "Login failed. Please check your credentials and try again.");
