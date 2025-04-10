@@ -133,13 +133,11 @@ const UserConsultationRequests: React.FC = () => {
         },
       });
   
-      // Check if the response has the paginated structure
       if (response.data && 
           response.data.data && 
           Array.isArray(response.data.data.data) && 
           response.data.data.data.length > 0) {
         
-        // Get the first item from the array
         const responseData = response.data.data.data[0];
         
         const formattedResponse: ConsultationResponse = {
@@ -152,7 +150,6 @@ const UserConsultationRequests: React.FC = () => {
           consultationStatus: responseData.status
         };
   
-        // Handle attachments if they exist
         try {
           if (typeof responseData.attachments === 'string' && responseData.attachments) {
             formattedResponse.attachments = JSON.parse(responseData.attachments);
@@ -202,14 +199,11 @@ const UserConsultationRequests: React.FC = () => {
       const profiles = await Promise.all(profilePromises);
       const validProfiles = profiles.filter(profile => profile !== null);
       
-      // Create a map of doctor IDs to profiles
       const profileMap: Record<string, DoctorProfile> = {};
       validProfiles.forEach(item => {
         if (item) {
-          // API returns an array, so we need to access the first item
           const profile = Array.isArray(item.profile) ? item.profile[0] : item.profile;
           
-          // Access the name directly from user object
           profileMap[item.id] = {
             id: item.id,
             fullName: profile.user?.name || `Doctor ${item.id.substring(0, 6)}`,
