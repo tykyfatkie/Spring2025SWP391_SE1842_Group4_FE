@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Spin, Typography, Tag, Button } from 'antd';
 import { CheckCircleOutlined, LineChartOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import axios from 'axios';
 
 const { Title, Text } = Typography;
 
@@ -26,20 +27,21 @@ interface BMIDetailsCardProps {
   selectedChildDOB?: string;
 }
 
-const whoBmiReferenceData = {
-  male: {
-    0: 13.4, 3: 16.0, 6: 17.3, 9: 17.2, 12: 16.8, 15: 16.4, 18: 16.2, 
-    24: 15.8, 36: 15.4, 48: 15.3, 60: 15.4, 
-    72: 15.5, 84: 16.0, 96: 16.5, 108: 17.0, 120: 17.8, 
-    132: 18.5, 144: 19.2, 156: 19.9, 168: 20.8, 180: 21.4, 192: 22.2, 204: 22.7, 216: 23.1, 228: 23.4
-  },
-  female: {
-    0: 13.2, 3: 15.7, 6: 16.9, 9: 16.8, 12: 16.4, 15: 16.1, 18: 15.9, 
-    24: 15.6, 36: 15.3, 48: 15.3, 60: 15.3, 
-    72: 15.3, 84: 15.7, 96: 16.2, 108: 16.8, 120: 17.5, 
-    132: 18.2, 144: 19.0, 156: 19.6, 168: 20.2, 180: 20.8, 192: 21.3, 204: 21.7, 216: 22.0, 228: 22.2
-  }
-};
+interface BMIReferenceData {
+  [key: number]: number;
+}
+
+interface GenderSpecificBMIData {
+  male: BMIReferenceData;
+  female: BMIReferenceData;
+}
+
+interface WHODataItem {
+  ageMonth: number;
+  bmiPercentile: number;
+  bmi: number;
+  gender: number; // 0 for male, 1 for female
+}
 
 const whoZScoreOffsets = {
   severelyUnderweight: -3,  
@@ -52,102 +54,6 @@ const whoZScoreOffsets = {
   obese: 3                 
 };
 
-const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
-  const referenceData = whoBmiReferenceData[gender];
-  
-  const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
-  
-  if (ageInMonths <= ages[0]) return referenceData[ages[0] as keyof typeof referenceData];
-  if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1] as keyof typeof referenceData];
-  
-  let lowerAge = ages[0];
-  let upperAge = ages[ages.length - 1];
-  
-  for (let i = 0; i < ages.length - 1; i++) {
-    if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
-      lowerAge = ages[i];
-      upperAge = ages[i + 1];
-      break;
-    }
-  }
-  
-  const lowerBMI = referenceData[lowerAge as keyof typeof referenceData];
-  const upperBMI = referenceData[upperAge as keyof typeof referenceData];
-  const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
-  
-  return lowerBMI + ratio * (upperBMI - lowerBMI);
-};
-
-const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
-  median: number;
-  underweight: number;
-  overweight: number;
-  obese: number;
-} => {
-  const median = getWhoBmiReference(ageInMonths, gender);
-  
-  const estimatedSD = median * 0.1;  
-  
-  return {
-    median,
-    underweight: median + (whoZScoreOffsets.underweight * estimatedSD),
-    overweight: median + (whoZScoreOffsets.overweight * estimatedSD),
-    obese: median + (whoZScoreOffsets.obese * estimatedSD)
-  };
-};
-
-const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): { 
-  category: 'severely-underweight' | 'underweight' | 'normal' | 'overweight' | 'obese';
-  color: string;
-  label: string;
-  whoBmiReference?: number;
-  whoBmiRange?: string;
-} => {
-  const references = getWhoZScoreReferences(ageInMonths, gender);
-  const whoBmiReference = references.median;
-  
-  if (bmi < references.underweight) {
-    return { 
-      category: 'underweight',
-      label: 'Underweight', 
-      color: '#91caff',  // Blue
-      whoBmiReference,
-      whoBmiRange: `< ${references.underweight.toFixed(1)}`
-    };
-  } else if (bmi >= references.obese) {
-    return { 
-      category: 'obese',
-      label: 'Obese', 
-      color: '#ff4d4f',  // Red
-      whoBmiReference,
-      whoBmiRange: `≥ ${references.obese.toFixed(1)}`
-    };
-  } else if (bmi >= references.overweight) {
-    return { 
-      category: 'overweight',
-      label: 'Overweight', 
-      color: '#faad14',  // Yellow/Orange
-      whoBmiReference,
-      whoBmiRange: `${references.overweight.toFixed(1)}-${references.obese.toFixed(1)}`
-    };
-  } else {
-    return { 
-      category: 'normal',
-      label: 'Normal', 
-      color: '#52c41a',  // Green
-      whoBmiReference,
-      whoBmiRange: `${references.underweight.toFixed(1)}-${references.overweight.toFixed(1)}`
-    };
-  }
-};
-
-const calculateAgeInMonths = (dateTime: string, dateOfBirth: string): number => {
-  const measurementDate = moment(dateTime);
-  const childDOB = moment(dateOfBirth);
-  
-  return measurementDate.diff(childDOB, 'months');
-};
-
 const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   selectedChild,
   selectedGender = 'male', 
@@ -157,6 +63,170 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   handleEditBmiRecord,
   selectedChildDOB
 }) => {
+  const [whoBmiReferenceData, setWhoBmiReferenceData] = useState<GenderSpecificBMIData>({
+    male: {},
+    female: {}
+  });
+  
+  const [loadingWhoData, setLoadingWhoData] = useState(true);
+
+  // Fetch WHO data from API
+  useEffect(() => {
+    const fetchWHOData = async () => {
+      try {
+        setLoadingWhoData(true);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("Authentication token missing");
+          setLoadingWhoData(false);
+          return;
+        }
+        
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_ENDPOINT}/WHOData/all`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        
+        if (response.data?.data) {
+          const whoData: WHODataItem[] = response.data.data;
+          
+          // Process WHO data into the format we need
+          const maleData: BMIReferenceData = {};
+          const femaleData: BMIReferenceData = {};
+          
+          // Filter for median percentile (50%)
+          whoData.forEach(item => {
+            if (item.bmiPercentile === 50) {
+              if (item.gender === 0) { // Male
+                maleData[item.ageMonth] = item.bmi;
+              } else if (item.gender === 1) { // Female
+                femaleData[item.ageMonth] = item.bmi;
+              }
+            }
+          });
+          
+          setWhoBmiReferenceData({
+            male: maleData,
+            female: femaleData
+          });
+          
+          console.log("WHO BMI data loaded:", { maleData, femaleData });
+        } else {
+          throw new Error("Invalid WHO data format received");
+        }
+        
+        setLoadingWhoData(false);
+      } catch (error) {
+        console.error("Error fetching WHO BMI data:", error);
+        setLoadingWhoData(false);
+      }
+    };
+    
+    fetchWHOData();
+  }, []);
+
+  const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
+    const referenceData = whoBmiReferenceData[gender];
+    
+    if (Object.keys(referenceData).length === 0) {
+      return 0; // Return default if data not loaded yet
+    }
+    
+    const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
+    
+    if (ageInMonths <= ages[0]) return referenceData[ages[0]];
+    if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1]];
+    
+    let lowerAge = ages[0];
+    let upperAge = ages[ages.length - 1];
+    
+    for (let i = 0; i < ages.length - 1; i++) {
+      if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
+        lowerAge = ages[i];
+        upperAge = ages[i + 1];
+        break;
+      }
+    }
+    
+    const lowerBMI = referenceData[lowerAge];
+    const upperBMI = referenceData[upperAge];
+    const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
+    
+    return lowerBMI + ratio * (upperBMI - lowerBMI);
+  };
+
+  const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
+    median: number;
+    underweight: number;
+    overweight: number;
+    obese: number;
+  } => {
+    const median = getWhoBmiReference(ageInMonths, gender);
+    
+    const estimatedSD = median * 0.1;  
+    
+    return {
+      median,
+      underweight: median + (whoZScoreOffsets.underweight * estimatedSD),
+      overweight: median + (whoZScoreOffsets.overweight * estimatedSD),
+      obese: median + (whoZScoreOffsets.obese * estimatedSD)
+    };
+  };
+
+  const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): { 
+    category: 'severely-underweight' | 'underweight' | 'normal' | 'overweight' | 'obese';
+    color: string;
+    label: string;
+    whoBmiReference?: number;
+    whoBmiRange?: string;
+  } => {
+    const references = getWhoZScoreReferences(ageInMonths, gender);
+    const whoBmiReference = references.median;
+    
+    if (bmi < references.underweight) {
+      return { 
+        category: 'underweight',
+        label: 'Underweight', 
+        color: '#91caff',  // Blue
+        whoBmiReference,
+        whoBmiRange: `< ${references.underweight.toFixed(1)}`
+      };
+    } else if (bmi >= references.obese) {
+      return { 
+        category: 'obese',
+        label: 'Obese', 
+        color: '#ff4d4f',  // Red
+        whoBmiReference,
+        whoBmiRange: `≥ ${references.obese.toFixed(1)}`
+      };
+    } else if (bmi >= references.overweight) {
+      return { 
+        category: 'overweight',
+        label: 'Overweight', 
+        color: '#faad14',  // Yellow/Orange
+        whoBmiReference,
+        whoBmiRange: `${references.overweight.toFixed(1)}-${references.obese.toFixed(1)}`
+      };
+    } else {
+      return { 
+        category: 'normal',
+        label: 'Normal', 
+        color: '#52c41a',  // Green
+        whoBmiReference,
+        whoBmiRange: `${references.underweight.toFixed(1)}-${references.overweight.toFixed(1)}`
+      };
+    }
+  };
+
+  const calculateAgeInMonths = (dateTime: string, dateOfBirth: string): number => {
+    const measurementDate = moment(dateTime);
+    const childDOB = moment(dateOfBirth);
+    
+    return measurementDate.diff(childDOB, 'months');
+  };
+
   // Process data to include WHO reference values
   const processedData = chartData.map(record => {
     const ageInMonths = record.ageInMonths || 
@@ -248,9 +318,12 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
                 Select a child above to view their BMI records
               </Text>
             </div>
-          ) : fetchingBMI ? (
+          ) : fetchingBMI || loadingWhoData ? (
             <div style={{ textAlign: 'center', padding: '50px 0' }}>
               <Spin size="large" />
+              <div style={{ marginTop: '10px' }}>
+                {loadingWhoData ? 'Loading WHO reference data...' : 'Loading BMI data...'}
+              </div>
             </div>
           ) : processedData.length > 0 ? (
             <>
