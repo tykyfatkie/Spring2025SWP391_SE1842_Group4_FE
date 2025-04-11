@@ -102,7 +102,7 @@ const DoctorResponseForm: React.FC<DoctorResponseFormProps> = ({
       const payload = {
         title: values.title,
         content: values.content,
-        attachments: uploadedFiles.map(file => file.url)
+        attachments: attachmentUrls
       };
       
       console.log('Submitting with attachments:', attachmentUrls);
