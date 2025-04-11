@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Layout, Typography, Form, Input, Button, message, Card, Alert, Upload } from 'antd';
+import React, { useState } from 'react';
+import { Layout, Typography, Row, Col, Card, Tag, Spin, Alert, Button, Empty } from 'antd';
+import { CheckCircleOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { UploadOutlined } from '@ant-design/icons';
 import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
+
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -19,511 +20,537 @@ const colors = {
   }
 };
 
-interface FormValues {
-  certificate: string;
-  licenseNumber: string;
-  biography: string;
-  specialize: string;
-  degrees: string;
-  research: string;
-  languages: string;
-  hospital: string;
-  experienceYears: string;
+interface DoctorProfile {
+  id: string;
+  certificate: string | null;
+  licenseNumber: string | null;
+  biography: string | null;
+  metadata: string | null;
+  specialize: string | null;
   profileImg: string;
-}
-
-// Define interface for metadata object
-interface MetadataObject {
+  status: number;
+  userId: string;
+  ratingAvg: number | null;
+  degrees: string | null;
+  research: string | null;
+  languages: string | null;
   hospital?: string;
-  years?: string;
+  user?: {
+    name: string;
+    userName: string;
+    email: string;
+    phone?: string;
+    address?: string;
+  };
 }
 
-const UpdateDoctorProfile = () => {
-  // Create state for form fields
-  const [formValues, setFormValues] = useState<FormValues>({
-    certificate: '',
-    licenseNumber: '',
-    biography: '',
-    specialize: '',
-    degrees: '',
-    research: '',
-    languages: '',
-    hospital: '',
-    experienceYears: '',
-    profileImg: '',
-  });
-  
-  const [form] = Form.useForm<FormValues>();
-  const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
+interface Metadata {
+  hospitals?: Array<{ hospital: string; years: string }>;
+  years?: string;
+  specialization?: string;
+  hospital?: string;
+  [key: string]: any;
+}
+
+const MyDoctorProfilePage: React.FC = () => {
+  const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>('');
-  const [uploadLoading, setUploadLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchDoctorProfile = async () => {
       try {
         const token = localStorage.getItem('token');
         const userId = localStorage.getItem('userId');
-        
         if (!token || !userId) {
           throw new Error("Unauthorized: Please log in");
         }
-        
-        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${userId}`, {
+  
+        // Try fetching from doctor endpoint
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/doctorprofile/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Cache-Control': 'no-cache',
+            },
+          });
+  
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data) {
+              // Check if data is an array
+              if (Array.isArray(result.data) && result.data.length > 0) {
+                setDoctor(result.data[0]);
+              } else {
+                setDoctor(result.data);
+              }
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+  
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/users/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Cache-Control': 'no-cache',
           },
         });
-        
+  
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
+  
+        const userData = await response.json();
+          
+        let doctorData: DoctorProfile | null = null;
         
-        const result = await response.json();
-        
-        if (!result.data) {
-          throw new Error("No doctor profile data found");
-        }
-        
-        // Extract doctor data
-        const doctorData = Array.isArray(result.data) ? result.data[0] : result.data;
-        
-        // Parse metadata to get hospital and experience years
-        let metadataObj: MetadataObject = {};
-        try {
-          if (doctorData.metadata) {
-            metadataObj = JSON.parse(doctorData.metadata) as MetadataObject;
+        if (userData.data) {
+          const user = userData.data;
+          
+          if (user.doctor) {
+            // User object has a nested doctor object
+            doctorData = {
+              ...user.doctor,
+              user: {
+                name: user.name,
+                userName: user.userName,
+                email: user.email,
+                phone: user.phone,
+                address: user.address
+              },
+              profileImg: user.profileImg || user.avatar || "",
+              id: user.id
+            };
+          } else {
+            // Create doctor profile from user data
+            doctorData = {
+              id: user.id,
+              userId: user.id,
+              certificate: null,
+              licenseNumber: null,
+              biography: null,
+              metadata: user.metadata || "{}",
+              specialize: null,
+              profileImg: user.profileImg || user.avatar || "",
+              status: 1,
+              ratingAvg: null,
+              degrees: null,
+              research: null,
+              languages: null,
+              user: {
+                name: user.name,
+                userName: user.userName,
+                email: user.email,
+                phone: user.phone,
+                address: user.address
+              }
+            };
           }
-        } catch (e) {
-          console.error("Error parsing metadata:", e);
         }
-        
-        // Prepare form values from fetched data
-        const initialValues: FormValues = {
-          certificate: doctorData.certificate || '',
-          licenseNumber: doctorData.licenseNumber || '',
-          biography: doctorData.biography || '',
-          specialize: doctorData.specialize || '',
-          degrees: doctorData.degrees || '',
-          research: doctorData.research || '',
-          languages: doctorData.languages || '',
-          hospital: metadataObj.hospital || '',
-          experienceYears: metadataObj.years || '',
-          profileImg: doctorData.profileImg || '',
-        };
-        
-        // Update state and form
-        setFormValues(initialValues);
-        form.setFieldsValue(initialValues);
-        setImageUrl(initialValues.profileImg);
-        
+  
+        if (!doctorData) {
+          throw new Error("Could not retrieve doctor information");
+        }
+  
+        setDoctor(doctorData);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to fetch doctor profile";
+        const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
         setError(errorMessage);
       } finally {
         setLoading(false);
       }
     };
-    
+  
     fetchDoctorProfile();
-  }, [form]);
-
-  // Function to handle input changes
-  const handleInputChange = (field: keyof FormValues, value: string) => {
-    setFormValues(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Also update the form field value
-    form.setFieldsValue({ [field]: value });
-  };
-
-  // Function to handle the API call for image upload
-  const uploadImage = async (file: File) => {
+  }, []);
+  
+  const getMetadata = (): Metadata | null => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error("Unauthorized: Please log in");
+      if (doctor?.metadata) {
+        return JSON.parse(doctor.metadata);
       }
-      
-      // Update to use the correct API endpoint
-      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result.url; // Return the URL from the upload API
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload image';
-      throw new Error(errorMessage);
+      return null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      return null;
     }
   };
 
-  // Function to handle file upload from the Upload component
-  const handleImageUpload = async (file: File) => {
-    setUploadLoading(true);
-    try {
-      // Show loading message
-      const loadingMsg = message.loading('Uploading image...', 0);
-      
-      // Call the upload API
-      const url = await uploadImage(file);
-      
-      // Update state with the returned URL
-      setImageUrl(url);
-      
-      // Update form field value and state
-      handleInputChange('profileImg', url);
-      
-      // Clear loading message and show success
-      loadingMsg();
-      message.success('Image uploaded successfully');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload image';
-      message.error(errorMessage);
-    } finally {
-      setUploadLoading(false);
-    }
-    
-    return false; // Prevent default upload behavior
-  };
-
-  // Validate form data
-  const validateFormData = (values: FormValues) => {
-    if (!values.specialize || values.specialize.trim() === '') {
-      message.error('Please enter your specializations!');
-      return false;
-    }
-    if (!values.degrees || values.degrees.trim() === '') {
-      message.error('Please enter your degrees!');
-      return false;
-    }
-    if (!values.certificate || values.certificate.trim() === '') {
-      message.error('Please enter your certifications!');
-      return false;
-    }
-    return true;
-  };
-
-  const handleUpdateProfile = async (values: FormValues) => {
-    // Merge values from form with our state
-    const finalValues = {
-      ...formValues,
-      ...values
-    };
-    
-    // Check if we have the required data
-    if (!validateFormData(finalValues)) {
-      return;
-    }
-  
-    setSubmitting(true);
-    try {
-      const token = localStorage.getItem('token');
-      const doctorId = localStorage.getItem('doctorId');
-      
-      if (!token || !doctorId) {
-        throw new Error("Unauthorized: Please log in");
-      }
-  
-      const metadata = JSON.stringify({
-        hospital: finalValues.hospital,
-        years: finalValues.experienceYears
-      });
-  
-      // Prepare the profile data for API submission according to specified format
-      const profileData = {
-        certificate: finalValues.certificate,
-        licenseNumber: finalValues.licenseNumber,
-        biography: finalValues.biography,
-        metadata: metadata,
-        specialize: finalValues.specialize,
-        profileImg: imageUrl || finalValues.profileImg,
-        degrees: finalValues.degrees,
-        research: finalValues.research || '', // Make sure this is at least empty string
-        languages: finalValues.languages
-      };
-  
-      // Debug logs to inspect the data
-      console.log("Final values:", finalValues);
-      console.log("Profile data being sent:", profileData);
-  
-      // Use PUT method for updating the doctor profile
-      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/doctors/${doctorId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(profileData),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
-      }
-  
-      const result = await response.json();
-      
-      // Store the updated doctor profile data in localStorage
-      localStorage.setItem('doctorProfile', JSON.stringify(result.data));
-      
-      message.success('Profile updated successfully!');
-      navigate('/my-doctor');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
-      setError(errorMessage);
-      message.error(errorMessage);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const metadata = getMetadata();
 
   if (loading) {
     return (
-      <Layout style={{ minHeight: '100vh', background: '#f5f7fa', margin: '-25px' }}>
+      <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
         <DoctorSidebar />
         <Layout style={{ background: '#f5f7fa' }}>
-          <Content style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto' }}>
-            <Card>
-              <div style={{ textAlign: 'center', padding: '50px' }}>
-                <div>Loading profile data...</div>
-              </div>
-            </Card>
+          <Content style={{ 
+            padding: '30px', 
+            maxWidth: '1200px', 
+            margin: '0 auto',
+            marginBottom: '30px'
+          }}>
+            <Spin size="large" />
           </Content>
         </Layout>
       </Layout>
     );
   }
 
-  return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f7fa', margin: '-25px' }}>
-      <DoctorSidebar />
-      <Layout style={{ background: '#f5f7fa' }}>
-        <Content style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ 
-            background: colors.primary.gradient,
-            padding: '20px 30px',
-            borderRadius: '12px',
-            marginBottom: '24px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+  if (error || !doctor) {
+    return (
+      <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
+        <DoctorSidebar />
+        <Layout style={{ background: '#f5f7fa' }}>
+          <Content style={{ 
+            padding: '30px', 
+            maxWidth: '1200px', 
+            margin: '0 auto',
+            marginBottom: '30px'
           }}>
-            <Title level={3} style={{ color: 'white', margin: 0 }}>Update Doctor Profile</Title>
-            <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-              Update your professional profile to show your expertise to patients
-            </Text>
-          </div>
-
-          {error && (
             <Alert
-              message="Error"
-              description={error}
+              message="Error retrieving doctor information"
+              description={error || "Doctor information not found"}
               type="error"
               showIcon
-              closable
-              style={{ marginBottom: '24px' }}
-              onClose={() => setError(null)}
+              style={{ marginTop: '24px' }}
             />
-          )}
+          </Content>
+        </Layout>
+      </Layout>
+    );
+  }
 
-          <Card style={{ borderRadius: '12px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
-            <Form 
-              form={form} 
-              layout="vertical" 
-              onFinish={handleUpdateProfile}
-              initialValues={formValues}
-            >
-              {/* Profile Image Section */}
-              <Title level={4} style={{ marginBottom: '20px' }}>Profile Image</Title>
-              <div style={{ background: colors.secondary.light, padding: '20px', borderRadius: '10px', marginBottom: '24px' }}>
-                <Form.Item 
-                  name="profileImg" 
-                  label="Profile Image"
-                  rules={[{ required: true, message: 'Please upload your profile image!' }]}
-                >
-                  <Upload
-                    name="profileImg"
-                    listType="picture-card"
-                    showUploadList={true}
-                    beforeUpload={handleImageUpload}
-                    maxCount={1}
-                  >
-                    {!imageUrl && !uploadLoading && (
-                      <div>
-                        <UploadOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                      </div>
-                    )}
-                    {uploadLoading && <div>Uploading...</div>}
-                  </Upload>
-                  {imageUrl && (
-                    <div style={{ marginTop: 8 }}>
-                      <Text type="success">Image uploaded successfully</Text>
-                    </div>
-                  )}
-                  <Text type="secondary">Upload a professional photo of yourself</Text>
-                </Form.Item>
-              </div>
-              
-              {/* Basic Information Section */}
-              <Title level={4} style={{ marginBottom: '20px' }}>Basic Information</Title>
-              <div style={{ background: colors.secondary.light, padding: '20px', borderRadius: '10px', marginBottom: '24px' }}>
-                <Form.Item 
-                  name="specialize" 
-                  label="Specialization" 
-                  rules={[{ required: true, message: 'Please enter your specializations!' }]}
-                >
-                  <Input 
-                    placeholder="Enter your specializations (e.g., Cardiology, Pediatrics)" 
-                    onChange={(e) => handleInputChange('specialize', e.target.value)}
-                  />
-                  <Text type="secondary">Separate multiple specializations with commas</Text>
-                </Form.Item>
-                
-                <Form.Item 
-                  name="hospital" 
-                  label="Hospital/Clinic"
-                  rules={[{ required: true, message: 'Please enter your workplace!' }]}
-                >
-                  <Input 
-                    placeholder="Where you currently work" 
-                    onChange={(e) => handleInputChange('hospital', e.target.value)}
-                  />
-                </Form.Item>
-                
-                <Form.Item 
-                  name="experienceYears" 
-                  label="Years of Experience"
-                  rules={[{ required: true, message: 'Please enter your years of experience!' }]}
-                >
-                  <Input 
-                    type="number" 
-                    placeholder="How many years of professional experience" 
-                    onChange={(e) => handleInputChange('experienceYears', e.target.value)}
-                  />
-                </Form.Item>
+  // Parse data from API without hardcoding default values
+  const degreesArray = doctor.degrees ? doctor.degrees.split(',').map(item => item.trim()) : [];
+  
+  const certificatesArray = doctor.certificate ? doctor.certificate.split(',').map(item => item.trim()) : [];
+  
+  const researchArray = doctor.research ? doctor.research.split(',').map(item => item.trim()) : [];
+  
+  const languagesArray = doctor.languages ? doctor.languages.split(',').map(item => item.trim()) : [];
+  
+  const specializationsArray = doctor.specialize ? doctor.specialize.split(',').map(item => item.trim()) : [];
 
-                <Form.Item 
-                  name="biography" 
-                  label="Biography"
-                  rules={[{ required: true, message: 'Please enter your biography!' }]}
-                >
-                  <Input.TextArea 
-                    rows={4} 
-                    placeholder="Brief description of your experience and expertise" 
-                    onChange={(e) => handleInputChange('biography', e.target.value)}
-                  />
-                </Form.Item>
-              </div>
+  // Get hospital information and years of experience from metadata
+  // This is updated to handle the new metadata format from CreateDoctorProfile
+  const hospitalExperiences = metadata?.hospitals || [];
+  const mainHospital = hospitalExperiences.length > 0 ? hospitalExperiences[0].hospital : (metadata?.hospital || doctor.hospital || "");
+  const experienceYears = hospitalExperiences.length > 0 ? parseInt(hospitalExperiences[0].years) : (metadata?.years ? parseInt(metadata.years) : 0);
 
-              {/* Qualifications Section */}
-              <Title level={4} style={{ marginBottom: '20px' }}>Qualifications</Title>
-              <div style={{ background: colors.secondary.light, padding: '20px', borderRadius: '10px', marginBottom: '24px' }}>
-                <Form.Item 
-                  name="degrees" 
-                  label="Degrees"
-                  rules={[{ required: true, message: 'Please enter your degrees!' }]}
-                >
-                  <Input.TextArea 
-                    rows={3} 
-                    placeholder="E.g., Doctor of Medicine (2018), Master of Science (2015)" 
-                    onChange={(e) => handleInputChange('degrees', e.target.value)}
-                  />
-                  <Text type="secondary">Separate multiple degrees with commas</Text>
-                </Form.Item>
-                
-                <Form.Item 
-                  name="certificate" 
-                  label="Certifications"
-                  rules={[{ required: true, message: 'Please enter your certifications!' }]}
-                >
-                  <Input.TextArea 
-                    rows={3} 
-                    placeholder="E.g., Medical License, Specialty Certification" 
-                    onChange={(e) => handleInputChange('certificate', e.target.value)}
-                  />
-                  <Text type="secondary">Separate multiple certifications with commas</Text>
-                </Form.Item>
+  // Check if profile has any meaningful data
+  const hasProfileData = !!(
+    doctor.degrees || 
+    doctor.certificate || 
+    doctor.research || 
+    doctor.languages || 
+    doctor.specialize
+  );
 
-                <Form.Item 
-                  name="licenseNumber" 
-                  label="License Number"
-                  rules={[{ required: true, message: 'Please enter your license number!' }]}
-                >
-                  <Input 
-                    placeholder="Your medical license number" 
-                    onChange={(e) => handleInputChange('licenseNumber', e.target.value)}
-                  />
-                </Form.Item>
-              </div>
+  return (
+    <Layout style={{ minHeight: '100vh', marginLeft: '-25px', marginTop: '-24px', marginBottom: '-24px', background: '#f5f7fa' }}>
+      <DoctorSidebar />
+      <Layout style={{ background: '#f5f7fa' }}>
+        <Content style={{ 
+          padding: '30px', 
+          maxWidth: '1995px', 
+          margin: '0 auto',
+          marginBottom: '30px'
+        }}>
+          {/* Profile Header Card with Blue Gradient */}
+          <Card 
+            style={{ 
+              marginTop: '24px', 
+              borderRadius: '20px',
+              overflow: 'hidden',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)'
+            }}
+            bodyStyle={{ padding: 0 }}
+          >
 
-              {/* Additional Information Section */}
-              <Title level={4} style={{ marginBottom: '20px' }}>Additional Information</Title>
-              <div style={{ background: colors.secondary.light, padding: '20px', borderRadius: '10px', marginBottom: '24px' }}>
-                <Form.Item 
-                  name="research" 
-                  label="Research & Publications"
-                >
-                  <Input.TextArea 
-                    rows={3} 
-                    placeholder="List your research papers or publications" 
-                    onChange={(e) => handleInputChange('research', e.target.value)}
-                  />
-                  <Text type="secondary">Separate multiple entries with commas</Text>
-                </Form.Item>
+            {/* Header with Gradient */}
+            <div style={{ 
+              background: colors.primary.gradient,
+              padding: '30px',
+              color: 'white'
+            }}>
+              <Row gutter={24} align="middle" justify="start">
+                <Col xs={24} md={6} style={{ textAlign: 'center', marginBottom: '20px' }}>
+                  <div style={{ 
+                    width: '150px', 
+                    height: '150px', 
+                    margin: '0 auto',
+                    borderRadius: '50%',
+                    border: '5px solid white',
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    background: '#f0f0f0'
+                  }}>
+                    <img 
+                      src={doctor.profileImg } 
+                      alt={doctor.user?.name || "Doctor"} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.currentTarget.src = '';
+                      }}
+                    />
+                  </div>
+                </Col>
+                <Col xs={24} md={18}>
+                <Title level={2} style={{ color: 'white', margin: 0 }}>
+                    {doctor.user?.name || "Dr. Unknown"}
+                  </Title>
+                  <Text style={{ color: 'white', display: 'block', marginTop: '8px', fontSize: '16px' }}>
+                    <MailOutlined style={{ marginRight: '8px' }} /> 
+                    {doctor.user?.email || "No email available"}
+                  </Text>
+                  <Text style={{ color: 'white', display: 'block', marginTop: '8px', fontSize: '16px' }}>
+                    <PhoneOutlined style={{ marginRight: '8px' }} /> 
+                    {doctor.user?.phone || "No phone available"}
+                  </Text>
+                </Col>
+              </Row>
+            </div>
 
-                <Form.Item 
-                  name="languages" 
-                  label="Languages"
-                  rules={[{ required: true, message: 'Please enter languages you speak!' }]}
-                >
-                  <Input 
-                    placeholder="E.g., English, Spanish, French" 
-                    onChange={(e) => handleInputChange('languages', e.target.value)}
-                  />
-                  <Text type="secondary">Separate multiple languages with commas</Text>
-                </Form.Item>
-              </div>
+            {/* Button Section - Create or Update Profile */}
+            <div style={{ padding: '20px 30px', textAlign: 'center' }}>
+              <Button 
+                type="primary" 
+                size="large"
+                style={{ 
+                  borderRadius: '50px',
+                  padding: '0 30px',
+                  height: '44px',
+                  background: colors.primary.main,
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                }}
+                onClick={() => navigate(hasProfileData ? '/update-doctor-profile' : '/create-doctor-profile')}
+              >
+                {hasProfileData ? 'Update Profile' : 'Create Profile'}
+              </Button>
+            </div>
+          </Card>
 
-              {/* Submit Button */}
-              <div style={{ textAlign: 'center' }}>
-                <Button 
-                  type="primary" 
-                  htmlType="submit" 
-                  loading={submitting}
+          {/* Only show sections if profile data exists */}
+          {hasProfileData && (
+            <>
+              {/* Degrees & Certificates Section */}
+              {(degreesArray.length > 0 || certificatesArray.length > 0) && (
+                <Card 
+                  title={<Title level={4} style={{ margin: 0 }}>Degrees & Certificates</Title>}
                   style={{ 
-                    borderRadius: '50px',
-                    padding: '0 40px',
-                    height: '44px',
-                    background: colors.primary.gradient,
-                    border: 'none',
-                    fontSize: '16px'
+                    marginTop: '24px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                   }}
                 >
-                  Update Profile
-                </Button>
+                  <Row gutter={[24, 24]}>
+                    {degreesArray.length > 0 && (
+                      <Col xs={24} md={12}>
+                        <Card 
+                          title="Education" 
+                          type="inner"
+                          style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}
+                        >
+                          <ul style={{ paddingLeft: '20px' }}>
+                            {degreesArray.map((degree, index) => (
+                              <li key={index} style={{ margin: '8px 0' }}>
+                                {degree}
+                              </li>
+                            ))}
+                          </ul>
+                        </Card>
+                      </Col>
+                    )}
+                    {certificatesArray.length > 0 && (
+                      <Col xs={24} md={degreesArray.length > 0 ? 12 : 24}>
+                        <Card 
+                          title="Professional Certificates" 
+                          type="inner"
+                          style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}
+                        >
+                          <ul style={{ paddingLeft: '20px' }}>
+                            {certificatesArray.map((cert, index) => (
+                              <li key={index} style={{ margin: '8px 0' }}>
+                                {cert}
+                              </li>
+                            ))}
+                          </ul>
+                        </Card>
+                      </Col>
+                    )}
+                  </Row>
+                </Card>
+              )}
+
+              {/* Expertise Section */}
+              {(specializationsArray.length > 0 || languagesArray.length > 0) && (
+                <Card 
+                  title={<Title level={4} style={{ margin: 0 }}>Expertise</Title>}
+                  style={{ 
+                    marginTop: '24px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  <Row gutter={[24, 24]}>
+                    {specializationsArray.length > 0 && (
+                      <Col xs={24} md={12}>
+                        <Card 
+                          title="Specialization Areas" 
+                          type="inner"
+                          style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}
+                        >
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {specializationsArray.map((spec, index) => (
+                              <Tag 
+                                color="blue" 
+                                key={index} 
+                                style={{ 
+                                  margin: '4px',
+                                  padding: '6px 15px',
+                                  borderRadius: '20px',
+                                  fontSize: '14px'
+                                }}
+                              >
+                                {spec}
+                              </Tag>
+                            ))}
+                          </div>
+                        </Card>
+                      </Col>
+                    )}
+                    {languagesArray.length > 0 && (
+                      <Col xs={24} md={specializationsArray.length > 0 ? 12 : 24}>
+                        <Card 
+                          title="Languages" 
+                          type="inner"
+                          style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}
+                        >
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {languagesArray.map((lang, index) => (
+                              <Tag 
+                                color="green" 
+                                key={index} 
+                                style={{ 
+                                  margin: '4px',
+                                  padding: '6px 15px',
+                                  borderRadius: '20px',
+                                  fontSize: '14px'
+                                }}
+                              >
+                                {lang}
+                              </Tag>
+                            ))}
+                          </div>
+                        </Card>
+                      </Col>
+                    )}
+                  </Row>
+                </Card>
+              )}
+
+              {/* Research & Publications Section */}
+              {researchArray.length > 0 && (
+                <Card 
+                  title={<Title level={4} style={{ margin: 0 }}>Research & Publications</Title>}
+                  style={{ 
+                    marginTop: '24px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  <ul style={{ paddingLeft: '20px' }}>
+                    {researchArray.map((item, index) => (
+                      <li key={index} style={{ margin: '12px 0' }}>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+
+              {/* Work Experience Section */}
+              {hospitalExperiences.length > 0 && (
+                <Card 
+                  title={<Title level={4} style={{ margin: 0 }}>Work Experience</Title>}
+                  style={{ 
+                    marginTop: '24px',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  <div style={{ padding: '10px' }}>
+                    {/* Display all hospital experiences */}
+                    {hospitalExperiences.map((exp, index) => (
+                      <div key={index} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '15px' }}>
+                        <div style={{ color: '#1890ff', marginRight: '10px', marginTop: '3px', fontSize: '16px' }}>
+                          <CheckCircleOutlined />
+                        </div>
+                        <Text>
+                          {new Date().getFullYear() - parseInt(exp.years)} - {new Date().getFullYear()}: Doctor at {exp.hospital}
+                        </Text>
+                      </div>
+                    ))}
+                    
+                    {/* Fallback for old metadata format */}
+                    {hospitalExperiences.length === 0 && experienceYears > 0 && mainHospital && (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '15px' }}>
+                          <div style={{ color: '#1890ff', marginRight: '10px', marginTop: '3px', fontSize: '16px' }}>
+                            <CheckCircleOutlined />
+                          </div>
+                          <Text>
+                            {new Date().getFullYear() - experienceYears} - {new Date().getFullYear()}: Doctor at {mainHospital}
+                          </Text>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '15px' }}>
+                          <div style={{ color: '#1890ff', marginRight: '10px', marginTop: '3px', fontSize: '16px' }}>
+                            <CheckCircleOutlined />
+                          </div>
+                          <Text>Professional experience of {experienceYears} years</Text>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Card>
+              )}
+            </>
+          )}
+
+          {/* If no profile data, show empty state */}
+          {!hasProfileData && (
+            <Card 
+              style={{ 
+                marginTop: '24px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                textAlign: 'center',
+                padding: '40px 0'
+              }}
+            >
+              <Empty
+                description="No profile information available"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+              <div style={{ marginTop: '20px' }}>
+                <Text type="secondary">
+                  Please create your profile to provide your medical qualifications and expertise
+                </Text>
               </div>
-            </Form>
-          </Card>
+            </Card>
+          )}
         </Content>
       </Layout>
     </Layout>
   );
 };
 
-export default UpdateDoctorProfile;
+export default MyDoctorProfilePage;

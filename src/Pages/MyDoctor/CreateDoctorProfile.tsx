@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Layout, Typography, Form, Input, Button, message, Card, Alert, Upload } from 'antd';
+import { Layout, Typography, Form, Input, Button, message, Card, Alert, Upload, Select, Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined, PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import DoctorSidebar from '../../components/Sidebar/DoctorSidebar';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 // Main color variables to maintain consistency
 const colors = {
@@ -20,6 +21,31 @@ const colors = {
   }
 };
 
+// Common languages list for dropdown
+const commonLanguages = [
+  'English',
+  'Vietnamese',
+  'Spanish',
+  'French',
+  'German',
+  'Chinese',
+  'Japanese',
+  'Korean',
+  'Russian',
+  'Portuguese',
+  'Italian',
+  'Arabic',
+  'Hindi',
+  'Bengali',
+  'Thai'
+];
+
+// Interface for hospital experience
+interface HospitalExperience {
+  hospital: string;
+  years: string;
+}
+
 // Define interfaces for form values and potential API errors
 interface FormValues {
   certificate: string;
@@ -28,9 +54,8 @@ interface FormValues {
   specialize: string;
   degrees: string;
   research: string;
-  languages: string;
-  hospital: string;
-  experienceYears: string;
+  languages: string[];
+  hospitalExperiences: HospitalExperience[];
   profileImg: string;
 }
 
@@ -43,9 +68,8 @@ const CreateDoctorProfile = () => {
     specialize: '',
     degrees: '',
     research: '',
-    languages: '',
-    hospital: '',
-    experienceYears: '',
+    languages: [],
+    hospitalExperiences: [{ hospital: '', years: '' }],
     profileImg: '',
   });
   
@@ -57,7 +81,7 @@ const CreateDoctorProfile = () => {
   const navigate = useNavigate();
 
   // Function to handle input changes
-  const handleInputChange = (field: keyof FormValues, value: string) => {
+  const handleInputChange = (field: keyof FormValues, value: any) => {
     setFormValues(prev => ({
       ...prev,
       [field]: value
@@ -142,6 +166,21 @@ const CreateDoctorProfile = () => {
       message.error('Please enter your certifications!');
       return false;
     }
+    if (!values.languages || values.languages.length === 0) {
+      message.error('Please select at least one language!');
+      return false;
+    }
+    
+    // Check if at least one hospital experience is entered properly
+    const validHospitals = values.hospitalExperiences.filter(exp => 
+      exp.hospital && exp.hospital.trim() !== '' && exp.years && exp.years.trim() !== ''
+    );
+    
+    if (validHospitals.length === 0) {
+      message.error('Please enter at least one hospital experience!');
+      return false;
+    }
+    
     return true;
   };
 
@@ -164,10 +203,12 @@ const CreateDoctorProfile = () => {
         throw new Error("Unauthorized: Please log in");
       }
 
-      // Create metadata object in the format {"hospital":"Hanoi","years":"20"}
+      // Create metadata object with hospital experiences
+      // Format: {"hospitals":[{"hospital":"Hospital A","years":"5"},{"hospital":"Hospital B","years":"3"}]}
       const metadata = JSON.stringify({
-        hospital: finalValues.hospital,
-        years: finalValues.experienceYears
+        hospitals: finalValues.hospitalExperiences.filter(exp => 
+          exp.hospital && exp.hospital.trim() !== '' && exp.years && exp.years.trim() !== ''
+        )
       });
 
       // Prepare the profile data for API submission according to specified format
@@ -175,12 +216,12 @@ const CreateDoctorProfile = () => {
         certificate: finalValues.certificate,
         licenseNumber: finalValues.licenseNumber,
         biography: finalValues.biography,
-        metadata: metadata, // JSON string format as required
+        metadata: metadata, // JSON string format with hospital experiences
         specialize: finalValues.specialize,
         profileImg: imageUrl || finalValues.profileImg, // Use the uploaded image URL
         degrees: finalValues.degrees,
         research: finalValues.research || '', // Handle empty research field
-        languages: finalValues.languages
+        languages: Array.isArray(finalValues.languages) ? finalValues.languages.join(', ') : finalValues.languages
       };
 
       console.log("Sending data to API:", profileData);
@@ -299,28 +340,58 @@ const CreateDoctorProfile = () => {
                   <Text type="secondary">Separate multiple specializations with commas</Text>
                 </Form.Item>
                 
-                <Form.Item 
-                  name="hospital" 
-                  label="Hospital/Clinic"
-                  rules={[{ required: true, message: 'Please enter your workplace!' }]}
-                >
-                  <Input 
-                    placeholder="Where you currently work" 
-                    onChange={(e) => handleInputChange('hospital', e.target.value)}
-                  />
-                </Form.Item>
-                
-                <Form.Item 
-                  name="experienceYears" 
-                  label="Years of Experience"
-                  rules={[{ required: true, message: 'Please enter your years of experience!' }]}
-                >
-                  <Input 
-                    type="number" 
-                    placeholder="How many years of professional experience" 
-                    onChange={(e) => handleInputChange('experienceYears', e.target.value)}
-                  />
-                </Form.Item>
+                {/* Hospital Experiences Section */}
+                <Form.List name="hospitalExperiences">
+                  {(fields, { add, remove }) => (
+                    <>
+                      <Form.Item label="Hospital Experience">
+                        <Text type="secondary">Add your experience at different hospitals or clinics</Text>
+                      </Form.Item>
+                      
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Space 
+                          key={key} 
+                          style={{ display: 'flex', marginBottom: 8 }} 
+                          align="baseline"
+                        >
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'hospital']}
+                            rules={[{ required: true, message: 'Hospital name is required' }]}
+                            style={{ width: '60%' }}
+                          >
+                            <Input placeholder="Hospital/Clinic Name" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'years']}
+                            rules={[{ required: true, message: 'Years is required' }]}
+                            style={{ width: '30%' }}
+                          >
+                            <Input type="number" placeholder="Years" />
+                          </Form.Item>
+                          {fields.length > 1 ? (
+                            <MinusCircleOutlined
+                              onClick={() => remove(name)}
+                              style={{ color: '#ff4d4f' }}
+                            />
+                          ) : null}
+                        </Space>
+                      ))}
+                      
+                      <Form.Item>
+                        <Button
+                          type="dashed"
+                          onClick={() => add({ hospital: '', years: '' })}
+                          icon={<PlusOutlined />}
+                          style={{ width: '100%' }}
+                        >
+                          Add Hospital Experience
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
 
                 <Form.Item 
                   name="biography" 
@@ -394,13 +465,21 @@ const CreateDoctorProfile = () => {
                 <Form.Item 
                   name="languages" 
                   label="Languages"
-                  rules={[{ required: true, message: 'Please enter languages you speak!' }]}
+                  rules={[{ required: true, message: 'Please select at least one language!' }]}
                 >
-                  <Input 
-                    placeholder="E.g., English, Spanish, French" 
-                    onChange={(e) => handleInputChange('languages', e.target.value)}
-                  />
-                  <Text type="secondary">Separate multiple languages with commas</Text>
+                  <Select
+                    mode="multiple"
+                    placeholder="Select languages you speak"
+                    style={{ width: '100%' }}
+                    onChange={(value) => handleInputChange('languages', value)}
+                    tokenSeparators={[',']}
+                    allowClear
+                  >
+                    {commonLanguages.map(language => (
+                      <Option key={language} value={language}>{language}</Option>
+                    ))}
+                  </Select>
+                  <Text type="secondary">You can select multiple languages or type to add your own</Text>
                 </Form.Item>
               </div>
 
