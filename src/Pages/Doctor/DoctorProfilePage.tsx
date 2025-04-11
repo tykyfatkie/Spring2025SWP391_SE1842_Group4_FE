@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline, Spin, Alert, Modal, Form, Input, Upload, message } from 'antd';
-import { UserOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined, ArrowRightOutlined, UploadOutlined, SendOutlined } from '@ant-design/icons';
+import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Tag, Timeline, Spin, Alert, Modal, Form, Input, Upload, message } from 'antd';
+import { EnvironmentOutlined, PhoneOutlined, MailOutlined, ArrowRightOutlined, UploadOutlined, SendOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
 import { UploadFile, UploadChangeParam } from 'antd/es/upload/interface';
 

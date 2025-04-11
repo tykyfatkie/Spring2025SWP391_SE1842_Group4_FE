@@ -34,11 +34,8 @@ const ChildProfilesLayout: React.FC<ChildProfilesLayoutProps> = ({
   activeTab,
   handleTabChange,
   loading,
-  archivedLoading,
   children,
-  archivedChildren,
   activeColumns,
-  archivedColumns,
   navigateToCreateChild
 }) => {
   return (
