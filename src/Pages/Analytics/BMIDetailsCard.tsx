@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Spin, Typography, Tag, Button } from 'antd';
-import { CheckCircleOutlined, LineChartOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Spin, Typography, Tag, Button, message } from 'antd';
+import { CheckCircleOutlined, LineChartOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import axios from 'axios';
 
@@ -23,8 +23,10 @@ interface BMIDetailsCardProps {
   chartData: ChartData[];
   fetchingBMI: boolean;
   handleOpenBmiModal: () => void;
-  handleEditBmiRecord: (recordId: string) => void; // Added prop for edit functionality
+  handleEditBmiRecord: (recordId: string) => void;
+  handleDeleteBmiRecord: (recordId: string) => void; // Added prop for delete functionality
   selectedChildDOB?: string;
+  fetchBmiData: () => void; // Function to refresh BMI data
 }
 
 interface BMIReferenceData {
@@ -54,6 +56,33 @@ const whoZScoreOffsets = {
   obese: 3                 
 };
 
+// Function to delete a BMI record
+const deleteBmiRecord = async (recordId: string) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Authentication token missing");
+    }
+    
+    const response = await axios.delete(
+      `${import.meta.env.VITE_API_ENDPOINT}/bmi/delete`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { recordId }
+      }
+    );
+    
+    if (response.status === 200) {
+      return true; // Successful deletion
+    } else {
+      throw new Error("Failed to delete BMI record");
+    }
+  } catch (error) {
+    console.error("Error deleting BMI record:", error);
+    throw error;
+  }
+};
+
 const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   selectedChild,
   selectedGender = 'male', 
@@ -61,7 +90,9 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   fetchingBMI,
   handleOpenBmiModal,
   handleEditBmiRecord,
-  selectedChildDOB
+  handleDeleteBmiRecord,
+  selectedChildDOB,
+  fetchBmiData
 }) => {
   const [whoBmiReferenceData, setWhoBmiReferenceData] = useState<GenderSpecificBMIData>({
     male: {},
@@ -240,6 +271,19 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
       bmiCategory
     };
   });
+
+  const confirmDeleteBmiRecord = async (recordId: string) => {
+    try {
+      if (window.confirm("Are you sure you want to delete this BMI record?")) {
+        await deleteBmiRecord(recordId);
+        message.success("BMI record deleted successfully");
+        fetchBmiData(); 
+      }
+    } catch (error) {
+      message.error("Failed to delete BMI record");
+      console.error("Error during BMI deletion:", error);
+    }
+  };
 
   return (
     <Row gutter={[24, 24]} style={{ marginTop: '24px' }}>
@@ -435,6 +479,13 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
                             icon={<EditOutlined style={{ color: '#1e3a8a' }} />} 
                             onClick={() => handleEditBmiRecord(record.id)}
                             title="Edit Record"
+                          />
+                          <Button 
+                            type="text" 
+                            danger
+                            icon={<DeleteOutlined />} 
+                            onClick={() => confirmDeleteBmiRecord(record.id)}
+                            title="Delete Record"
                           />
                         </td>
                       </tr>

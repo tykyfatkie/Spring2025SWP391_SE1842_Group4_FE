@@ -5,8 +5,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import moment from 'moment';
 import type { Dayjs } from 'dayjs';
 import axios from 'axios';
-
-// Import our new components
 import BMIFilters from './BMIFiltersProps';
 import BMICategories from './BMICategories';
 import BMIChartTooltip from './BMITooltipProps';
