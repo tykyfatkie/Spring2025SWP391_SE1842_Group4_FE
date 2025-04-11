@@ -229,38 +229,6 @@ const PremiumSubscriptionPage: React.FC = () => {
               justifyContent: 'center', 
               gap: '16px' 
             }}>
-              <Button 
-                type="primary" 
-                size="large" 
-                style={{ 
-                  borderRadius: '50px', 
-                  paddingLeft: '28px', 
-                  paddingRight: '28px',
-                  height: '52px',
-                  background: 'white',
-                  color: '#1e3a8a',
-                  border: 'none',
-                  fontWeight: 600,
-                  boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                Compare Plans
-              </Button>
-              <Button 
-                size="large"
-                style={{ 
-                  borderRadius: '50px', 
-                  borderColor: 'rgba(255, 255, 255, 0.3)', 
-                  color: 'white',
-                  paddingLeft: '28px', 
-                  paddingRight: '28px',
-                  height: '52px',
-                  background: 'transparent',
-                  fontWeight: 500,
-                }}
-              >
-                Contact Sales
-              </Button>
             </div>
           </div>
         </div>

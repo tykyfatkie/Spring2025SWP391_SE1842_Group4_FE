@@ -114,7 +114,6 @@ const DoctorSidebar: React.FC = () => {
     transition: 'all 0.3s ease',
   };
 
-  const doctorName = doctor?.user?.name || 'Dr. Unknown';
   const doctorSpecialty = doctor?.specialize || 'Doctor';
   const avatarUrl = doctor?.profileImg || null;
 
@@ -157,9 +156,6 @@ const DoctorSidebar: React.FC = () => {
         
         {!collapsed && (
           <div style={{ marginTop: 16 }}>
-            <Typography.Title level={5} style={{ color: '#fff', margin: 0, fontWeight: 600 }}>
-              {loading ? 'Loading...' : doctorName}
-            </Typography.Title>
             <div style={{
               background: 'rgba(255, 255, 255, 0.15)',
               borderRadius: '20px',

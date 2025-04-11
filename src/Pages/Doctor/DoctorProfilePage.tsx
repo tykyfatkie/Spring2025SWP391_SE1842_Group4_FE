@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Avatar, Tag, Timeline, Spin, Alert, Modal, Form, Input, Upload, message } from 'antd';
-import { UserOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined, ArrowRightOutlined, UploadOutlined, SendOutlined } from '@ant-design/icons';
+import { Layout, Typography, Row, Col, Card, Tabs, Rate, Button, Tag, Timeline, Spin, Alert, Modal, Form, Input, Upload, message } from 'antd';
+import { EnvironmentOutlined, PhoneOutlined, MailOutlined, ArrowRightOutlined, UploadOutlined, SendOutlined } from '@ant-design/icons';
 import AppFooter from "../../components/Footer/Footer";
 import { UploadFile, UploadChangeParam } from 'antd/es/upload/interface';
 
@@ -603,7 +603,6 @@ const DoctorProfilePage: React.FC = () => {
             <Col span={16}>
               <Title level={2} style={{ marginBottom: '12px' }}>{doctor.user?.name || doctor.biography || "Doctor"}</Title>
               <Rate disabled defaultValue={ratingValue} style={{ fontSize: '16px' }} />
-              <Text style={{ marginLeft: '8px' }}>(80 reviews)</Text>
               
               <Row style={{ marginTop: '16px' }}>
                 <Col span={24}>
@@ -766,33 +765,6 @@ const DoctorProfilePage: React.FC = () => {
               </Card>
             </TabPane>
 
-            <TabPane tab="Reviews" key="2">
-              <Row gutter={[16, 16]}>
-                {[1, 2, 3].map((review) => (
-                  <Col span={24} key={review}>
-                    <Card
-                      style={{ 
-                        borderRadius: '16px', 
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' 
-                      }}
-                    >
-                      <Row align="middle">
-                        <Avatar size={48} icon={<UserOutlined />} style={{ backgroundColor: colors.primary.light }} />
-                        <div style={{ marginLeft: '12px' }}>
-                          <Text strong>Anonymous User</Text>
-                          <br />
-                          <Rate disabled defaultValue={5} style={{ fontSize: '12px' }} />
-                          <Text type="secondary" style={{ marginLeft: '8px' }}>1 month ago</Text>
-                        </div>
-                      </Row>
-                      <Paragraph style={{ marginTop: '12px' }}>
-                        The doctor is very dedicated and professional. I am very satisfied with the medical service.
-                      </Paragraph>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            </TabPane>
           </Tabs>
         </Card>
       </Content>

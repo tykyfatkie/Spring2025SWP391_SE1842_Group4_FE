@@ -36,7 +36,7 @@ interface BMIData {
   ageMonth: number;
   bmiPercentile?: number;
   bmi: number;
-  gender: number; // 0 for female, 1 for male
+  gender: number; // 1 for female, 0 for male
 }
 
 const BMIDataPage = () => {
@@ -201,7 +201,6 @@ const BMIDataPage = () => {
     form.setFieldsValue({
       ageMonth: record.ageMonth,
       bmi: record.bmi,
-      bmiPercentile: record.bmiPercentile,
       gender: record.gender
     });
     setIsEditModalVisible(true);
@@ -229,7 +228,7 @@ const BMIDataPage = () => {
 
   // ============ HELPER FUNCTIONS ============
   const getGenderTag = (gender: number) => {
-    return gender === 1 ? 
+    return gender === 0 ? 
       <Tag color="#3b82f6" style={{ borderRadius: '12px', padding: '2px 12px' }}>Male</Tag> :
       <Tag color="#ec4899" style={{ borderRadius: '12px', padding: '2px 12px' }}>Female</Tag>;
   };
@@ -405,8 +404,8 @@ const BMIDataPage = () => {
                   borderRadius: '50px'
                 }}
               >
-                <Option value={1}>Male</Option>
-                <Option value={0}>Female</Option>
+                <Option value={0}>Male</Option>
+                <Option value={1}>Female</Option>
               </Select>
               
               <Button 
@@ -581,8 +580,8 @@ const BMIDataPage = () => {
             rules={[{ required: true, message: 'Please select gender!' }]}
           >
             <Select placeholder="Select gender">
-              <Option value={1}>Male</Option>
-              <Option value={0}>Female</Option>
+              <Option value={0}>Male</Option>
+              <Option value={1}>Female</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -627,8 +626,8 @@ const BMIDataPage = () => {
             rules={[{ required: true, message: 'Please select gender!' }]}
           >
             <Select placeholder="Select gender">
-              <Option value={1}>Male</Option>
-              <Option value={0}>Female</Option>
+              <Option value={0}>Male</Option>
+              <Option value={1}>Female</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -637,13 +636,6 @@ const BMIDataPage = () => {
             rules={[{ required: true, message: 'Please input BMI value!' }]}
           >
             <InputNumber min={0} precision={1} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item
-            name="bmiPercentile"
-            label="BMI Percentile"
-            rules={[{ required: true, message: 'Please input BMI percentile!' }]}
-          >
-            <InputNumber min={0} max={100} style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>
