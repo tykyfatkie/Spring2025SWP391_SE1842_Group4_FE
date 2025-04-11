@@ -518,13 +518,15 @@ const ParentProfilePage: React.FC = () => {
                   </div>
                 }
                 extra={
-                  <Button 
-                    type="link" 
-                    icon={<EditOutlined />}
-                    style={{ color: '#1e3a8a', fontWeight: 500 }}
-                  >
-                    Update
-                  </Button>
+                  <Link to="/child-manage">
+                    <Button 
+                      type="link" 
+                      icon={<EditOutlined />}
+                      style={{ color: '#1e3a8a', fontWeight: 500 }}
+                    >
+                      Update
+                    </Button>
+                  </Link>
                 }
                 bodyStyle={{ padding: '24px' }}
               >
@@ -654,6 +656,7 @@ const ParentProfilePage: React.FC = () => {
                     <Title level={4} style={{ color: '#6b7280', fontWeight: 'normal', marginBottom: '24px' }}>
                       No child information available.
                     </Title>
+                    <Link to="/child-manage">
                     <Button 
                       type="primary" 
                       icon={<PlusOutlined />}
@@ -671,6 +674,7 @@ const ParentProfilePage: React.FC = () => {
                     >
                       Add Child Information
                     </Button>
+                    </Link>
                   </div>
                 )}
               </Card>
