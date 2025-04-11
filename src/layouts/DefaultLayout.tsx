@@ -7,7 +7,8 @@ import {
   MedicineBoxOutlined,
   DashboardOutlined,
   MenuUnfoldOutlined,
-  MenuFoldOutlined
+  MenuFoldOutlined,
+  BarChartOutlined
 } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoutButton from "../components/LogoutButton/LogoutButton";
@@ -40,6 +41,11 @@ const DefaultLayout: React.FC = () => {
       key: "/my-admin/doctors",
       icon: <MedicineBoxOutlined />,
       label: "Doctors"
+    },
+    {
+      key: "/my-admin/bmi",
+      icon: <BarChartOutlined /> ,
+      label: "BMI"
     },
     {
       key: "/my-admin/packages",
