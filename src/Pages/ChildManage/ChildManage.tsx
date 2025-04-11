@@ -390,21 +390,6 @@ const ChildManage: React.FC = () => {
             }}
           />
           <Button 
-            icon={<EyeInvisibleOutlined />} 
-            onClick={() => handleHideChild(record.id)} 
-            type="default"
-            title="Hide"
-            style={{
-              borderRadius: '8px',
-              height: '38px',
-              width: '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #e5e7eb'
-            }}
-          />
-          <Button 
             danger
             icon={<DeleteOutlined />} 
             onClick={() => handleDeleteChild(record.id)}
