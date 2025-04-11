@@ -213,24 +213,29 @@ const DoctorConsultationResponse: React.FC = () => {
   const renderAttachments = (attachments: string) => {
     if (!attachments) return null;
     
-    const attachmentList = attachments.split(',').map(att => att.trim()).filter(Boolean);
+    // Clean up attachments string if it has brackets or quotes
+    const cleanAttachments = attachments.replace(/[\[\]"']/g, '');
+    
+    const attachmentList = cleanAttachments.split(',').map(att => att.trim()).filter(Boolean);
     
     if (attachmentList.length === 0) return null;
     
     return (
       <Space>
         {attachmentList.map((url, index) => {
-          const fileType = getFileType(url);
+          // Clean up individual URL
+          const cleanUrl = url.replace(/[\[\]"']/g, '');
+          const fileType = getFileType(cleanUrl);
           
           if (fileType === 'image') {
             return (
               <Image 
                 key={index}
-                src={url}
+                src={cleanUrl}
                 width={40}
                 height={40}
                 style={{ objectFit: 'cover', borderRadius: '4px' }}
-                preview={{ src: url }}
+                preview={{ src: cleanUrl }}
               />
             );
           } else if (fileType === 'pdf') {

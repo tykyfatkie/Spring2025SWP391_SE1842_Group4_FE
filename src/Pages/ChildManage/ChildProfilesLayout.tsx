@@ -34,11 +34,8 @@ const ChildProfilesLayout: React.FC<ChildProfilesLayoutProps> = ({
   activeTab,
   handleTabChange,
   loading,
-  archivedLoading,
   children,
-  archivedChildren,
   activeColumns,
-  archivedColumns,
   navigateToCreateChild
 }) => {
   return (
@@ -127,29 +124,7 @@ const ChildProfilesLayout: React.FC<ChildProfilesLayoutProps> = ({
                 />
               )}
             </TabPane>
-            <TabPane 
-              tab={
-                <span style={{ padding: '4px 8px', fontWeight: 500 }}>Hidden Children</span>
-              } 
-              key="archived"
-            >
-              {archivedLoading ? (
-                <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
-                  <Spin size="large" />
-                </div>
-              ) : (
-                <Table 
-                  dataSource={archivedChildren} 
-                  columns={archivedColumns} 
-                  rowKey="id" 
-                  pagination={{ pageSize: 10 }}
-                  style={{
-                    borderRadius: '12px',
-                    overflow: 'hidden'
-                  }} 
-                />
-              )}
-            </TabPane>
+
           </Tabs>
         </Card>
       </Col>

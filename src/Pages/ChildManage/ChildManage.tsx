@@ -11,7 +11,6 @@ import {
 import { 
   EditOutlined, 
   DeleteOutlined, 
-  EyeInvisibleOutlined, 
   EyeOutlined,
   LineChartOutlined
 } from "@ant-design/icons";
@@ -231,51 +230,7 @@ const ChildManage: React.FC = () => {
     }
   };
 
-  const handleHideChild = async (childId: string) => {
-    try {
-      const token = localStorage.getItem("token");
-  
-      if (!token) {
-        return;
-      }
-  
-      Modal.confirm({
-        title: "Hide Child Record",
-        content: "Are you sure you want to hide this child's record? You can unhide it later if needed.",
-        okText: "Yes, Hide",
-        cancelText: "Cancel",
-        zIndex: 1050,
-        mask: true,
-        maskClosable: false,
-        onOk: async () => {
-          try {
-            await axios.post(
-              `${import.meta.env.VITE_API_ENDPOINT}/children/hideChildren/${childId}`,
-              true,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-  
-            message.success("Child record hidden successfully");
-  
-            setChildren((prevChildren) => prevChildren.filter(child => child.id !== childId));
-            setArchivedChildren((prevArchived) => [
-              ...prevArchived,
-              children.find(child => child.id === childId),
-            ]);
-          } catch (error: any) {
-            console.error("Failed to hide child:", error.message);
-          }
-        },
-      });
-    } catch (error: any) {  
-      console.error("Failed to process hide child:", error.message);
-    }
-  };
+
   
   const handleUnhideChild = async (childId: string) => {
     try {
@@ -379,21 +334,6 @@ const ChildManage: React.FC = () => {
             icon={<EditOutlined />} 
             onClick={() => handleEditChild(record)} 
             type="default" 
-            style={{
-              borderRadius: '8px',
-              height: '38px',
-              width: '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #e5e7eb'
-            }}
-          />
-          <Button 
-            icon={<EyeInvisibleOutlined />} 
-            onClick={() => handleHideChild(record.id)} 
-            type="default"
-            title="Hide"
             style={{
               borderRadius: '8px',
               height: '38px',
