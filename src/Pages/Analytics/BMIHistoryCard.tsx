@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Spin, Typography, Tag, Button, Alert, Select, DatePicker } from 'antd';
+import { Card, Spin, Typography, Button, Alert } from 'antd';
 import { LineChartOutlined, PlusOutlined } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Brush } from 'recharts';
 import moment from 'moment';
-import type { RangePickerProps } from 'antd/es/date-picker';
 import type { Dayjs } from 'dayjs';
+import axios from 'axios';
+
+// Import our new components
+import BMIFilters from './BMIFiltersProps';
+import BMICategories from './BMICategories';
+import BMIChartTooltip from './BMITooltipProps';
 
 const { Title, Text } = Typography;
-const { RangePicker } = DatePicker;
 
 interface BMIHistoryCardProps {
-  // existing props
   selectedChild: string | null;
   selectedGender?: 'male' | 'female'; 
   fetchingBMI: boolean;
@@ -37,21 +40,12 @@ interface GenderSpecificBMIData {
   female: BMIReferenceData;
 }
 
-const whoBmiReferenceData: GenderSpecificBMIData = {
-  male: {
-    0: 13.4, 3: 16.0, 6: 17.3, 9: 17.2, 12: 16.8, 15: 16.4, 18: 16.2, 
-    24: 15.8, 36: 15.4, 48: 15.3, 60: 15.4, 
-    72: 15.5, 84: 16.0, 96: 16.5, 108: 17.0, 120: 17.8, 
-    132: 18.5, 144: 19.2, 156: 19.9, 168: 20.8, 180: 21.4, 192: 22.2, 204: 22.7, 216: 23.1, 228: 23.4
-  },
-  female: {
-    0: 13.2, 3: 15.7, 6: 16.9, 9: 16.8, 12: 16.4, 15: 16.1, 18: 15.9, 
-    24: 15.6, 36: 15.3, 48: 15.3, 60: 15.3, 
-    72: 15.3, 84: 15.7, 96: 16.2, 108: 16.8, 120: 17.5, 
-    132: 18.2, 144: 19.0, 156: 19.6, 168: 20.2, 180: 20.8, 192: 21.3, 204: 21.7, 216: 22.0, 228: 22.2
-  }
-};
-
+interface WHODataItem {
+  ageMonth: number;
+  bmiPercentile: number;
+  bmi: number;
+  gender: number; // 0 for male, 1 for female
+}
 
 const whoZScoreOffsets = {
   severelyUnderweight: -3,  
@@ -62,79 +56,6 @@ const whoZScoreOffsets = {
   },
   overweight: 2,            
   obese: 3                 
-};
-
-const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
-  const referenceData = whoBmiReferenceData[gender];
-  
-  const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
-  
-  if (ageInMonths <= ages[0]) return referenceData[ages[0]];
-  if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1]];
-  
-  let lowerAge = ages[0];
-  let upperAge = ages[ages.length - 1];
-  
-  for (let i = 0; i < ages.length - 1; i++) {
-    if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
-      lowerAge = ages[i];
-      upperAge = ages[i + 1];
-      break;
-    }
-  }
-  
-  const lowerBMI = referenceData[lowerAge];
-  const upperBMI = referenceData[upperAge];
-  const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
-  
-  return lowerBMI + ratio * (upperBMI - lowerBMI);
-};
-
-const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
-  median: number;
-  underweight: number;
-  overweight: number;
-  obese: number;
-} => {
-  const median = getWhoBmiReference(ageInMonths, gender);
-  
-  const estimatedSD = median * 0.1; 
-  
-  return {
-    median,
-    underweight: median + (whoZScoreOffsets.underweight * estimatedSD),
-    overweight: median + (whoZScoreOffsets.overweight * estimatedSD),
-    obese: median + (whoZScoreOffsets.obese * estimatedSD)
-  };
-};
-
-const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): {
-  category: 'severely-underweight' | 'underweight' | 'normal' | 'overweight' | 'obese';
-  color: string;
-} => {
-  const references = getWhoZScoreReferences(ageInMonths, gender);
-  
-  if (bmi < references.underweight) {
-    return { 
-      category: 'underweight', 
-      color: '#91caff'  // Blue
-    };
-  } else if (bmi >= references.obese) {
-    return { 
-      category: 'obese', 
-      color: '#ff4d4f'  // Red
-    };
-  } else if (bmi >= references.overweight) {
-    return { 
-      category: 'overweight', 
-      color: '#faad14'  // Yellow/Orange
-    };
-  } else {
-    return { 
-      category: 'normal', 
-      color: '#52c41a'  // Green
-    };
-  }
 };
 
 const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({ 
@@ -152,8 +73,72 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
   const [filteredData, setFilteredData] = useState(chartData);
   const [isFiltered, setIsFiltered] = useState(false);
   
-  // Rest of the component
+  // Add state for WHO reference data
+  const [whoBmiReferenceData, setWhoBmiReferenceData] = useState<GenderSpecificBMIData>({
+    male: {},
+    female: {}
+  });
+  
+  const [loadingWhoData, setLoadingWhoData] = useState(true);
 
+  // Fetch WHO data from API
+// Fetch WHO data from API
+useEffect(() => {
+  const fetchWHOData = async () => {
+    try {
+      setLoadingWhoData(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Authentication token missing");
+        setLoadingWhoData(false);
+        return;
+      }
+      
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_ENDPOINT}/WHOData/all`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
+      if (response.data?.data) {
+        const whoData: WHODataItem[] = response.data.data;
+        
+        // Process WHO data into the format we need
+        const maleData: BMIReferenceData = {};
+        const femaleData: BMIReferenceData = {};
+        
+        // Filter for median percentile (50%)
+        whoData.forEach(item => {
+          if (item.bmiPercentile === 50) {
+            if (item.gender === 0) { // Male
+              maleData[item.ageMonth] = item.bmi;
+            } else if (item.gender === 1) { // Female
+              femaleData[item.ageMonth] = item.bmi;
+            }
+          }
+        });
+        
+        setWhoBmiReferenceData({
+          male: maleData,
+          female: femaleData
+        });
+        
+        console.log("WHO BMI data loaded:", { maleData, femaleData });
+      } else {
+        throw new Error("Invalid WHO data format received");
+      }
+      
+      setLoadingWhoData(false);
+    } catch (error) {
+      console.error("Error fetching WHO BMI data:", error);
+      setLoadingWhoData(false);
+    }
+  };
+  
+  fetchWHOData();
+}, []);
+  
   useEffect(() => {
     console.log("New chart data received from API:", chartData);
     console.log("Number of records:", chartData.length);
@@ -162,24 +147,6 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     setOriginalData(chartData);
   }, [chartData]);
 
-  const handleDateRangeChange: RangePickerProps['onChange'] = (dates, dateStrings) => {
-    setDateRange(dates as [Dayjs, Dayjs] | null);
-    
-    if (dates && dates[0] && dates[1] && selectedChild) {
-      const startDate = dateStrings[0];
-      const endDate = dateStrings[1];
-      
-      console.log("Date range selected for API:", startDate, "to", endDate);
-      
-      onDateRangeChange(startDate, endDate);
-      setIsFiltered(true);
-    } else {
-      console.log("Clearing date range filters");
-      setIsFiltered(false);
-      onDateRangeChange(undefined, undefined);
-    }
-  };
-
   const clearAllFilters = () => {
     setDateRange(null);
     setFilteredData(originalData);
@@ -187,6 +154,54 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     onDateRangeChange(undefined, undefined);
   };
   
+  const getWhoBmiReference = (ageInMonths: number, gender: 'male' | 'female' = 'male'): number => {
+    const referenceData = whoBmiReferenceData[gender];
+    
+    if (Object.keys(referenceData).length === 0) {
+      return 0; // Return default if data not loaded yet
+    }
+    
+    const ages = Object.keys(referenceData).map(Number).sort((a, b) => a - b);
+    
+    if (ageInMonths <= ages[0]) return referenceData[ages[0]];
+    if (ageInMonths >= ages[ages.length - 1]) return referenceData[ages[ages.length - 1]];
+    
+    let lowerAge = ages[0];
+    let upperAge = ages[ages.length - 1];
+    
+    for (let i = 0; i < ages.length - 1; i++) {
+      if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
+        lowerAge = ages[i];
+        upperAge = ages[i + 1];
+        break;
+      }
+    }
+    
+    const lowerBMI = referenceData[lowerAge];
+    const upperBMI = referenceData[upperAge];
+    const ratio = (ageInMonths - lowerAge) / (upperAge - lowerAge);
+    
+    return lowerBMI + ratio * (upperBMI - lowerBMI);
+  };
+  
+  const getWhoZScoreReferences = (ageInMonths: number, gender: 'male' | 'female'): {
+    median: number;
+    underweight: number;
+    overweight: number;
+    obese: number;
+  } => {
+    const median = getWhoBmiReference(ageInMonths, gender);
+    
+    const estimatedSD = median * 0.1; 
+    
+    return {
+      median,
+      underweight: median + (whoZScoreOffsets.underweight * estimatedSD),
+      overweight: median + (whoZScoreOffsets.overweight * estimatedSD),
+      obese: median + (whoZScoreOffsets.obese * estimatedSD)
+    };
+  };
+
   const getBMIWarning = (bmi: number, ageInMonths: number) => {
     const category = getWHOBmiCategory(bmi, ageInMonths, selectedGender);
     
@@ -202,6 +217,35 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
       };
     }
     return null;
+  };
+
+  const getWHOBmiCategory = (bmi: number, ageInMonths: number, gender: 'male' | 'female'): {
+    category: 'severely-underweight' | 'underweight' | 'normal' | 'overweight' | 'obese';
+    color: string;
+  } => {
+    const references = getWhoZScoreReferences(ageInMonths, gender);
+    
+    if (bmi < references.underweight) {
+      return { 
+        category: 'underweight', 
+        color: '#91caff'  // Blue
+      };
+    } else if (bmi >= references.obese) {
+      return { 
+        category: 'obese', 
+        color: '#ff4d4f'  // Red
+      };
+    } else if (bmi >= references.overweight) {
+      return { 
+        category: 'overweight', 
+        color: '#faad14'  // Yellow/Orange
+      };
+    } else {
+      return { 
+        category: 'normal', 
+        color: '#52c41a'  // Green
+      };
+    }
   };
 
   const calculateAgeInMonths = (dateTime: string, dateOfBirth: string): number => {
@@ -262,56 +306,6 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
     return acc;
   }, [] as typeof processedData);
 
-  const CustomTooltip = (props: any) => {
-    const { active, payload, label } = props;
-    
-    if (active && payload && payload.length) {
-      const bmiPayload = payload.find((p: any) => p.dataKey === 'bmi');
-      const whoBmiPayload = payload.find((p: any) => p.dataKey === 'whoBmi');
-      const item = aggregatedData.find(d => d.date === label);
-      
-      if (!item || !bmiPayload) return null;
-      
-      const category = getWHOBmiCategory(bmiPayload.value, item.ageInMonths, selectedGender);
-      
-      return (
-        <div style={{ 
-          backgroundColor: 'white', 
-          padding: '10px', 
-          border: '1px solid #ccc',
-          borderRadius: '6px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-        }}>
-          <p style={{ margin: '0 0 5px' }}><strong>Date:</strong> {label}</p>
-          {bmiPayload && (
-            <p style={{ margin: '0 0 5px' }}>
-              <strong>Personal BMI:</strong> {bmiPayload.value.toFixed(1)}
-            </p>
-          )}
-          {whoBmiPayload && (
-            <p style={{ margin: '0 0 5px' }}>
-              <strong>WHO BMI Reference:</strong> {whoBmiPayload.value.toFixed(1)}
-            </p>
-          )}
-          {bmiPayload && (
-            <p style={{ margin: '0 0 5px' }}>
-              <strong>Status:</strong> <span style={{ color: category.color }}>{category.category.charAt(0).toUpperCase() + category.category.slice(1)}</span>
-            </p>
-          )}
-          {item && (
-            <>
-              <p style={{ margin: '0 0 5px' }}><strong>Age:</strong> {item.ageInMonths} months</p>
-              <p style={{ margin: '0 0 5px' }}><strong>Height:</strong> {item.height} cm</p>
-              <p style={{ margin: '0 0 5px' }}><strong>Weight:</strong> {item.weight} kg</p>
-            </>
-          )}
-        </div>
-      );
-    }
-    
-    return null;
-  };
-
   const renderCustomDot = (props: any) => {
     const { cx, cy, payload } = props;
     const category = getWHOBmiCategory(payload.bmi, payload.ageInMonths, selectedGender);
@@ -341,92 +335,6 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
   const latestBMI = latestRecord ? latestRecord.bmi : null;
   const latestAgeInMonths = latestRecord ? (latestRecord.ageInMonths || (selectedChildDOB ? calculateAgeInMonths(latestRecord.dateTime, selectedChildDOB) : 0)) : null;
   const bmiWarning = (latestBMI && latestAgeInMonths) ? getBMIWarning(latestBMI, latestAgeInMonths) : null;
-
-  const renderBMICategories = () => (
-    <div style={{ 
-      marginBottom: '20px', 
-      background: 'rgba(30, 58, 138, 0.05)', 
-      padding: '16px', 
-      borderRadius: '12px',
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '8px'
-    }}>
-      <Text strong style={{ marginRight: '12px', fontSize: '14px' }}>WHO BMI Categories: </Text>
-      <Tag color="#91caff" style={{ borderRadius: '20px', padding: '0 12px' }}>Underweight (&lt; -2 SD)</Tag>
-      <Tag color="#52c41a" style={{ borderRadius: '20px', padding: '0 12px' }}>Normal (-2 SD to +1 SD)</Tag>
-      <Tag color="#faad14" style={{ borderRadius: '20px', padding: '0 12px' }}>Overweight (+1 SD to +2 SD)</Tag>
-      <Tag color="#ff4d4f" style={{ borderRadius: '20px', padding: '0 12px' }}>Obese (&gt; +2 SD)</Tag>
-    </div>
-  );
-
-  const renderFilters = () => (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      marginBottom: '20px',
-      gap: '10px',
-      flexWrap: 'wrap'
-    }}>
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <Text>Display by:</Text>
-        <Select 
-          value={displayMode} 
-          onChange={(value: 'day' | 'month' | 'year') => {
-            setDisplayMode(value);
-          }}
-          style={{ width: 120 }}
-        >
-          <Select.Option value="day">Day</Select.Option>
-          <Select.Option value="month">Month</Select.Option>
-          <Select.Option value="year">Year</Select.Option>
-        </Select>
-      </div>
-      
-      {/* Date Range Picker with future date prevention */}
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <Text>Filter date range:</Text>
-        <RangePicker 
-          value={dateRange}
-          onChange={handleDateRangeChange}
-          disabledDate={(current) => {
-            return current && current > moment().endOf('day');
-          }}
-          style={{ width: 280 }}
-          allowClear={true}
-          placeholder={['Start date', 'End date']}
-        />
-      </div>
-    </div>
-  );
-
-  const renderFilterStatus = () => (
-    isFiltered && dateRange && dateRange[0] && dateRange[1] && (
-      <div style={{ marginBottom: '16px' }}>
-        <Alert
-          type="info"
-          message={
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <Text>Showing BMI data from: </Text>
-                <Text strong>
-                  {dateRange[0].format('YYYY-MM-DD')} to {dateRange[1].format('YYYY-MM-DD')}
-                </Text>
-                {filteredData.length === 0 && (
-                  <span> (No data found in this range)</span>
-                )}
-              </div>
-              <Button type="link" onClick={clearAllFilters}>
-                Clear Filter
-              </Button>
-            </div>
-          }
-          showIcon
-          style={{ backgroundColor: 'rgba(30, 58, 138, 0.05)' }}
-        />
-      </div>
-    )
-  );
 
   return (
     <Card 
@@ -491,9 +399,12 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
             Please select a child to view their BMI history
           </Text>
         </div>
-      ) : fetchingBMI ? (
+      ) : fetchingBMI || loadingWhoData ? (
         <div style={{ textAlign: 'center', padding: '50px' }}>
           <Spin size="large" />
+          <div style={{ marginTop: '10px' }}>
+            {loadingWhoData ? 'Loading WHO reference data...' : 'Loading BMI data...'}
+          </div>
         </div>
       ) : (
         <>
@@ -507,14 +418,23 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
             />
           )}
 
-          {/* Always show filters */}
-          {renderFilters()}
+          {/* Use our new filter component */}
+          <BMIFilters
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            isFiltered={isFiltered}
+            filteredDataLength={filteredData.length}
+            onDateRangeChange={(startDate, endDate) => {
+              onDateRangeChange(startDate, endDate);
+              setIsFiltered(startDate !== undefined && endDate !== undefined);
+            }}
+            clearAllFilters={clearAllFilters}
+          />
 
-          {/* Show filter status */}
-          {renderFilterStatus()}
-
-          {/* Always show BMI categories */}
-          {renderBMICategories()}
+          {/* Use our new BMI categories component */}
+          <BMICategories />
 
           {chartData.length > 0 && aggregatedData.length > 0 ? (
             <div style={{ 
@@ -581,7 +501,17 @@ const BMIHistoryCard: React.FC<BMIHistoryCardProps> = ({
                     </>
                   )}
                   
-                  <Tooltip content={<CustomTooltip />} />
+                  {/* Use our custom tooltip component */}
+                  <Tooltip content={
+                    <BMIChartTooltip 
+                      active={false} 
+                      payload={[]} 
+                      label="" 
+                      aggregatedData={aggregatedData}
+                      selectedGender={selectedGender}
+                      getWHOBmiCategory={getWHOBmiCategory}
+                    />
+                  } />
                   <Legend />
                   
                   <Line 

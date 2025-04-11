@@ -20,6 +20,7 @@ interface Child {
 }
 
 interface ChartData {
+  id: string;
   dateTime: string;
   date: string;
   bmi: number;
