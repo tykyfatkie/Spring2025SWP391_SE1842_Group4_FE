@@ -38,6 +38,7 @@ import UserPackagePage from "../Pages/PremiumSubscription/UserPackagePage";
 import CreateDoctorProfile from "../Pages/MyDoctor/CreateDoctorProfile";
 import UpdateDoctorProfile from "../Pages/MyDoctor/UpdateDoctorProfile";
 import ProfitDashboard from "../Pages/Dashboard/Dashboard";
+import BMIDataPage from "../Pages/Dashboard/BMIPage";
 
 const ProtectedComponent = (Component: React.ComponentType<any>, allowedRoles: string[]) => {
   return (props: any) => 
@@ -90,6 +91,7 @@ const routes: LayoutRoute[] = [
       { path: "/my-admin/packages", component: ProtectedComponent(PackagesPage, ["Admin"]) },
       { path: "/my-admin/revenue", component: ProtectedComponent(RevenuePage, ["Admin"]) },
       { path: "/my-admin/dashboard", component: ProtectedComponent(ProfitDashboard, ["Admin"]) },
+      { path: "/my-admin/bmi", component: ProtectedComponent(BMIDataPage, ["Admin"]) },
     ],
   },
 ];
