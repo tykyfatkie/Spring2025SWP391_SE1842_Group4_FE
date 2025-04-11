@@ -1,11 +1,12 @@
 import React from 'react';
 import { Row, Col, Card, Spin, Typography, Tag, Button } from 'antd';
-import { CheckCircleOutlined, LineChartOutlined, PlusOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, LineChartOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 const { Title, Text } = Typography;
 
 interface ChartData {
+  id: string; // Added id for record identification
   dateTime: string;
   date: string;
   bmi: number;
@@ -21,6 +22,7 @@ interface BMIDetailsCardProps {
   chartData: ChartData[];
   fetchingBMI: boolean;
   handleOpenBmiModal: () => void;
+  handleEditBmiRecord: (recordId: string) => void; // Added prop for edit functionality
   selectedChildDOB?: string;
 }
 
@@ -152,6 +154,7 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   chartData,
   fetchingBMI,
   handleOpenBmiModal,
+  handleEditBmiRecord,
   selectedChildDOB
 }) => {
   // Process data to include WHO reference values
@@ -190,6 +193,18 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
                 <Title level={4} style={{ margin: 0, color: '#1e3a8a' }}>BMI Details</Title>
               </div>
             </div>
+          }
+          extra={
+            selectedChild && processedData.length > 0 ? (
+              <Button 
+                type="primary" 
+                icon={<PlusOutlined />}
+                style={{ background: '#1e3a8a' }}
+                onClick={handleOpenBmiModal}
+              >
+                Add BMI Record
+              </Button>
+            ) : null
           }
           style={{ 
             borderRadius: '16px', 
@@ -299,6 +314,13 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
                       color: '#1e3a8a',
                       fontWeight: 600
                     }}>Status</th>
+                    <th style={{ 
+                      textAlign: 'center', 
+                      padding: '12px 16px', 
+                      borderBottom: '1px solid #f0f0f0',
+                      color: '#1e3a8a',
+                      fontWeight: 600
+                    }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -333,6 +355,14 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
                           <Tag color={bmiCategory.color} style={{ borderRadius: '20px', padding: '0 12px' }}>
                             {bmiCategory.label}
                           </Tag>
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
+                          <Button 
+                            type="text" 
+                            icon={<EditOutlined style={{ color: '#1e3a8a' }} />} 
+                            onClick={() => handleEditBmiRecord(record.id)}
+                            title="Edit Record"
+                          />
                         </td>
                       </tr>
                     );

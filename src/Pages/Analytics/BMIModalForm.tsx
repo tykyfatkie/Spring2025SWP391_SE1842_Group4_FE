@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Row, Col, message, DatePicker } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import axios from 'axios';
 
 interface Child {
   id: string;
@@ -14,6 +15,8 @@ interface Child {
   bmi: number;
   bmiPercentile: number;
 }
+
+
 
 interface BMIModalFormProps {
   visible: boolean;
@@ -32,25 +35,86 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
 }) => {
   const [submitting, setSubmitting] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [duplicateConfirmVisible, setDuplicateConfirmVisible] = useState(false);
   const [formValues, setFormValues] = useState<any>(null);
+  const [formattedDate, setFormattedDate] = useState<string>('');
+  const [duplicateRecordId, setDuplicateRecordId] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Kiểm tra trùng lặp record theo ngày
+  const checkDuplicateRecord = async (childId: string, date: string): Promise<any | null> => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        message.error("Authentication token missing. Please login again.");
+        return null;
+      }
+      
+      // Sử dụng endpoint đúng như trong Network tab
+      const url = `${import.meta.env.VITE_API_ENDPOINT}/bmi/tracking?childId=${childId}`;
+      
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Xử lý cấu trúc dữ liệu phù hợp với API thực tế
+      if (response.data?.value?.data && Array.isArray(response.data.value.data)) {
+        // Tìm bất kỳ record nào có cùng ngày (so sánh phần ngày)
+        const records = response.data.value.data;
+        const duplicateRecord = records.find((record: any) => {
+          const recordDate = moment(record.createdAt).format('YYYY-MM-DD');
+          return recordDate === date;
+        });
+        
+        return duplicateRecord || null;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error checking for duplicate records:", error);
+      return null;
+    }
+  };
   
   const showConfirmation = async () => {
     try {
       const values = await form.validateFields();
-      console.log("Form values before processing:", values); // Debug log
+      console.log("Form values before processing:", values);
       
-      // Clone values to avoid reference issues
+      // Clone values để tránh vấn đề tham chiếu
       const processedValues = { ...values };
       
-      // Convert Moment object to string format for API
-      processedValues.doY = values.doY 
-        ? values.doY.toISOString()  // Use toISOString() instead of format()
+      // Chuyển đổi Moment object sang string format
+      const momentDate = values.doY;
+      processedValues.doY = momentDate
+        ? momentDate.toISOString()
         : new Date().toISOString();
       
-      processedValues.childId = selectedChildData?.id || selectedChildData?.childId;
+      // Lưu ngày đã định dạng để hiển thị
+      const displayDate = momentDate
+        ? momentDate.format('YYYY-MM-DD')
+        : moment().format('YYYY-MM-DD');
+      
+      setFormattedDate(displayDate);
+      
+      const childId = selectedChildData?.id || selectedChildData?.childId;
+      processedValues.childId = childId;
       processedValues.gender = selectedChildData?.gender;
       
-      console.log("Processed values:", processedValues); // Debug log
+      // Kiểm tra trùng lặp record trước khi lưu
+      if (childId) {
+        const duplicateRecord = await checkDuplicateRecord(childId, displayDate);
+        
+        if (duplicateRecord && !isEditMode) {
+          // Nếu tìm thấy trùng lặp, hiển thị hộp thoại xác nhận
+          setDuplicateRecordId(duplicateRecord.id);
+          setFormValues(processedValues);
+          setDuplicateConfirmVisible(true);
+          return;
+        }
+      }
+      
+      console.log("Processed values:", processedValues);
       setFormValues(processedValues);
       setConfirmVisible(true);
     } catch (validationError) {
@@ -62,22 +126,74 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
     setConfirmVisible(false);
   };
   
+  const handleDuplicateConfirmCancel = () => {
+    setDuplicateConfirmVisible(false);
+  };
+  
+  const handleDuplicateConfirmEdit = () => {
+    setDuplicateConfirmVisible(false);
+    setIsEditMode(true);
+    // Hiển thị hộp thoại xác nhận thông thường
+    setConfirmVisible(true);
+  };
+  
   const handleConfirmOk = async () => {
     try {
       setSubmitting(true);
-      console.log("Submitting values:", formValues); // Debug log
+      console.log("Submitting values:", formValues);
       
       try {
-        await onSave(formValues);
-        message.success(`BMI record for ${selectedChildData?.name} has been saved successfully!`);
+        if (isEditMode && duplicateRecordId) {
+          // Sử dụng endpoint edit với recordId
+          const token = localStorage.getItem("token");
+          if (!token) {
+            message.error("Authentication token missing. Please login again.");
+            return;
+          }
+          
+          // Lấy childId từ selectedChildData
+          const childId = selectedChildData?.id || selectedChildData?.childId;
+          
+          const editData = {
+            childId: childId,
+            height: formValues.height,
+            weight: formValues.weight,
+            gender: selectedChildData?.gender,
+            createdAt: formValues.doY, // Add the date field
+            notes: "" 
+          };
+          
+          console.log("Edit data being sent:", editData);
+          
+          // Đường dẫn API edit
+          await axios.post(
+            `${import.meta.env.VITE_API_ENDPOINT}/bmi/edit?recordId=${duplicateRecordId}`, 
+            editData,
+            {
+              headers: { 
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              }
+            }
+          );
+          
+          message.success(`BMI record for ${selectedChildData?.name} has been updated successfully!`);
+        } else {
+          // Sử dụng endpoint save thông thường
+          await onSave(formValues);
+          message.success(`BMI record for ${selectedChildData?.name} has been saved successfully!`);
+        }
+        
         setConfirmVisible(false);
         onCancel();
-        // Reset form after all operations are complete
+        // Reset form và state sau khi hoàn tất các thao tác
         form.resetFields();
+        setIsEditMode(false);
+        setDuplicateRecordId(null);
       } catch (error: any) {
         console.error("Full error:", error);
         console.error("Error data:", error.response?.data);
-
+  
         if (error.response?.status === 500) {
           if (error.response?.data?.message?.includes("BMI Category not found")) {
             message.error("Invalid BMI data: BMI Category not found. Please check height and weight values.");
@@ -95,11 +211,14 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
     }
   };
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
       form.setFieldsValue({
         doY: moment() 
       });
+      // Reset edit mode khi modal được mở
+      setIsEditMode(false);
+      setDuplicateRecordId(null);
     }
   }, [visible, form]);
   
@@ -118,15 +237,19 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
               justifyContent: 'center',
               marginRight: '16px' 
             }}>
-              <PlusOutlined style={{ fontSize: '16px', color: '#1e3a8a' }} />
+              {isEditMode ? (
+                <EditOutlined style={{ fontSize: '16px', color: '#1e3a8a' }} />
+              ) : (
+                <PlusOutlined style={{ fontSize: '16px', color: '#1e3a8a' }} />
+              )}
             </div>
-            <span>Add New BMI Record</span>
+            <span>{isEditMode ? 'Edit BMI Record' : 'Add New BMI Record'}</span>
           </div>
         }
         visible={visible}
         onCancel={onCancel}
         onOk={showConfirmation}
-        okText="Save Record"
+        okText={isEditMode ? "Update Record" : "Save Record"}
         okButtonProps={{ style: { background: '#1e3a8a' }, loading: submitting }}
         width={500}
       >
@@ -199,14 +322,30 @@ const BMIModalForm: React.FC<BMIModalFormProps> = ({
         visible={confirmVisible}
         onCancel={handleConfirmCancel}
         onOk={handleConfirmOk}
-        okText="Yes, Save"
+        okText={isEditMode ? "Yes, Update" : "Yes, Save"}
         cancelText="No, Cancel"
         okButtonProps={{ style: { background: '#1e3a8a' }, loading: submitting }}
       >
-        <p>Are you sure you want to save this BMI record for {selectedChildData?.name}?</p>
-        <p>Date: {formValues?.doY}</p>
+        <p>{isEditMode 
+          ? `Are you sure you want to update this BMI record for ${selectedChildData?.name}?` 
+          : `Are you sure you want to save this BMI record for ${selectedChildData?.name}?`}</p>
+        <p>Date: {formattedDate}</p>
         <p>Height: {formValues?.height} cm</p>
         <p>Weight: {formValues?.weight} kg</p>
+      </Modal>
+      
+      {/* Duplicate Record Modal */}
+      <Modal
+        title="Record Already Exists"
+        visible={duplicateConfirmVisible}
+        onCancel={handleDuplicateConfirmCancel}
+        onOk={handleDuplicateConfirmEdit}
+        okText="Yes, Edit Existing Record"
+        cancelText="No, Cancel"
+        okButtonProps={{ style: { background: '#1e3a8a' } }}
+      >
+        <p>A BMI record already exists for {selectedChildData?.name} on {formattedDate}.</p>
+        <p>Would you like to edit the existing record instead?</p>
       </Modal>
     </>
   );
