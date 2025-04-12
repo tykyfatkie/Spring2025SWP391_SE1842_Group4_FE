@@ -317,21 +317,23 @@ const MyDoctorProfilePage: React.FC = () => {
 
             {/* Button Section - Create or Update Profile */}
             <div style={{ padding: '20px 30px', textAlign: 'center' }}>
-              <Button 
-                type="primary" 
-                size="large"
-                style={{ 
-                  borderRadius: '50px',
-                  padding: '0 30px',
-                  height: '44px',
-                  background: colors.primary.main,
-                  border: 'none',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                }}
-                onClick={() => navigate(hasProfileData ? '/update-doctor-profile' : '/create-doctor-profile')}
-              >
-                {hasProfileData ? 'Update Profile' : 'Create Profile'}
-              </Button>
+            {!hasProfileData && (
+  <Button 
+    type="primary" 
+    size="large"
+    style={{ 
+      borderRadius: '50px',
+      padding: '0 30px',
+      height: '44px',
+      background: colors.primary.main,
+      border: 'none',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+    }}
+    onClick={() => navigate('/create-doctor-profile')}
+  >
+    Create Profile
+  </Button>
+)}
             </div>
           </Card>
 
