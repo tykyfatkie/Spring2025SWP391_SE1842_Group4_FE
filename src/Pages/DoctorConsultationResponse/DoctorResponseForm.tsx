@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Modal, Input, Button, Form, Upload, message, Spin, Typography, Space } from 'antd';
-import { SendOutlined, InboxOutlined } from '@ant-design/icons';
+import { Modal, Input, Button, Form, message, Typography, Space } from 'antd';
+import { SendOutlined } from '@ant-design/icons';
 import axiosInstance from '../../utils/axiosInstance';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
-const { Dragger } = Upload;
 
 interface DoctorResponseFormProps {
   visible: boolean;
@@ -36,56 +35,11 @@ const DoctorResponseForm: React.FC<DoctorResponseFormProps> = ({
   onSuccess
 }) => {
   const [form] = Form.useForm();
-  const [uploading, setUploading] = useState<boolean>(false);
+  const [] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [fileList, setFileList] = useState<any[]>([]);
+  const [, setFileList] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
-  const handleFileUpload = async (options: any) => {
-    const { file, onSuccess, onError } = options;
-    
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    setUploading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-      
-      const response = await axiosInstance.post('/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      // Check if the API returns file URL in response
-      if (response.data && response.data.fileUrl) {
-        // Add file to our uploadedFiles state
-        const newFile = {
-          uid: file.uid,
-          name: file.name,
-          url: response.data.fileUrl
-        };
-        
-        setUploadedFiles(prev => [...prev, newFile]);
-        
-        // Call the onSuccess callback with the response data
-        onSuccess(response.data);
-        message.success(`${file.name} uploaded successfully`);
-      } else {
-        throw new Error('File upload failed');
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      message.error(`${file.name} upload failed.`);
-      onError();
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleSubmit = async (values: any) => {
     setSubmitting(true);
@@ -98,6 +52,10 @@ const DoctorResponseForm: React.FC<DoctorResponseFormProps> = ({
       // Create a string of file URLs
       const attachmentUrls = uploadedFiles.map(file => file.url).join(',');
       
+      // Log for debugging
+      console.log('Current uploadedFiles:', uploadedFiles);
+      console.log('Submitting with attachments:', attachmentUrls);
+      
       // Prepare payload
       const payload = {
         title: values.title,
@@ -105,15 +63,15 @@ const DoctorResponseForm: React.FC<DoctorResponseFormProps> = ({
         attachments: attachmentUrls
       };
       
-      console.log('Submitting with attachments:', attachmentUrls);
-      
       // Send response
-      await axiosInstance.post(`/response/send?requestId=${requestData.id}`, payload, {
+      const response = await axiosInstance.post(`/response/send?requestId=${requestData.id}`, payload, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
+      
+      console.log('Response from server:', response.data);
       
       message.success('Response sent successfully');
       form.resetFields();
@@ -129,33 +87,6 @@ const DoctorResponseForm: React.FC<DoctorResponseFormProps> = ({
     }
   };
 
-  const uploadProps = {
-    name: 'file',
-    multiple: true,
-    customRequest: handleFileUpload,
-    onChange(info: any) {
-      // Update fileList state
-      let newFileList = [...info.fileList];
-      
-      // Limit to 5 files
-      newFileList = newFileList.slice(-5);
-      
-      // Update fileList state
-      setFileList(newFileList);
-    },
-    fileList,
-    showUploadList: {
-      showRemoveIcon: true
-    },
-    onRemove: (file: any) => {
-      // Remove from fileList
-      const newFileList = fileList.filter(f => f.uid !== file.uid);
-      setFileList(newFileList);
-      
-      // Remove from uploadedFiles
-      setUploadedFiles(prev => prev.filter(f => f.uid !== file.uid));
-    }
-  };
 
   return (
     <Modal
@@ -212,7 +143,7 @@ const DoctorResponseForm: React.FC<DoctorResponseFormProps> = ({
           />
         </Form.Item>
         
-        <Form.Item
+        {/* <Form.Item
           label="Attachments (Optional)"
           extra="Upload files to support your response. Maximum 5 files."
         >
@@ -231,15 +162,22 @@ const DoctorResponseForm: React.FC<DoctorResponseFormProps> = ({
             )}
           </Dragger>
           
-          {/* Debug info to show attachments that will be sent */}
+
           {uploadedFiles.length > 0 && (
-            <div style={{ marginTop: '8px' }}>
-              <Text type="secondary">
-                Files ready to send: {uploadedFiles.map(f => f.name).join(', ')}
-              </Text>
+            <div style={{ marginTop: '8px', border: '1px solid #f0f0f0', padding: '8px', borderRadius: '4px' }}>
+              <Text strong>Files ready to send:</Text>
+              <ul style={{ margin: '4px 0 0 0', padding: '0 0 0 20px' }}>
+                {uploadedFiles.map(f => (
+                  <li key={f.uid}>
+                    <Text type="secondary">
+                      {f.name} - <Text code>{f.url}</Text>
+                    </Text>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
-        </Form.Item>
+        </Form.Item> */}
         
         <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
           <Space>
