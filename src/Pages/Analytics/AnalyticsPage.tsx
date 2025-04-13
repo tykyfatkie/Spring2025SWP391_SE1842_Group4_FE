@@ -195,6 +195,41 @@ const BMITrackingPage: React.FC = () => {
     }
   };
 
+  // Add this function to handle BMI record deletion
+  const handleDeleteBmiRecord = async (recordId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        message.error("Authentication token missing. Please login again.");
+        return;
+      }
+      
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_ENDPOINT}/bmi/delete/${recordId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.status === 200) {
+        message.success("BMI record deleted successfully");
+        if (selectedChild) {
+          fetchBMIData(selectedChild);
+        }
+      }
+    } catch (error: any) {
+      console.error("Error deleting BMI record:", error);
+      message.error(error.response?.data?.message || "Failed to delete BMI record");
+    }
+  };
+
+  // Create a wrapper function that matches the expected signature
+  const refreshBmiData = () => {
+    if (selectedChild) {
+      fetchBMIData(selectedChild);
+    }
+  };
+
   const handleSaveBMI = async (values: any) => {
     try {
       if (!selectedChild || !selectedChildData) {
@@ -321,7 +356,9 @@ const BMITrackingPage: React.FC = () => {
             chartData={chartData}
             fetchingBMI={fetchingBMI}
             handleOpenBmiModal={handleOpenBmiModal}
-            handleEditBmiRecord={handleEditBmiRecord} // Pass the edit function
+            handleEditBmiRecord={handleEditBmiRecord}
+            handleDeleteBmiRecord={handleDeleteBmiRecord}
+            fetchBmiData={refreshBmiData} // Use the wrapper function here
             selectedChildDOB={selectedChildData?.doB}
           />
         </Content>

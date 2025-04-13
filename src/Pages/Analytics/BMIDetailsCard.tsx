@@ -90,7 +90,6 @@ const BMIDetailsCard: React.FC<BMIDetailsCardProps> = ({
   fetchingBMI,
   handleOpenBmiModal,
   handleEditBmiRecord,
-  handleDeleteBmiRecord,
   selectedChildDOB,
   fetchBmiData
 }) => {
