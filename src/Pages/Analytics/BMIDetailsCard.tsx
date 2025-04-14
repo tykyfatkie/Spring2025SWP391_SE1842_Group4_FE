@@ -7,7 +7,7 @@ import axios from 'axios';
 const { Title, Text } = Typography;
 
 interface ChartData {
-  id: string; // Added id for record identification
+  id: string; 
   dateTime: string;
   date: string;
   bmi: number;
