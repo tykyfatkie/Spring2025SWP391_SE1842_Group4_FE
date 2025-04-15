@@ -272,74 +272,74 @@ const ProfitDashboard = () => {
       <Row gutter={16}>
         {/* Profit Chart Card */}
         <Col xs={24} lg={14} style={{ marginBottom: 24 }}>
-          <Card
-            title={
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <AreaChartOutlined style={{ color: '#3b82f6', marginRight: 8 }} />
-                <Text strong style={{ fontSize: '16px' }}>Daily Profit Chart</Text>
-              </div>
-            }
-            style={{ 
-              borderRadius: '12px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-              backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
-              height: '100%'
+  <Card
+    title={
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <AreaChartOutlined style={{ color: '#3b82f6', marginRight: 8 }} />
+        <Text strong style={{ fontSize: '16px' }}>Daily Profit Chart</Text>
+      </div>
+    }
+    style={{ 
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      height: '100%',
+    }}
+  >
+    {loading ? (
+      <div style={{ textAlign: 'center', padding: '80px 0' }}>
+        <Spin size="large" />
+        <div style={{ marginTop: 16 }}>
+          <Text type="secondary">Loading profit data...</Text>
+        </div>
+      </div>
+    ) : profitData.length > 0 ? (
+      <div style={{ width: '100%', height: 350 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={profitData}
+            margin={{
+              top: 20,
+              right: 30,
+              left: 20,
+              bottom: 10,
             }}
           >
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '80px 0' }}>
-                <Spin size="large" />
-                <div style={{ marginTop: 16 }}>
-                  <Text type="secondary">Loading profit data...</Text>
-                </div>
-              </div>
-            ) : profitData.length > 0 ? (
-              <div style={{ width: '100%', height: 350 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={profitData}
-                    margin={{
-                      top: 20,
-                      right: 30,
-                      left: 20,
-                      bottom: 10,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="date" 
-                      tick={{ fill: '#6b7280' }}
-                      tickLine={{ stroke: '#e5e7eb' }}
-                    />
-                    <YAxis 
-                      tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
-                      tick={{ fill: '#6b7280' }}
-                      tickLine={{ stroke: '#e5e7eb' }}
-                    />
-                    <RechartsTooltip content={<CustomTooltip />} />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="totalProfit" 
-                      name="Profit (VND)"
-                      stroke="#3b82f6" 
-                      strokeWidth={3}
-                      dot={{ r: 6, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }}
-                      activeDot={{ r: 8, fill: '#2563eb', stroke: '#fff', strokeWidth: 2 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <Empty
-                description="No profit data available"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                style={{ padding: '40px 0' }}
-              />
-            )}
-          </Card>
-        </Col>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis 
+              dataKey="date" 
+              tick={{ fill: '#6b7280' }}
+              tickLine={{ stroke: '#e5e7eb' }}
+            />
+            <YAxis 
+              tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+              tick={{ fill: '#6b7280' }}
+              tickLine={{ stroke: '#e5e7eb' }}
+            />
+            <RechartsTooltip content={<CustomTooltip />} />
+            <Legend />
+            <Line 
+              type="monotone" 
+              dataKey="totalProfit" 
+              name="Profit (VND)"
+              stroke="#ef4444" 
+              strokeWidth={3}
+              dot={{ r: 6, fill: '#ef4444', stroke: '#fff', strokeWidth: 2 }}
+              activeDot={{ r: 8, fill: '#dc2626', stroke: '#fff', strokeWidth: 2 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    ) : (
+      <Empty
+        description="No profit data available"
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        style={{ padding: '40px 0' }}
+      />
+    )}
+  </Card>
+</Col>
 
         {/* User Role Pie Chart */}
         <Col xs={24} lg={10} style={{ marginBottom: 24 }}>

@@ -558,74 +558,6 @@ const DoctorPage: React.FC = () => {
     </div>
   );
 
-  const renderDoctorCard = (doctor: User) => (
-    <Col xs={24} md={12} lg={8} key={doctor.id}>
-      <Card
-        hoverable
-        cover={
-          <div style={{ position: 'relative' }}>
-            <img 
-              alt={doctor.name || "Doctor Image"} 
-              src={getDoctorImageUrl(doctor)} 
-              onError={() => handleImageError(doctor.id)}
-              loading="lazy"
-              style={{ 
-                objectFit: 'cover', 
-                width: '100%', 
-                height: '250px' 
-              }} 
-            />
-          </div>
-        }
-        style={{ 
-          height: '100%',
-          borderRadius: '16px',
-          border: 'none',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-          transition: 'all 0.3s ease',
-          overflow: 'hidden',
-          position: 'relative'
-        }}
-        bodyStyle={{ padding: '24px' }}
-        actions={[
-          <Button 
-            key="view" 
-            type="primary" 
-            icon={<EyeOutlined />}
-            onClick={() => navigateToDoctorProfile(doctor)}
-            style={{
-              margin: '0 8px',
-              background: '#1e3a8a',
-              borderColor: '#1e3a8a'
-            }}
-          >
-            View Profile
-          </Button>,
-          <Button 
-          key="contact"
-          onClick={(e) => handleMessageClick(e, doctor)}
-          style={{
-            margin: '0 8px'
-          }}
-        >
-          Contact
-        </Button>
-        ]}
-      >
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: '#1e3a8a', opacity: 0.7 }} />
-        <Card.Meta
-          title={<div style={{ fontSize: '22px', color: '#1e3a8a', fontWeight: 600, marginBottom: '8px' }}>{doctor.name || "Doctor"}</div>}
-          description={
-            <div style={{ color: '#4b5563' }}>
-              <p><strong>Specialization:</strong> {getDoctorSpecialization(doctor)}</p>
-              <p><strong>License:</strong> {getDoctorLicenseNumber(doctor)}</p>
-            </div>
-          }
-        />
-      </Card>
-    </Col>
-  );
-
   const renderMessageModal = () => (
     <Modal
       title={<div style={{ color: '#1e3a8a', fontSize: '20px', fontWeight: 600 }}>Send Message to Doctor</div>}
@@ -697,8 +629,8 @@ const DoctorPage: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh', background: 'white', margin: '-25px' }}>
       {renderHeroBanner()}
-
-      <Content style={{ width: '95%', maxWidth: '1300px', margin: '0 auto', padding: '0 24px 60px' }}>
+  
+      <Content style={{ width: '100%', margin: '0 auto', padding: '0 24px 60px' }}>
         {loading && <Spin size="large" style={{ display: 'flex', justifyContent: 'center', margin: '40px auto' }} />}
         
         {error && (
@@ -721,13 +653,83 @@ const DoctorPage: React.FC = () => {
           />
         )}
         
-        <Row gutter={[32, 32]} style={{ marginTop: '20px' }}>
-          {!loading && !error && doctors.map(renderDoctorCard)}
+        <Row gutter={[16, 24]} style={{ marginTop: '20px' }}>
+          {!loading && !error && doctors.map(doctor => (
+            <Col span={24/5} style={{ flex: '0 0 20%', maxWidth: '20%' }} key={doctor.id}>
+              <Card
+                hoverable
+                cover={
+                  <div style={{ position: 'relative' }}>
+                    <img 
+                      alt={doctor.name || "Doctor Image"} 
+                      src={getDoctorImageUrl(doctor)} 
+                      onError={() => handleImageError(doctor.id)}
+                      loading="lazy"
+                      style={{ 
+                        objectFit: 'cover', 
+                        width: '100%', 
+                        height: '220px' 
+                      }} 
+                    />
+                  </div>
+                }
+                style={{ 
+                  height: '100%',
+                  borderRadius: '16px',
+                  border: 'none',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
+                  transition: 'all 0.3s ease',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+                bodyStyle={{ padding: '16px' }}
+                actions={[
+                  <Button 
+                    key="view" 
+                    type="primary" 
+                    icon={<EyeOutlined />}
+                    onClick={() => navigateToDoctorProfile(doctor)}
+                    style={{
+                      margin: '0 4px',
+                      background: '#1e3a8a',
+                      borderColor: '#1e3a8a',
+                      fontSize: '12px'
+                    }}
+                    size="small"
+                  >
+                    View
+                  </Button>,
+                  <Button 
+                    key="contact"
+                    onClick={(e) => handleMessageClick(e, doctor)}
+                    style={{
+                      margin: '0 4px',
+                      fontSize: '12px'
+                    }}
+                    size="small"
+                  >
+                    Contact
+                  </Button>
+                ]}
+              >
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: '#1e3a8a', opacity: 0.7 }} />
+                <Card.Meta
+                  title={<div style={{ fontSize: '18px', color: '#1e3a8a', fontWeight: 600, marginBottom: '6px' }}>{doctor.name || "Doctor"}</div>}
+                  description={
+                    <div style={{ color: '#4b5563', fontSize: '13px' }}>
+                      <p><strong>Specialization:</strong> {getDoctorSpecialization(doctor)}</p>
+                      <p><strong>License:</strong> {getDoctorLicenseNumber(doctor)}</p>
+                    </div>
+                  }
+                />
+              </Card>
+            </Col>
+          ))}
         </Row>
       </Content>
-
+  
       {renderMessageModal()}
-
+  
       <AppFooter />
     </Layout>
   );
