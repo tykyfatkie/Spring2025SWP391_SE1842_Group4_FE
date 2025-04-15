@@ -508,7 +508,6 @@ const MyDoctorProfilePage: React.FC = () => {
             </>
           )}
 
-          {/* If no profile data, show empty state */}
           {!hasProfileData && (
             <Card 
               style={{ 
