@@ -23,4 +23,5 @@ const BMICategories: React.FC = () => {
   );
 };
 
+
 export default BMICategories;
