@@ -507,8 +507,7 @@ const MyDoctorProfilePage: React.FC = () => {
               )}
             </>
           )}
-
-          
+       
           {!hasProfileData && (
             <Card 
               style={{ 
