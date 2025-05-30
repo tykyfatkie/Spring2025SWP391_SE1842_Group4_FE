@@ -3,6 +3,7 @@ import { Typography, Tag } from 'antd';
 
 const { Text } = Typography;
 
+
 const BMICategories: React.FC = () => {
   return (
     <div style={{ 
